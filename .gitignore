@@ -1,0 +1,43 @@
+# 데이터베이스 파일
+*.db
+*.sqlite
+*.sqlite3
+
+# 로그 파일
+*.log
+logs/
+
+# Python 관련
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+
+# 환경 설정 (민감 정보)
+.env
+
+# IDE/편집기
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS 관련
+.DS_Store
+Thumbs.db
+
+# 백업 파일
+*_backup.py
+*.backup
+*.bak
+
+# 임시 파일
+*.tmp
+*.temp
+temp/
+
+# Jupyter 노트북 체크포인트
+.ipynb_checkpoints/
