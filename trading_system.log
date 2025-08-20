@@ -22045,3 +22045,189 @@ connector: <aiohttp.connector.TCPConnector object at 0x110aa1b80>
 2025-08-20 21:51:07,081 - core.services.trading_engine - INFO - ✅ ETH 처리 완료: success - 신호 없음
 2025-08-20 21:51:18,082 - core.services.trading_engine - INFO - 🔍 DOGE 신호 분석 시작 (4/5)
 2025-08-20 21:51:18,129 - core.services.trading_engine - INFO - ✅ DOGE 처리 완료: success - 신호 없음
+2025-08-20 21:51:29,132 - core.services.trading_engine - INFO - 🔍 BTT 신호 분석 시작 (5/5)
+2025-08-20 21:51:29,160 - core.services.trading_engine - INFO - ✅ BTT 처리 완료: success - 신호 없음
+2025-08-20 21:51:37,161 - core.services.trading_engine - INFO - ✅ 사이클 #26 완료: 5/5 코인 처리 (52.2초)
+2025-08-20 21:52:37,163 - core.services.trading_engine - INFO - 🔄 사이클 #27 시작
+2025-08-20 21:52:37,164 - core.services.trading_engine - INFO - 🔍 BTC 신호 분석 시작 (1/5)
+2025-08-20 21:52:37,245 - core.services.trading_engine - INFO - ✅ BTC 처리 완료: success - 신호 없음
+2025-08-20 21:52:48,248 - core.services.trading_engine - INFO - 🔍 XRP 신호 분석 시작 (2/5)
+2025-08-20 21:52:48,266 - core.services.trading_engine - INFO - ✅ XRP 처리 완료: success - 신호 없음
+2025-08-20 21:52:59,269 - core.services.trading_engine - INFO - 🔍 ETH 신호 분석 시작 (3/5)
+2025-08-20 21:52:59,305 - core.services.trading_engine - INFO - ✅ ETH 처리 완료: success - 신호 없음
+2025-08-20 21:53:10,307 - core.services.trading_engine - INFO - 🔍 DOGE 신호 분석 시작 (4/5)
+2025-08-20 21:53:10,340 - core.services.trading_engine - INFO - ✅ DOGE 처리 완료: success - 신호 없음
+2025-08-20 21:53:21,343 - core.services.trading_engine - INFO - 🔍 BTT 신호 분석 시작 (5/5)
+2025-08-20 21:53:21,366 - core.services.trading_engine - INFO - ✅ BTT 처리 완료: success - 신호 없음
+2025-08-20 21:53:29,367 - core.services.trading_engine - INFO - ✅ 사이클 #27 완료: 5/5 코인 처리 (52.2초)
+2025-08-20 21:54:29,369 - core.services.trading_engine - INFO - 🔄 사이클 #28 시작
+2025-08-20 21:54:29,369 - core.services.trading_engine - INFO - 🔍 BTC 신호 분석 시작 (1/5)
+2025-08-20 21:54:29,499 - core.services.trading_engine - INFO - ✅ BTC 처리 완료: success - 신호 없음
+2025-08-20 21:54:40,501 - core.services.trading_engine - INFO - 🔍 XRP 신호 분석 시작 (2/5)
+2025-08-20 21:54:40,529 - core.services.trading_engine - INFO - ✅ XRP 처리 완료: success - 신호 없음
+2025-08-20 21:54:51,532 - core.services.trading_engine - INFO - 🔍 ETH 신호 분석 시작 (3/5)
+2025-08-20 21:54:51,565 - core.services.trading_engine - INFO - ✅ ETH 처리 완료: success - 신호 없음
+2025-08-20 21:55:02,568 - core.services.trading_engine - INFO - 🔍 DOGE 신호 분석 시작 (4/5)
+2025-08-20 21:55:02,587 - core.services.trading_engine - INFO - ✅ DOGE 처리 완료: success - 신호 없음
+2025-08-20 21:55:13,589 - core.services.trading_engine - INFO - 🔍 BTT 신호 분석 시작 (5/5)
+2025-08-20 21:55:13,614 - core.services.trading_engine - INFO - ✅ BTT 처리 완료: success - 신호 없음
+2025-08-20 21:55:21,615 - core.services.trading_engine - INFO - ✅ 사이클 #28 완료: 5/5 코인 처리 (52.2초)
+2025-08-20 21:56:21,617 - core.services.trading_engine - INFO - 🔄 사이클 #29 시작
+2025-08-20 21:56:21,617 - core.services.trading_engine - INFO - 🔍 BTC 신호 분석 시작 (1/5)
+2025-08-20 21:56:21,685 - core.services.trading_engine - INFO - ✅ BTC 처리 완료: success - 신호 없음
+2025-08-20 21:56:32,687 - core.services.trading_engine - INFO - 🔍 XRP 신호 분석 시작 (2/5)
+2025-08-20 21:56:32,720 - core.services.trading_engine - INFO - ✅ XRP 처리 완료: success - 신호 없음
+2025-08-20 21:56:43,723 - core.services.trading_engine - INFO - 🔍 ETH 신호 분석 시작 (3/5)
+2025-08-20 21:56:43,745 - core.services.trading_engine - INFO - ✅ ETH 처리 완료: success - 신호 없음
+2025-08-20 21:56:54,747 - core.services.trading_engine - INFO - 🔍 DOGE 신호 분석 시작 (4/5)
+2025-08-20 21:56:54,767 - core.services.trading_engine - INFO - ✅ DOGE 처리 완료: success - 신호 없음
+2025-08-20 21:57:05,770 - core.services.trading_engine - INFO - 🔍 BTT 신호 분석 시작 (5/5)
+2025-08-20 21:57:05,827 - core.services.trading_engine - INFO - ✅ BTT 처리 완료: success - 신호 없음
+2025-08-20 21:57:13,828 - core.services.trading_engine - INFO - ✅ 사이클 #29 완료: 5/5 코인 처리 (52.2초)
+2025-08-20 21:58:45,398 - core.session.session_manager - INFO - 🎯 세션 관리자 초기화 완료
+2025-08-20 22:00:16,668 - core.session.session_manager - INFO - 🎯 세션 관리자 초기화 완료
+2025-08-20 22:02:00,690 - core.session.session_manager - INFO - 🎯 세션 관리자 초기화 완료
+2025-08-20 22:02:00,753 - __main__ - INFO - 🚀 업비트 자동거래 시스템 시작...
+2025-08-20 22:02:00,765 - main - INFO - 🚀 업비트 자동거래 시스템 시작
+2025-08-20 22:02:00,765 - main - WARNING - ⚠️ 프로세스 우선순위 설정 실패: [Errno 1] Operation not permitted (권한 부족)
+2025-08-20 22:02:00,767 - main - INFO - 🛡️ 슬립 방지 활성화 (PID: 19896)
+2025-08-20 22:02:00,767 - main - INFO - 🛡️ 24시간 연속 거래를 위한 슬립 방지 활성화
+2025-08-20 22:02:00,774 - main - INFO - ✅ SQLite 데이터베이스 초기화 완료
+2025-08-20 22:02:00,779 - core.database.mysql_connection - INFO - ✅ MySQL 연결 테스트 성공
+2025-08-20 22:02:00,781 - core.database.migration - INFO - ✅ users 테이블 생성/확인 완료
+2025-08-20 22:02:00,782 - core.database.migration - INFO - 🎉 데이터베이스 마이그레이션 완료 (보안 강화된 스키마)
+2025-08-20 22:02:00,782 - main - INFO - ✅ MySQL 인증 데이터베이스 초기화 완료
+2025-08-20 22:02:00,784 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-08-20 22:02:00,784 - apscheduler.scheduler - INFO - Added job "주간 자동 최적화" to job store "default"
+2025-08-20 22:02:00,784 - apscheduler.scheduler - INFO - Scheduler started
+2025-08-20 22:02:00,784 - core.services.optimizer - INFO - 🕐 [스케줄러] 자동 최적화 스케줄러 시작
+2025-08-20 22:02:00,784 - core.services.optimizer - INFO - 📅 매주 일요일 오전 2시에 자동 최적화 실행
+2025-08-20 22:02:00,784 - main - INFO - ✅ 자동 최적화 스케줄러 시작
+2025-08-20 22:02:00,784 - main - INFO - 📊 모니터링 대상 마켓: ['KRW-BTC', 'KRW-XRP', 'KRW-ETH', 'KRW-DOGE', 'KRW-BTT']
+2025-08-20 22:02:00,784 - main - INFO - 🌐 웹서버 포트: 8001
+2025-08-20 22:02:20,771 - core.auth.auth_service - INFO - ✅ 사용자 인증 성공: teamprime
+2025-08-20 22:02:20,771 - core.auth.auth_service - INFO - 🔒 일반 로그인 모드: user_id=2, 24시간 유지
+2025-08-20 22:02:20,771 - core.auth.auth_service - ERROR - ❌ 세션 생성 실패: module 'jwt' has no attribute 'encode'
+2025-08-20 22:05:52,719 - core.session.session_manager - INFO - 🎯 세션 관리자 초기화 완료
+2025-08-20 22:05:52,770 - __main__ - INFO - 🚀 업비트 자동거래 시스템 시작...
+2025-08-20 22:05:52,793 - main - INFO - 🚀 업비트 자동거래 시스템 시작
+2025-08-20 22:05:52,793 - main - WARNING - ⚠️ 프로세스 우선순위 설정 실패: [Errno 1] Operation not permitted (권한 부족)
+2025-08-20 22:05:52,795 - main - INFO - 🛡️ 슬립 방지 활성화 (PID: 20758)
+2025-08-20 22:05:52,795 - main - INFO - 🛡️ 24시간 연속 거래를 위한 슬립 방지 활성화
+2025-08-20 22:05:52,798 - main - INFO - ✅ SQLite 데이터베이스 초기화 완료
+2025-08-20 22:05:52,803 - core.database.mysql_connection - INFO - ✅ MySQL 연결 테스트 성공
+2025-08-20 22:05:52,804 - core.database.migration - INFO - ✅ users 테이블 생성/확인 완료
+2025-08-20 22:05:52,805 - core.database.migration - INFO - 🎉 데이터베이스 마이그레이션 완료 (보안 강화된 스키마)
+2025-08-20 22:05:52,805 - main - INFO - ✅ MySQL 인증 데이터베이스 초기화 완료
+2025-08-20 22:05:52,806 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-08-20 22:05:52,806 - apscheduler.scheduler - INFO - Added job "주간 자동 최적화" to job store "default"
+2025-08-20 22:05:52,806 - apscheduler.scheduler - INFO - Scheduler started
+2025-08-20 22:05:52,806 - core.services.optimizer - INFO - 🕐 [스케줄러] 자동 최적화 스케줄러 시작
+2025-08-20 22:05:52,806 - core.services.optimizer - INFO - 📅 매주 일요일 오전 2시에 자동 최적화 실행
+2025-08-20 22:05:52,806 - main - INFO - ✅ 자동 최적화 스케줄러 시작
+2025-08-20 22:05:52,806 - main - INFO - 📊 모니터링 대상 마켓: ['KRW-BTC', 'KRW-XRP', 'KRW-ETH', 'KRW-DOGE', 'KRW-BTT']
+2025-08-20 22:05:52,806 - main - INFO - 🌐 웹서버 포트: 8001
+2025-08-20 22:05:52,807 - main - INFO - 🛑 시스템 종료 중...
+2025-08-20 22:05:52,808 - main - INFO - 🛡️ 슬립 방지 해제
+2025-08-20 22:05:52,808 - core.services.optimizer - INFO - 🛑 [스케줄러] 자동 최적화 스케줄러 종료
+2025-08-20 22:05:52,808 - apscheduler.scheduler - INFO - Scheduler has been shut down
+2025-08-20 22:06:17,694 - main - INFO - 🛑 시스템 종료 중...
+2025-08-20 22:06:17,694 - core.services.optimizer - INFO - 🛑 [스케줄러] 자동 최적화 스케줄러 종료
+2025-08-20 22:06:17,694 - apscheduler.scheduler - INFO - Scheduler has been shut down
+2025-08-20 22:06:18,048 - core.session.session_manager - INFO - 🎯 세션 관리자 초기화 완료
+2025-08-20 22:06:18,100 - __main__ - INFO - 🚀 업비트 자동거래 시스템 시작...
+2025-08-20 22:06:18,108 - main - INFO - 🚀 업비트 자동거래 시스템 시작
+2025-08-20 22:06:18,108 - main - WARNING - ⚠️ 프로세스 우선순위 설정 실패: [Errno 1] Operation not permitted (권한 부족)
+2025-08-20 22:06:18,111 - main - INFO - 🛡️ 슬립 방지 활성화 (PID: 20963)
+2025-08-20 22:06:18,111 - main - INFO - 🛡️ 24시간 연속 거래를 위한 슬립 방지 활성화
+2025-08-20 22:06:18,115 - main - INFO - ✅ SQLite 데이터베이스 초기화 완료
+2025-08-20 22:06:18,120 - core.database.mysql_connection - INFO - ✅ MySQL 연결 테스트 성공
+2025-08-20 22:06:18,121 - core.database.migration - INFO - ✅ users 테이블 생성/확인 완료
+2025-08-20 22:06:18,122 - core.database.migration - INFO - 🎉 데이터베이스 마이그레이션 완료 (보안 강화된 스키마)
+2025-08-20 22:06:18,122 - main - INFO - ✅ MySQL 인증 데이터베이스 초기화 완료
+2025-08-20 22:06:18,123 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-08-20 22:06:18,124 - apscheduler.scheduler - INFO - Added job "주간 자동 최적화" to job store "default"
+2025-08-20 22:06:18,124 - apscheduler.scheduler - INFO - Scheduler started
+2025-08-20 22:06:18,124 - core.services.optimizer - INFO - 🕐 [스케줄러] 자동 최적화 스케줄러 시작
+2025-08-20 22:06:18,124 - core.services.optimizer - INFO - 📅 매주 일요일 오전 2시에 자동 최적화 실행
+2025-08-20 22:06:18,124 - main - INFO - ✅ 자동 최적화 스케줄러 시작
+2025-08-20 22:06:18,124 - main - INFO - 📊 모니터링 대상 마켓: ['KRW-BTC', 'KRW-XRP', 'KRW-ETH', 'KRW-DOGE', 'KRW-BTT']
+2025-08-20 22:06:18,124 - main - INFO - 🌐 웹서버 포트: 8001
+2025-08-20 22:06:26,207 - main - INFO - 🛑 시스템 종료 중...
+2025-08-20 22:06:26,207 - core.services.optimizer - INFO - 🛑 [스케줄러] 자동 최적화 스케줄러 종료
+2025-08-20 22:06:26,207 - apscheduler.scheduler - INFO - Scheduler has been shut down
+2025-08-20 22:06:28,181 - core.session.session_manager - INFO - 🎯 세션 관리자 초기화 완료
+2025-08-20 22:06:28,231 - __main__ - INFO - 🚀 업비트 자동거래 시스템 시작...
+2025-08-20 22:06:28,239 - main - INFO - 🚀 업비트 자동거래 시스템 시작
+2025-08-20 22:06:28,239 - main - WARNING - ⚠️ 프로세스 우선순위 설정 실패: [Errno 1] Operation not permitted (권한 부족)
+2025-08-20 22:06:28,241 - main - INFO - 🛡️ 슬립 방지 활성화 (PID: 21141)
+2025-08-20 22:06:28,241 - main - INFO - 🛡️ 24시간 연속 거래를 위한 슬립 방지 활성화
+2025-08-20 22:06:28,246 - main - INFO - ✅ SQLite 데이터베이스 초기화 완료
+2025-08-20 22:06:28,251 - core.database.mysql_connection - INFO - ✅ MySQL 연결 테스트 성공
+2025-08-20 22:06:28,253 - core.database.migration - INFO - ✅ users 테이블 생성/확인 완료
+2025-08-20 22:06:28,253 - core.database.migration - INFO - 🎉 데이터베이스 마이그레이션 완료 (보안 강화된 스키마)
+2025-08-20 22:06:28,253 - main - INFO - ✅ MySQL 인증 데이터베이스 초기화 완료
+2025-08-20 22:06:28,255 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-08-20 22:06:28,255 - apscheduler.scheduler - INFO - Added job "주간 자동 최적화" to job store "default"
+2025-08-20 22:06:28,255 - apscheduler.scheduler - INFO - Scheduler started
+2025-08-20 22:06:28,255 - core.services.optimizer - INFO - 🕐 [스케줄러] 자동 최적화 스케줄러 시작
+2025-08-20 22:06:28,255 - core.services.optimizer - INFO - 📅 매주 일요일 오전 2시에 자동 최적화 실행
+2025-08-20 22:06:28,255 - main - INFO - ✅ 자동 최적화 스케줄러 시작
+2025-08-20 22:06:28,255 - main - INFO - 📊 모니터링 대상 마켓: ['KRW-BTC', 'KRW-XRP', 'KRW-ETH', 'KRW-DOGE', 'KRW-BTT']
+2025-08-20 22:06:28,255 - main - INFO - 🌐 웹서버 포트: 8001
+2025-08-20 22:06:31,079 - core.auth.auth_service - INFO - ✅ 사용자 인증 성공: teamprime
+2025-08-20 22:06:31,079 - core.auth.auth_service - INFO - 🔒 일반 로그인 모드: user_id=2, 24시간 유지
+2025-08-20 22:06:31,079 - core.auth.auth_service - ERROR - ❌ 세션 생성 실패: module 'jwt' has no attribute 'encode'
+2025-08-20 22:06:32,245 - core.auth.auth_service - INFO - ✅ 사용자 인증 성공: teamprime
+2025-08-20 22:06:32,245 - core.auth.auth_service - INFO - 🔒 일반 로그인 모드: user_id=2, 24시간 유지
+2025-08-20 22:06:32,245 - core.auth.auth_service - ERROR - ❌ 세션 생성 실패: module 'jwt' has no attribute 'encode'
+2025-08-20 22:06:39,259 - core.auth.auth_service - INFO - ✅ 사용자 인증 성공: teamprime
+2025-08-20 22:06:39,260 - core.auth.auth_service - INFO - 🔒 일반 로그인 모드: user_id=2, 24시간 유지
+2025-08-20 22:06:39,260 - core.auth.auth_service - ERROR - ❌ 세션 생성 실패: module 'jwt' has no attribute 'encode'
+2025-08-20 22:08:22,923 - main - INFO - 🛑 시스템 종료 중...
+2025-08-20 22:08:22,924 - core.services.optimizer - INFO - 🛑 [스케줄러] 자동 최적화 스케줄러 종료
+2025-08-20 22:08:22,924 - apscheduler.scheduler - INFO - Scheduler has been shut down
+2025-08-20 22:08:43,449 - core.session.session_manager - INFO - 🎯 세션 관리자 초기화 완료
+2025-08-20 22:08:43,493 - __main__ - INFO - 🚀 업비트 자동거래 시스템 시작...
+2025-08-20 22:08:43,515 - main - INFO - 🚀 업비트 자동거래 시스템 시작
+2025-08-20 22:08:43,515 - main - WARNING - ⚠️ 프로세스 우선순위 설정 실패: [Errno 1] Operation not permitted (권한 부족)
+2025-08-20 22:08:43,518 - main - INFO - 🛡️ 슬립 방지 활성화 (PID: 21920)
+2025-08-20 22:08:43,518 - main - INFO - 🛡️ 24시간 연속 거래를 위한 슬립 방지 활성화
+2025-08-20 22:08:43,520 - main - INFO - ✅ SQLite 데이터베이스 초기화 완료
+2025-08-20 22:08:43,526 - core.database.mysql_connection - INFO - ✅ MySQL 연결 테스트 성공
+2025-08-20 22:08:43,527 - core.database.migration - INFO - ✅ users 테이블 생성/확인 완료
+2025-08-20 22:08:43,528 - core.database.migration - INFO - 🎉 데이터베이스 마이그레이션 완료 (보안 강화된 스키마)
+2025-08-20 22:08:43,528 - main - INFO - ✅ MySQL 인증 데이터베이스 초기화 완료
+2025-08-20 22:08:43,529 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-08-20 22:08:43,529 - apscheduler.scheduler - INFO - Added job "주간 자동 최적화" to job store "default"
+2025-08-20 22:08:43,529 - apscheduler.scheduler - INFO - Scheduler started
+2025-08-20 22:08:43,529 - core.services.optimizer - INFO - 🕐 [스케줄러] 자동 최적화 스케줄러 시작
+2025-08-20 22:08:43,529 - core.services.optimizer - INFO - 📅 매주 일요일 오전 2시에 자동 최적화 실행
+2025-08-20 22:08:43,529 - main - INFO - ✅ 자동 최적화 스케줄러 시작
+2025-08-20 22:08:43,529 - main - INFO - 📊 모니터링 대상 마켓: ['KRW-BTC', 'KRW-XRP', 'KRW-ETH', 'KRW-DOGE', 'KRW-BTT']
+2025-08-20 22:08:43,529 - main - INFO - 🌐 웹서버 포트: 8001
+2025-08-20 22:08:52,771 - core.auth.auth_service - INFO - ✅ 사용자 인증 성공: teamprime
+2025-08-20 22:08:52,771 - core.auth.auth_service - INFO - 🔒 일반 로그인 모드: user_id=2, 24시간 유지
+2025-08-20 22:08:52,771 - core.auth.auth_service - INFO - ✅ JWT 토큰 생성 완료: user_id=2, 만료시간=24시간
+2025-08-20 22:09:09,247 - main - INFO - 🔑 [MAIN] API 키 인증 요청 수신 - 보안 강화 방식
+2025-08-20 22:09:09,251 - main - INFO - 🔍 [MAIN] API 키 형식 검증 시작: Access Key 길이 40, Secret Key 길이 66
+2025-08-20 22:09:09,251 - main - INFO - 🔑 [MAIN] JWT 토큰 생성 완료, 업비트 API 호출 시작
+2025-08-20 22:09:09,513 - main - INFO - 📡 [MAIN] 업비트 API 응답 수신: 401
+2025-08-20 22:09:09,514 - main - WARNING - ⚠️ [MAIN] API 키 검증 실패: 401 - {"error":{"name":"jwt_verification","message":"Failed to verify Jwt token."}}
+2025-08-20 22:09:13,381 - main - INFO - 🔑 [MAIN] API 키 인증 요청 수신 - 보안 강화 방식
+2025-08-20 22:09:13,385 - main - INFO - 🔍 [MAIN] API 키 형식 검증 시작: Access Key 길이 40, Secret Key 길이 40
+2025-08-20 22:09:13,386 - main - INFO - 🔑 [MAIN] JWT 토큰 생성 완료, 업비트 API 호출 시작
+2025-08-20 22:09:13,505 - main - INFO - 📡 [MAIN] 업비트 API 응답 수신: 200
+2025-08-20 22:09:13,506 - main - INFO - 📊 [MAIN] 계좌 데이터 파싱 성공: 14개 계좌
+2025-08-20 22:09:13,506 - core.session.session_manager - INFO - ✅ 사용자 세션 생성: teamprime (ID: 2)
+2025-08-20 22:09:13,506 - core.session.session_manager - INFO - ✅ 새 세션 생성 완료: teamprime (총 1개 활성 세션)
+2025-08-20 22:09:13,507 - core.session.session_manager - INFO - 🔑 API 키 업데이트: teamprime
+2025-08-20 22:09:13,507 - core.session.session_manager - INFO - 🔗 업비트 클라이언트 설정: teamprime
+2025-08-20 22:09:13,507 - core.session.session_manager - INFO - 🔐 로그인 상태 업데이트: teamprime -> True
+2025-08-20 22:09:13,507 - main - INFO - 🔗 [MAIN] 사용자별 세션 시스템 업데이트 완료: teamprime - 341,404 KRW
+2025-08-20 22:09:13,508 - main - WARNING - ⚠️ [MAIN] 기존 시스템 전역 변수도 업데이트됨 (다중 사용자 시 충돌 가능)
+2025-08-20 22:09:13,508 - main - INFO - ✅ [MAIN] API 키 검증 및 세션 저장 성공: 사용자 teamprime
+2025-08-20 22:09:13,508 - main - INFO - 💰 [MAIN] 계좌 정보: 14개 계좌, 12개 자산
+2025-08-20 22:09:28,570 - main - INFO - 🛑 시스템 종료 중...
+2025-08-20 22:09:28,571 - core.services.optimizer - INFO - 🛑 [스케줄러] 자동 최적화 스케줄러 종료
+2025-08-20 22:09:28,571 - apscheduler.scheduler - INFO - Scheduler has been shut down
