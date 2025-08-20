@@ -21789,3 +21789,19 @@ connector: <aiohttp.connector.TCPConnector object at 0x110aa1b80>
 2025-08-20 21:11:28,233 - core.services.trading_engine - INFO - ✅ BTC 처리 완료: success - 신호 없음
 2025-08-20 21:11:39,236 - core.services.trading_engine - INFO - 🔍 XRP 신호 분석 시작 (2/5)
 2025-08-20 21:11:39,265 - core.services.trading_engine - INFO - ✅ XRP 처리 완료: success - 신호 없음
+2025-08-20 21:11:50,268 - core.services.trading_engine - INFO - 🔍 ETH 신호 분석 시작 (3/5)
+2025-08-20 21:11:50,282 - core.services.trading_engine - INFO - ✅ ETH 처리 완료: success - 신호 없음
+2025-08-20 21:12:01,284 - core.services.trading_engine - INFO - 🔍 DOGE 신호 분석 시작 (4/5)
+2025-08-20 21:12:01,300 - core.services.trading_engine - INFO - ✅ DOGE 처리 완료: success - 신호 없음
+2025-08-20 21:12:12,303 - core.services.trading_engine - INFO - 🔍 BTT 신호 분석 시작 (5/5)
+2025-08-20 21:12:12,330 - core.services.trading_engine - INFO - ✅ BTT 처리 완료: success - 신호 없음
+2025-08-20 21:12:20,331 - core.services.trading_engine - INFO - ✅ 사이클 #5 완료: 5/5 코인 처리 (52.3초)
+2025-08-20 21:13:20,334 - core.services.trading_engine - INFO - 🔄 사이클 #6 시작
+2025-08-20 21:13:20,334 - core.services.trading_engine - INFO - 🔍 BTC 신호 분석 시작 (1/5)
+2025-08-20 21:13:20,437 - core.services.trading_engine - INFO - ✅ BTC 처리 완료: success - 신호 없음
+2025-08-20 21:13:31,439 - core.services.trading_engine - INFO - 🔍 XRP 신호 분석 시작 (2/5)
+2025-08-20 21:13:31,457 - core.services.trading_engine - INFO - ✅ XRP 처리 완료: success - 신호 없음
+2025-08-20 21:13:42,459 - core.services.trading_engine - INFO - 🔍 ETH 신호 분석 시작 (3/5)
+2025-08-20 21:13:42,477 - core.services.trading_engine - INFO - ✅ ETH 처리 완료: success - 신호 없음
+2025-08-20 21:13:53,478 - core.services.trading_engine - INFO - 🔍 DOGE 신호 분석 시작 (4/5)
+2025-08-20 21:13:53,495 - core.services.trading_engine - INFO - ✅ DOGE 처리 완료: success - 신호 없음
