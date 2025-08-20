@@ -383,7 +383,7 @@ async def authenticated_api_key_input_dashboard(request: Request, current_user: 
             .app-title {{
                 font-size: 24px;
                 font-weight: 700;
-                color: #1976d2;
+                color: #333;
                 text-decoration: none;
             }}
             
@@ -626,7 +626,7 @@ async def authenticated_api_key_input_dashboard(request: Request, current_user: 
         <!-- 사이드패널 -->
         <div class="side-panel">
             <div class="side-panel-header">
-                <h3>메뉴</h3>
+                <h3 onclick="goToProfile()" style="cursor: pointer; color: #1976d2;">{username}</h3>
                 <button class="close-btn" onclick="closeSidePanel()">×</button>
             </div>
             <ul class="menu-items">
@@ -709,6 +709,11 @@ async def authenticated_api_key_input_dashboard(request: Request, current_user: 
                 
                 overlay.classList.remove('active');
                 panel.classList.remove('active');
+            }}
+            
+            // 개인정보 페이지로 이동
+            function goToProfile() {{
+                window.location.href = '/profile';
             }}
             
             async function handleLogout() {{
@@ -851,7 +856,7 @@ async def trading_dashboard(request: Request):
             .app-title {{
                 font-size: 24px;
                 font-weight: 700;
-                color: #1976d2;
+                color: #333;
                 text-decoration: none;
             }}
             
@@ -960,44 +965,29 @@ async def trading_dashboard(request: Request):
                 color: #1976d2;
             }}
             
-            .header {{
-                background: rgba(255,255,255,0.95);
-                padding: 15px 0;
-                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            /* 사이드패널 사용자 정보 스타일 */
+            .side-panel-user {{
+                padding: 15px 20px;
+                background: rgba(25, 118, 210, 0.05);
+                border-bottom: 1px solid #e0e0e0;
+                margin-bottom: 10px;
             }}
-            .header-content {{
-                max-width: 1200px;
-                margin: 0 auto;
+            .side-panel-user .user-info {{
                 display: flex;
-                justify-content: space-between;
-                align-items: center;
-                padding: 0 20px;
+                flex-direction: column;
+                gap: 5px;
             }}
-            .logo {{
-                font-size: 24px;
-                font-weight: bold;
-                color: #1976d2;
-            }}
-            .user-info {{
-                display: flex;
-                align-items: center;
-                gap: 15px;
-            }}
-            .user-name {{
+            .side-panel-user .user-name {{
                 font-weight: 600;
                 color: #333;
+                font-size: 16px;
             }}
-            .logout-btn {{
-                background: #f44336;
-                color: white;
-                border: none;
-                padding: 8px 16px;
-                border-radius: 6px;
-                cursor: pointer;
+            .side-panel-user .user-status {{
                 font-size: 14px;
-            }}
-            .logout-btn:hover {{
-                background: #d32f2f;
+                color: #4caf50;
+                display: flex;
+                align-items: center;
+                gap: 5px;
             }}
             .main-content {{
                 max-width: 1200px;
@@ -1089,9 +1079,18 @@ async def trading_dashboard(request: Request):
         <!-- 사이드패널 -->
         <div class="side-panel">
             <div class="side-panel-header">
-                <h3>메뉴</h3>
+                <h3 onclick="goToProfile()" style="cursor: pointer; color: #1976d2;">{username}</h3>
                 <button class="close-btn" onclick="closeSidePanel()">×</button>
             </div>
+            
+            <!-- 사용자 정보 섹션 -->
+            <div class="side-panel-user">
+                <div class="user-info">
+                    <div class="user-name">{username}</div>
+                    <div class="user-status">✅ 업비트 연결됨</div>
+                </div>
+            </div>
+            
             <ul class="menu-items">
                 <li class="menu-item">
                     <a href="/main-dashboard">🏠 메인 대시보드</a>
@@ -1101,16 +1100,6 @@ async def trading_dashboard(request: Request):
                 </li>
             </ul>
         </div>
-        
-        <header class="header">
-            <div class="header-content">
-                <div class="logo">🚀 업비트 자동거래 시스템</div>
-                <div class="user-info">
-                    <span class="user-name">{username}</span>
-                    <button class="logout-btn" onclick="handleLogout()">로그아웃</button>
-                </div>
-            </div>
-        </header>
         
         <main class="main-content">
             <div class="trading-status">
@@ -1148,6 +1137,11 @@ async def trading_dashboard(request: Request):
                 
                 overlay.classList.remove('active');
                 panel.classList.remove('active');
+            }}
+            
+            // 개인정보 페이지로 이동
+            function goToProfile() {{
+                window.location.href = '/profile';
             }}
             
             async function handleLogout() {{
@@ -1322,7 +1316,7 @@ async def main_dashboard(request: Request):
             .app-title {{
                 font-size: 24px;
                 font-weight: 700;
-                color: #1976d2;
+                color: #333;
                 text-decoration: none;
             }}
             
@@ -1591,7 +1585,7 @@ async def main_dashboard(request: Request):
         <!-- 사이드 패널 -->
         <div class="side-panel">
             <div class="side-panel-header">
-                <h2>메뉴</h2>
+                <h2 onclick="goToProfile()" style="cursor: pointer; color: #1976d2;">{username}</h2>
                 <button class="close-btn" onclick="closeSidePanel()">×</button>
             </div>
             
@@ -1627,6 +1621,11 @@ async def main_dashboard(request: Request):
             
             function goToTrading() {{
                 window.location.href = '/trading-flow';
+            }}
+            
+            // 개인정보 페이지로 이동
+            function goToProfile() {{
+                window.location.href = '/profile';
             }}
             
             // 🔔 토스트 알림 시스템
@@ -1831,6 +1830,496 @@ async def trading_flow(request: Request):
     
     # API 키가 있으면 기존 거래 대시보드로
     return RedirectResponse(url="/dashboard")
+
+@app.get("/profile", response_class=HTMLResponse)
+async def profile_page(request: Request):
+    """사용자 개인정보 페이지"""
+    
+    # 사용자 인증 확인
+    from core.auth.middleware import get_current_user
+    current_user = await get_current_user(request)
+    
+    if not current_user:
+        return RedirectResponse(url="/login")
+    
+    username = current_user.get('username', '사용자')
+    user_id = current_user.get('id')
+    email = current_user.get('email', '')
+    created_at = current_user.get('created_at', '')
+    last_login = current_user.get('last_login', '')
+    
+    # API 키 세션 확인
+    session_data = user_sessions.get(user_id)
+    api_connected = bool(session_data)
+    
+    html_content = f"""
+    <!DOCTYPE html>
+    <html lang="ko">
+    <head>
+        <meta charset="UTF-8">
+        <title>개인정보 - Teamprime</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            * {{
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }}
+            
+            body {{
+                font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+                background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+                min-height: 100vh;
+                color: #333;
+                padding-top: 80px; /* Teamprime 앱바 공간 확보 */
+            }}
+            
+            /* Teamprime 앱바 스타일 */
+            .app-bar {{
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 60px;
+                background: white;
+                display: flex;
+                align-items: center;
+                padding: 0 20px;
+                justify-content: space-between;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                z-index: 100;
+            }}
+            
+            .app-title {{
+                font-size: 24px;
+                font-weight: 700;
+                color: #333;
+                text-decoration: none;
+            }}
+            
+            .hamburger-btn {{
+                background: none;
+                border: none;
+                font-size: 24px;
+                cursor: pointer;
+                color: #666;
+                padding: 8px;
+                border-radius: 4px;
+            }}
+            
+            .hamburger-btn:hover {{
+                background-color: rgba(0, 0, 0, 0.1);
+            }}
+            
+            /* 사이드패널 스타일 */
+            .side-panel-overlay {{
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.5);
+                opacity: 0;
+                visibility: hidden;
+                transition: all 0.3s ease;
+                z-index: 200;
+            }}
+            
+            .side-panel-overlay.active {{
+                opacity: 1;
+                visibility: visible;
+            }}
+            
+            .side-panel {{
+                position: fixed;
+                top: 0;
+                right: 0;
+                width: 300px;
+                height: 100%;
+                background: white;
+                transform: translateX(100%);
+                transition: transform 0.3s ease;
+                z-index: 201;
+                box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+                overflow-y: auto;
+            }}
+            
+            .side-panel.active {{
+                transform: translateX(0);
+            }}
+            
+            .side-panel-header {{
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 20px;
+                border-bottom: 1px solid #eee;
+                background: #f8f9fa;
+            }}
+            
+            .side-panel-header h3 {{
+                margin: 0;
+                color: #333;
+                font-size: 18px;
+            }}
+            
+            .close-btn {{
+                background: none;
+                border: none;
+                font-size: 24px;
+                cursor: pointer;
+                color: #666;
+                padding: 4px 8px;
+                border-radius: 4px;
+            }}
+            
+            .close-btn:hover {{
+                background-color: rgba(0, 0, 0, 0.1);
+            }}
+            
+            /* 사이드패널 사용자 정보 스타일 */
+            .side-panel-user {{
+                padding: 15px 20px;
+                background: rgba(25, 118, 210, 0.05);
+                border-bottom: 1px solid #e0e0e0;
+                margin-bottom: 10px;
+            }}
+            .side-panel-user .user-info {{
+                display: flex;
+                flex-direction: column;
+                gap: 5px;
+            }}
+            .side-panel-user .user-name {{
+                font-weight: 600;
+                color: #333;
+                font-size: 16px;
+            }}
+            .side-panel-user .user-status {{
+                font-size: 14px;
+                color: #4caf50;
+                display: flex;
+                align-items: center;
+                gap: 5px;
+            }}
+            
+            .menu-items {{
+                list-style: none;
+                padding: 20px 0;
+            }}
+            
+            .menu-items li {{
+                margin-bottom: 10px;
+            }}
+            
+            .menu-items a {{
+                display: block;
+                padding: 12px 20px;
+                color: #333;
+                text-decoration: none;
+                transition: background-color 0.2s;
+            }}
+            
+            .menu-items a:hover {{
+                background-color: #f5f5f5;
+            }}
+            
+            .menu-items a.active {{
+                background-color: rgba(25, 118, 210, 0.1);
+                color: #1976d2;
+                border-right: 3px solid #1976d2;
+            }}
+            
+            .main-content {{
+                max-width: 800px;
+                margin: 40px auto;
+                padding: 0 20px;
+            }}
+            
+            .profile-header {{
+                text-align: center;
+                color: white;
+                margin-bottom: 40px;
+            }}
+            
+            .profile-header h1 {{
+                font-size: 32px;
+                margin-bottom: 10px;
+            }}
+            
+            .profile-header p {{
+                font-size: 18px;
+                opacity: 0.9;
+            }}
+            
+            .profile-card {{
+                background: white;
+                border-radius: 12px;
+                padding: 30px;
+                box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+                margin-bottom: 30px;
+            }}
+            
+            .profile-section {{
+                margin-bottom: 30px;
+            }}
+            
+            .section-title {{
+                font-size: 20px;
+                font-weight: 600;
+                color: #333;
+                margin-bottom: 20px;
+                padding-bottom: 10px;
+                border-bottom: 2px solid #e0e0e0;
+            }}
+            
+            .profile-field {{
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 15px 0;
+                border-bottom: 1px solid #f0f0f0;
+            }}
+            
+            .profile-field:last-child {{
+                border-bottom: none;
+            }}
+            
+            .field-label {{
+                font-weight: 500;
+                color: #666;
+            }}
+            
+            .field-value {{
+                font-weight: 600;
+                color: #333;
+            }}
+            
+            .status-badge {{
+                display: inline-block;
+                padding: 6px 12px;
+                border-radius: 20px;
+                font-size: 12px;
+                font-weight: 600;
+                text-transform: uppercase;
+            }}
+            
+            .status-connected {{
+                background-color: #e8f5e8;
+                color: #2e7d32;
+            }}
+            
+            .status-disconnected {{
+                background-color: #ffebee;
+                color: #c62828;
+            }}
+            
+            .btn {{
+                background: #1976d2;
+                color: white;
+                border: none;
+                padding: 12px 24px;
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: 16px;
+                font-weight: 500;
+                transition: background-color 0.3s;
+                text-decoration: none;
+                display: inline-block;
+                margin-right: 10px;
+            }}
+            
+            .btn:hover {{
+                background: #1565c0;
+            }}
+            
+            .btn-outline {{
+                background: transparent;
+                border: 2px solid #1976d2;
+                color: #1976d2;
+            }}
+            
+            .btn-outline:hover {{
+                background: #1976d2;
+                color: white;
+            }}
+            
+            .btn-danger {{
+                background: #f44336;
+            }}
+            
+            .btn-danger:hover {{
+                background: #d32f2f;
+            }}
+            
+            @media (max-width: 768px) {{
+                .main-content {{
+                    padding: 0 15px;
+                }}
+                
+                .profile-card {{
+                    padding: 20px;
+                }}
+                
+                .profile-field {{
+                    flex-direction: column;
+                    align-items: flex-start;
+                    gap: 5px;
+                }}
+                
+                .field-label {{
+                    font-size: 14px;
+                }}
+            }}
+        </style>
+    </head>
+    <body>
+        <!-- 앱바 -->
+        <div class="app-bar">
+            <div class="app-title">Teamprime</div>
+            <button class="hamburger-btn" onclick="toggleSidePanel()">☰</button>
+        </div>
+        
+        <!-- 사이드패널 오버레이 -->
+        <div class="side-panel-overlay" onclick="closeSidePanel()"></div>
+        
+        <!-- 사이드패널 -->
+        <div class="side-panel">
+            <div class="side-panel-header">
+                <h3 onclick="goToProfile()" style="cursor: pointer; color: #1976d2;">{username}</h3>
+                <button class="close-btn" onclick="closeSidePanel()">×</button>
+            </div>
+            
+            <!-- 사용자 정보 섹션 -->
+            <div class="side-panel-user">
+                <div class="user-info">
+                    <div class="user-name">{username}</div>
+                    <div class="user-status">✅ 업비트 연결됨</div>
+                </div>
+            </div>
+            
+            <ul class="menu-items">
+                <li><a href="/">🏠 대시보드</a></li>
+                <li><a href="/dashboard">📊 거래 현황</a></li>
+                <li><a href="/profile" class="active">👤 개인정보</a></li>
+                <li><a href="#" onclick="logout()">🚪 로그아웃</a></li>
+            </ul>
+        </div>
+        
+        <!-- 메인 컨텐츠 -->
+        <div class="main-content">
+            <div class="profile-header">
+                <h1>👤 개인정보</h1>
+                <p>계정 정보를 확인하고 관리할 수 있습니다</p>
+            </div>
+            
+            <div class="profile-card">
+                <div class="profile-section">
+                    <h2 class="section-title">기본 정보</h2>
+                    <div class="profile-field">
+                        <span class="field-label">사용자명</span>
+                        <span class="field-value">{username}</span>
+                    </div>
+                    <div class="profile-field">
+                        <span class="field-label">이메일</span>
+                        <span class="field-value">{email}</span>
+                    </div>
+                    <div class="profile-field">
+                        <span class="field-label">가입일</span>
+                        <span class="field-value">{created_at}</span>
+                    </div>
+                    <div class="profile-field">
+                        <span class="field-label">마지막 로그인</span>
+                        <span class="field-value">{last_login}</span>
+                    </div>
+                </div>
+                
+                <div class="profile-section">
+                    <h2 class="section-title">API 연결 상태</h2>
+                    <div class="profile-field">
+                        <span class="field-label">업비트 API</span>
+                        <span class="field-value">
+                            <span class="status-badge {'status-connected' if api_connected else 'status-disconnected'}">
+                                {'연결됨' if api_connected else '연결 안됨'}
+                            </span>
+                        </span>
+                    </div>
+                    {f'''
+                    <div class="profile-field">
+                        <span class="field-label">Access Key</span>
+                        <span class="field-value">{session_data.get('access_key', '')[:8]}...</span>
+                    </div>
+                    ''' if api_connected else ''}
+                </div>
+                
+                <div class="profile-section">
+                    <h2 class="section-title">계정 관리</h2>
+                    <div style="text-align: center; padding: 20px 0;">
+                        <button class="btn btn-outline" onclick="showChangePasswordModal()">
+                            🔒 비밀번호 변경
+                        </button>
+                        <button class="btn btn-outline" onclick="showApiKeyModal()">
+                            🔑 API 키 관리
+                        </button>
+                        <button class="btn btn-danger" onclick="confirmLogout()">
+                            🚪 로그아웃
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <script>
+            // 사이드패널 관련 함수들
+            function toggleSidePanel() {{
+                const overlay = document.querySelector('.side-panel-overlay');
+                const panel = document.querySelector('.side-panel');
+                
+                overlay.classList.add('active');
+                panel.classList.add('active');
+            }}
+            
+            function closeSidePanel() {{
+                const overlay = document.querySelector('.side-panel-overlay');
+                const panel = document.querySelector('.side-panel');
+                
+                overlay.classList.remove('active');
+                panel.classList.remove('active');
+            }}
+            
+            // 개인정보 페이지로 이동
+            function goToProfile() {{
+                window.location.href = '/profile';
+            }}
+            
+            // 로그아웃 함수
+            function logout() {{
+                if (confirm('정말 로그아웃 하시겠습니까?')) {{
+                    window.location.href = '/api/logout';
+                }}
+            }}
+            
+            // 로그아웃 확인
+            function confirmLogout() {{
+                if (confirm('정말 로그아웃 하시겠습니까?')) {{
+                    window.location.href = '/api/logout';
+                }}
+            }}
+            
+            // 비밀번호 변경 모달 (추후 구현)
+            function showChangePasswordModal() {{
+                alert('비밀번호 변경 기능은 추후 구현 예정입니다.');
+            }}
+            
+            // API 키 관리 모달 (추후 구현)
+            function showApiKeyModal() {{
+                alert('API 키 관리 기능은 추후 구현 예정입니다.');
+            }}
+        </script>
+    </body>
+    </html>
+    """
+    
+    return html_content
 
 async def collect_recent_candles():
     """최근 캔들 데이터 수집"""
