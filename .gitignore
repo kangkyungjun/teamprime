@@ -56,3 +56,7 @@ debug_*.py
 # 캐시 및 세션 파일
 *.session
 cache/
+
+# 백업 파일 (민감한 정보 포함)
+users_backup_*.json
+*.backup.json

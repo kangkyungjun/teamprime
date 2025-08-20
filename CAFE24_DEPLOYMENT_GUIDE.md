@@ -61,6 +61,33 @@ git clone https://github.com/your_username/teamprime.git .
 mysql -u your_username -p your_database < setup_mysql.sql
 ```
 
+### 2.5단계: 기존 사용자 데이터 이전 (선택사항)
+
+기존 로컬 개발 환경에서 등록한 사용자 계정을 Cafe24로 이전하려면:
+
+#### 로컬에서 사용자 백업:
+```bash
+# 현재 MySQL 사용자를 JSON으로 백업
+python backup_users.py
+
+# 생성된 백업 파일 확인
+ls users_backup_*.json
+```
+
+#### Cafe24 서버에서 복원:
+```bash
+# 백업 파일을 Cafe24 서버에 업로드 후
+python restore_users.py users_backup_20250820_215506.json
+
+# 또는 대화형 모드로 실행
+python restore_users.py
+```
+
+**주의사항**: 
+- 비밀번호는 암호화된 상태로 이전됩니다
+- 중복된 사용자명/이메일은 자동으로 건너뜁니다
+- 백업 파일에는 민감한 정보가 포함되므로 보안에 주의하세요
+
 ### 3단계: 환경 설정
 
 #### .env 파일 생성:
