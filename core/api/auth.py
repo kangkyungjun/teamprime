@@ -229,10 +229,15 @@ async def login_page(request: Request, next: str = "/main-dashboard"):
                     const result = await response.json();
                     
                     if (result.success) {{
-                        // JWT 토큰을 쿠키에 저장
-                        document.cookie = `auth_token=${{result.token}}; path=/; max-age=${{24 * 60 * 60}}`; // 24시간
+                        // remember_me에 따른 쿠키 만료 시간 설정
+                        const maxAge = result.remember_me ? (7 * 24 * 60 * 60) : (24 * 60 * 60); // 7일 or 24시간
+                        const cookieOptions = `path=/; max-age=${{maxAge}}; SameSite=Lax` + (location.protocol === 'https:' ? '; Secure' : '');
                         
-                        showAlert('로그인 성공! 잠시 후 이동합니다...', 'success');
+                        // JWT 토큰을 쿠키에 저장 (보안 옵션 추가)
+                        document.cookie = `auth_token=${{result.token}}; ${{cookieOptions}}`;
+                        
+                        const keepMessage = result.remember_me ? '7일간 로그인 상태가 유지됩니다.' : '24시간 로그인 상태가 유지됩니다.';
+                        showAlert(`로그인 성공! ${{keepMessage}} 잠시 후 이동합니다...`, 'success');
                         
                         // 2초 후 리다이렉트
                         setTimeout(() => {{
@@ -572,15 +577,19 @@ async def login_user(request: LoginRequest):
         if not success or not user_data:
             return {"success": False, "message": message}
         
-        # 세션 생성
-        session_success, session_message, token = await AuthService.create_session(user_data['id'])
+        # 세션 생성 (remember_me 옵션 전달)
+        session_success, session_message, token = await AuthService.create_session(
+            user_data['id'], 
+            remember_me=request.remember_me
+        )
         
         if session_success and token:
             return {
                 "success": True, 
                 "message": "로그인 성공",
                 "token": token,
-                "user": user_data
+                "user": user_data,
+                "remember_me": request.remember_me  # 프론트엔드에서 쿠키 설정에 사용
             }
         else:
             return {"success": False, "message": session_message}
@@ -641,6 +650,47 @@ async def logout_user(current_user: Dict[str, Any] = Depends(require_auth)):
         logger.error(f"로그아웃 API 오류: {str(e)}")
         # 에러가 발생해도 로그아웃은 성공으로 처리 (보안상)
         return {"success": True, "message": "로그아웃 완료"}
+
+@router.post("/api/auth/refresh-token")
+async def refresh_token(request: Request):
+    """토큰 갱신 API - 자동 토큰 갱신용"""
+    try:
+        # Authorization 헤더에서 토큰 추출
+        authorization = request.headers.get("Authorization")
+        if not authorization or not authorization.startswith("Bearer "):
+            return {"success": False, "message": "유효하지 않은 인증 헤더입니다"}
+        
+        current_token = authorization[7:]  # "Bearer " 제거
+        
+        # 토큰 갱신
+        success, message, new_token, remember_me = await AuthService.refresh_token(current_token)
+        
+        if success and new_token:
+            return {
+                "success": True,
+                "message": message,
+                "token": new_token,
+                "remember_me": remember_me
+            }
+        else:
+            return {"success": False, "message": message}
+            
+    except Exception as e:
+        logger.error(f"토큰 갱신 API 오류: {str(e)}")
+        return {"success": False, "message": "토큰 갱신 중 오류가 발생했습니다"}
+
+@router.get("/api/auth/server-status")
+async def get_server_status():
+    """서버 상태 조회 API - 서버 재시작 감지용"""
+    from config import SERVER_START_TIME
+    from datetime import datetime
+    
+    return {
+        "success": True,
+        "server_start_time": SERVER_START_TIME,
+        "current_time": datetime.utcnow().timestamp(),
+        "uptime_seconds": datetime.utcnow().timestamp() - SERVER_START_TIME
+    }
 
 @router.get("/api/auth/me")
 async def get_current_user_info(current_user: Dict[str, Any] = Depends(require_auth)):

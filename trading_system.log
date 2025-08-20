@@ -21099,3 +21099,693 @@ connector: <aiohttp.connector.TCPConnector object at 0x110aa1b80>
 2025-08-20 19:58:49,581 - core.services.trading_engine - INFO - ✅ XRP 처리 완료: success - 신호 없음
 2025-08-20 19:59:00,587 - core.services.trading_engine - INFO - 🔍 ETH 신호 분석 시작 (3/5)
 2025-08-20 19:59:00,619 - core.services.trading_engine - INFO - ✅ ETH 처리 완료: success - 신호 없음
+2025-08-20 20:06:37,934 - core.session.session_manager - INFO - 🎯 세션 관리자 초기화 완료
+2025-08-20 20:06:37,993 - __main__ - INFO - 🚀 업비트 자동거래 시스템 시작...
+2025-08-20 20:06:38,012 - main - INFO - 🚀 업비트 자동거래 시스템 시작
+2025-08-20 20:06:38,012 - main - WARNING - ⚠️ 프로세스 우선순위 설정 실패: [Errno 1] Operation not permitted (권한 부족)
+2025-08-20 20:06:38,015 - main - INFO - 🛡️ 슬립 방지 활성화 (PID: 9071)
+2025-08-20 20:06:38,015 - main - INFO - 🛡️ 24시간 연속 거래를 위한 슬립 방지 활성화
+2025-08-20 20:06:38,017 - main - INFO - ✅ SQLite 데이터베이스 초기화 완료
+2025-08-20 20:06:38,037 - core.database.mysql_connection - INFO - ✅ MySQL 연결 테스트 성공
+2025-08-20 20:06:38,038 - core.database.migration - INFO - ✅ users 테이블 생성/확인 완료
+2025-08-20 20:06:38,039 - core.database.migration - INFO - 🎉 데이터베이스 마이그레이션 완료 (보안 강화된 스키마)
+2025-08-20 20:06:38,039 - main - INFO - ✅ MySQL 인증 데이터베이스 초기화 완료
+2025-08-20 20:06:38,040 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-08-20 20:06:38,041 - apscheduler.scheduler - INFO - Added job "주간 자동 최적화" to job store "default"
+2025-08-20 20:06:38,041 - apscheduler.scheduler - INFO - Scheduler started
+2025-08-20 20:06:38,041 - core.services.optimizer - INFO - 🕐 [스케줄러] 자동 최적화 스케줄러 시작
+2025-08-20 20:06:38,041 - core.services.optimizer - INFO - 📅 매주 일요일 오전 2시에 자동 최적화 실행
+2025-08-20 20:06:38,041 - main - INFO - ✅ 자동 최적화 스케줄러 시작
+2025-08-20 20:06:38,041 - main - INFO - 📊 모니터링 대상 마켓: ['KRW-BTC', 'KRW-XRP', 'KRW-ETH', 'KRW-DOGE', 'KRW-BTT']
+2025-08-20 20:06:38,041 - main - INFO - 🌐 웹서버 포트: 8001
+2025-08-20 20:07:59,963 - core.session.session_manager - INFO - 🎯 세션 관리자 초기화 완료
+2025-08-20 20:08:00,005 - __main__ - INFO - 🚀 업비트 자동거래 시스템 시작...
+2025-08-20 20:08:00,026 - main - INFO - 🚀 업비트 자동거래 시스템 시작
+2025-08-20 20:08:00,027 - main - WARNING - ⚠️ 프로세스 우선순위 설정 실패: [Errno 1] Operation not permitted (권한 부족)
+2025-08-20 20:08:00,029 - main - INFO - 🛡️ 슬립 방지 활성화 (PID: 9277)
+2025-08-20 20:08:00,029 - main - INFO - 🛡️ 24시간 연속 거래를 위한 슬립 방지 활성화
+2025-08-20 20:08:00,031 - main - INFO - ✅ SQLite 데이터베이스 초기화 완료
+2025-08-20 20:08:00,036 - core.database.mysql_connection - INFO - ✅ MySQL 연결 테스트 성공
+2025-08-20 20:08:00,037 - core.database.migration - INFO - ✅ users 테이블 생성/확인 완료
+2025-08-20 20:08:00,038 - core.database.migration - INFO - 🎉 데이터베이스 마이그레이션 완료 (보안 강화된 스키마)
+2025-08-20 20:08:00,038 - main - INFO - ✅ MySQL 인증 데이터베이스 초기화 완료
+2025-08-20 20:08:00,039 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-08-20 20:08:00,039 - apscheduler.scheduler - INFO - Added job "주간 자동 최적화" to job store "default"
+2025-08-20 20:08:00,039 - apscheduler.scheduler - INFO - Scheduler started
+2025-08-20 20:08:00,039 - core.services.optimizer - INFO - 🕐 [스케줄러] 자동 최적화 스케줄러 시작
+2025-08-20 20:08:00,039 - core.services.optimizer - INFO - 📅 매주 일요일 오전 2시에 자동 최적화 실행
+2025-08-20 20:08:00,039 - main - INFO - ✅ 자동 최적화 스케줄러 시작
+2025-08-20 20:08:00,039 - main - INFO - 📊 모니터링 대상 마켓: ['KRW-BTC', 'KRW-XRP', 'KRW-ETH', 'KRW-DOGE', 'KRW-BTT']
+2025-08-20 20:08:00,039 - main - INFO - 🌐 웹서버 포트: 8001
+2025-08-20 20:08:25,176 - core.session.session_manager - WARNING - ⚠️ 제거할 세션이 존재하지 않음: user_id=2
+2025-08-20 20:08:25,177 - core.api.auth - INFO - ✅ 사용자 teamprime 세션 관리자에서 정리 완료
+2025-08-20 20:08:25,177 - core.api.auth - INFO - 🔗 기존 거래 시스템 상태 초기화 완료
+2025-08-20 20:08:31,681 - core.auth.auth_service - INFO - ✅ 사용자 인증 성공: teamprime
+2025-08-20 20:08:31,681 - core.auth.auth_service - INFO - ✅ JWT 토큰 생성 완료: user_id=2
+2025-08-20 20:09:03,599 - main - INFO - 🔑 [MAIN] API 키 인증 요청 수신 - 보안 강화 방식
+2025-08-20 20:09:03,603 - main - INFO - 🔍 [MAIN] API 키 형식 검증 시작: Access Key 길이 40, Secret Key 길이 40
+2025-08-20 20:09:03,603 - main - INFO - 🔑 [MAIN] JWT 토큰 생성 완료, 업비트 API 호출 시작
+2025-08-20 20:09:03,820 - main - INFO - 📡 [MAIN] 업비트 API 응답 수신: 200
+2025-08-20 20:09:03,821 - main - INFO - 📊 [MAIN] 계좌 데이터 파싱 성공: 14개 계좌
+2025-08-20 20:09:03,821 - core.session.session_manager - INFO - ✅ 사용자 세션 생성: teamprime (ID: 2)
+2025-08-20 20:09:03,822 - core.session.session_manager - INFO - ✅ 새 세션 생성 완료: teamprime (총 1개 활성 세션)
+2025-08-20 20:09:03,822 - core.session.session_manager - INFO - 🔑 API 키 업데이트: teamprime
+2025-08-20 20:09:03,822 - core.session.session_manager - INFO - 🔗 업비트 클라이언트 설정: teamprime
+2025-08-20 20:09:03,822 - core.session.session_manager - INFO - 🔐 로그인 상태 업데이트: teamprime -> True
+2025-08-20 20:09:03,822 - main - INFO - 🔗 [MAIN] 사용자별 세션 시스템 업데이트 완료: teamprime - 426,808 KRW
+2025-08-20 20:09:03,823 - main - WARNING - ⚠️ [MAIN] 기존 시스템 전역 변수도 업데이트됨 (다중 사용자 시 충돌 가능)
+2025-08-20 20:09:03,823 - main - INFO - ✅ [MAIN] API 키 검증 및 세션 저장 성공: 사용자 teamprime
+2025-08-20 20:09:03,823 - main - INFO - 💰 [MAIN] 계좌 정보: 14개 계좌, 12개 자산
+2025-08-20 20:09:07,633 - core.services.trading_engine - INFO - 🚀 멀티 코인 거래 엔진 시작
+2025-08-20 20:09:07,633 - core.utils.api_manager - INFO - 🚀 API 매니저 워커 시작됨
+2025-08-20 20:09:07,633 - core.api.trading - INFO - ✅ teamprime 자동거래 시작
+2025-08-20 20:09:07,635 - core.services.trading_engine - INFO - 🔄 사이클 #1 시작
+2025-08-20 20:09:07,635 - core.services.trading_engine - INFO - 🔍 BTC 신호 분석 시작 (1/5)
+2025-08-20 20:09:07,781 - core.services.trading_engine - INFO - ✅ BTC 처리 완료: success - 신호 없음
+2025-08-20 20:09:18,783 - core.services.trading_engine - INFO - 🔍 XRP 신호 분석 시작 (2/5)
+2025-08-20 20:09:18,815 - core.services.trading_engine - INFO - ✅ XRP 처리 완료: success - 신호 없음
+2025-08-20 20:09:29,817 - core.services.trading_engine - INFO - 🔍 ETH 신호 분석 시작 (3/5)
+2025-08-20 20:09:29,840 - core.services.trading_engine - INFO - ✅ ETH 처리 완료: success - 신호 없음
+2025-08-20 20:09:40,842 - core.services.trading_engine - INFO - 🔍 DOGE 신호 분석 시작 (4/5)
+2025-08-20 20:09:40,857 - core.services.trading_engine - INFO - ✅ DOGE 처리 완료: success - 신호 없음
+2025-08-20 20:09:51,860 - core.services.trading_engine - INFO - 🔍 BTT 신호 분석 시작 (5/5)
+2025-08-20 20:09:51,886 - core.services.trading_engine - INFO - ✅ BTT 처리 완료: success - 신호 없음
+2025-08-20 20:09:59,887 - core.services.trading_engine - INFO - ✅ 사이클 #1 완료: 5/5 코인 처리 (52.3초)
+2025-08-20 20:10:59,889 - core.services.trading_engine - INFO - 🔄 사이클 #2 시작
+2025-08-20 20:10:59,890 - core.services.trading_engine - INFO - 🔍 BTC 신호 분석 시작 (1/5)
+2025-08-20 20:10:59,986 - core.services.trading_engine - INFO - ✅ BTC 처리 완료: success - 신호 없음
+2025-08-20 20:11:10,989 - core.services.trading_engine - INFO - 🔍 XRP 신호 분석 시작 (2/5)
+2025-08-20 20:11:11,014 - core.services.trading_engine - INFO - ✅ XRP 처리 완료: success - 신호 없음
+2025-08-20 20:11:22,017 - core.services.trading_engine - INFO - 🔍 ETH 신호 분석 시작 (3/5)
+2025-08-20 20:11:22,036 - core.services.trading_engine - INFO - ✅ ETH 처리 완료: success - 신호 없음
+2025-08-20 20:11:33,038 - core.services.trading_engine - INFO - 🔍 DOGE 신호 분석 시작 (4/5)
+2025-08-20 20:11:33,098 - core.services.trading_engine - INFO - ✅ DOGE 처리 완료: success - 신호 없음
+2025-08-20 20:11:44,101 - core.services.trading_engine - INFO - 🔍 BTT 신호 분석 시작 (5/5)
+2025-08-20 20:11:44,124 - core.services.trading_engine - INFO - ✅ BTT 처리 완료: success - 신호 없음
+2025-08-20 20:11:52,125 - core.services.trading_engine - INFO - ✅ 사이클 #2 완료: 5/5 코인 처리 (52.2초)
+2025-08-20 20:12:52,127 - core.services.trading_engine - INFO - 🔄 사이클 #3 시작
+2025-08-20 20:12:52,128 - core.services.trading_engine - INFO - 🔍 BTC 신호 분석 시작 (1/5)
+2025-08-20 20:12:52,219 - core.services.trading_engine - INFO - ✅ BTC 처리 완료: success - 신호 없음
+2025-08-20 20:13:03,221 - core.services.trading_engine - INFO - 🔍 XRP 신호 분석 시작 (2/5)
+2025-08-20 20:13:03,263 - core.services.trading_engine - INFO - ✅ XRP 처리 완료: success - 신호 없음
+2025-08-20 20:13:14,266 - core.services.trading_engine - INFO - 🔍 ETH 신호 분석 시작 (3/5)
+2025-08-20 20:13:14,286 - core.services.trading_engine - INFO - ✅ ETH 처리 완료: success - 신호 없음
+2025-08-20 20:13:25,288 - core.services.trading_engine - INFO - 🔍 DOGE 신호 분석 시작 (4/5)
+2025-08-20 20:13:25,311 - core.services.trading_engine - INFO - ✅ DOGE 처리 완료: success - 신호 없음
+2025-08-20 20:13:36,313 - core.services.trading_engine - INFO - 🔍 BTT 신호 분석 시작 (5/5)
+2025-08-20 20:13:36,339 - core.services.trading_engine - INFO - ✅ BTT 처리 완료: success - 신호 없음
+2025-08-20 20:13:44,341 - core.services.trading_engine - INFO - ✅ 사이클 #3 완료: 5/5 코인 처리 (52.2초)
+2025-08-20 20:14:44,343 - core.services.trading_engine - INFO - 🔄 사이클 #4 시작
+2025-08-20 20:14:44,343 - core.services.trading_engine - INFO - 🔍 BTC 신호 분석 시작 (1/5)
+2025-08-20 20:14:44,449 - core.services.trading_engine - INFO - ✅ BTC 처리 완료: success - 신호 없음
+2025-08-20 20:14:55,451 - core.services.trading_engine - INFO - 🔍 XRP 신호 분석 시작 (2/5)
+2025-08-20 20:14:55,474 - core.services.trading_engine - INFO - ✅ XRP 처리 완료: success - 신호 없음
+2025-08-20 20:15:06,477 - core.services.trading_engine - INFO - 🔍 ETH 신호 분석 시작 (3/5)
+2025-08-20 20:15:06,506 - core.services.trading_engine - INFO - ✅ ETH 처리 완료: success - 신호 없음
+2025-08-20 20:15:17,508 - core.services.trading_engine - INFO - 🔍 DOGE 신호 분석 시작 (4/5)
+2025-08-20 20:15:17,532 - core.services.trading_engine - INFO - ✅ DOGE 처리 완료: success - 신호 없음
+2025-08-20 20:15:28,534 - core.services.trading_engine - INFO - 🔍 BTT 신호 분석 시작 (5/5)
+2025-08-20 20:15:28,585 - core.services.trading_engine - INFO - ✅ BTT 처리 완료: success - 신호 없음
+2025-08-20 20:15:36,586 - core.services.trading_engine - INFO - ✅ 사이클 #4 완료: 5/5 코인 처리 (52.2초)
+2025-08-20 20:16:36,588 - core.services.trading_engine - INFO - 🔄 사이클 #5 시작
+2025-08-20 20:16:36,589 - core.services.trading_engine - INFO - 🔍 BTC 신호 분석 시작 (1/5)
+2025-08-20 20:16:36,662 - core.services.trading_engine - INFO - ✅ BTC 처리 완료: success - 신호 없음
+2025-08-20 20:16:47,665 - core.services.trading_engine - INFO - 🔍 XRP 신호 분석 시작 (2/5)
+2025-08-20 20:16:47,698 - core.services.trading_engine - INFO - ✅ XRP 처리 완료: success - 신호 없음
+2025-08-20 20:16:58,701 - core.services.trading_engine - INFO - 🔍 ETH 신호 분석 시작 (3/5)
+2025-08-20 20:16:58,742 - core.services.trading_engine - INFO - ✅ ETH 처리 완료: success - 신호 없음
+2025-08-20 20:17:09,745 - core.services.trading_engine - INFO - 🔍 DOGE 신호 분석 시작 (4/5)
+2025-08-20 20:17:09,765 - core.services.trading_engine - INFO - ✅ DOGE 처리 완료: success - 신호 없음
+2025-08-20 20:17:20,768 - core.services.trading_engine - INFO - 🔍 BTT 신호 분석 시작 (5/5)
+2025-08-20 20:17:20,826 - core.services.trading_engine - INFO - ✅ BTT 처리 완료: success - 신호 없음
+2025-08-20 20:17:28,828 - core.services.trading_engine - INFO - ✅ 사이클 #5 완료: 5/5 코인 처리 (52.2초)
+2025-08-20 20:18:28,829 - core.services.trading_engine - INFO - 🔄 사이클 #6 시작
+2025-08-20 20:18:28,830 - core.services.trading_engine - INFO - 🔍 BTC 신호 분석 시작 (1/5)
+2025-08-20 20:18:28,900 - core.services.trading_engine - INFO - ✅ BTC 처리 완료: success - 신호 없음
+2025-08-20 20:18:39,902 - core.services.trading_engine - INFO - 🔍 XRP 신호 분석 시작 (2/5)
+2025-08-20 20:18:39,944 - core.services.trading_engine - INFO - ✅ XRP 처리 완료: success - 신호 없음
+2025-08-20 20:18:50,947 - core.services.trading_engine - INFO - 🔍 ETH 신호 분석 시작 (3/5)
+2025-08-20 20:18:50,981 - core.services.trading_engine - INFO - ✅ ETH 처리 완료: success - 신호 없음
+2025-08-20 20:19:01,984 - core.services.trading_engine - INFO - 🔍 DOGE 신호 분석 시작 (4/5)
+2025-08-20 20:19:02,004 - core.services.trading_engine - INFO - ✅ DOGE 처리 완료: success - 신호 없음
+2025-08-20 20:19:13,007 - core.services.trading_engine - INFO - 🔍 BTT 신호 분석 시작 (5/5)
+2025-08-20 20:19:13,039 - core.services.trading_engine - INFO - ✅ BTT 처리 완료: success - 신호 없음
+2025-08-20 20:19:21,041 - core.services.trading_engine - INFO - ✅ 사이클 #6 완료: 5/5 코인 처리 (52.2초)
+2025-08-20 20:20:21,043 - core.services.trading_engine - INFO - 🔄 사이클 #7 시작
+2025-08-20 20:20:21,043 - core.services.trading_engine - INFO - 🔍 BTC 신호 분석 시작 (1/5)
+2025-08-20 20:20:21,168 - core.services.trading_engine - INFO - ✅ BTC 처리 완료: success - 신호 없음
+2025-08-20 20:20:32,171 - core.services.trading_engine - INFO - 🔍 XRP 신호 분석 시작 (2/5)
+2025-08-20 20:20:32,190 - core.services.trading_engine - INFO - ✅ XRP 처리 완료: success - 신호 없음
+2025-08-20 20:20:43,192 - core.services.trading_engine - INFO - 🔍 ETH 신호 분석 시작 (3/5)
+2025-08-20 20:20:43,224 - core.services.trading_engine - INFO - ✅ ETH 처리 완료: success - 신호 없음
+2025-08-20 20:20:54,227 - core.services.trading_engine - INFO - 🔍 DOGE 신호 분석 시작 (4/5)
+2025-08-20 20:20:54,264 - core.services.trading_engine - INFO - ✅ DOGE 처리 완료: success - 신호 없음
+2025-08-20 20:21:05,266 - core.services.trading_engine - INFO - 🔍 BTT 신호 분석 시작 (5/5)
+2025-08-20 20:21:05,285 - core.services.trading_engine - INFO - ✅ BTT 처리 완료: success - 신호 없음
+2025-08-20 20:21:13,287 - core.services.trading_engine - INFO - ✅ 사이클 #7 완료: 5/5 코인 처리 (52.2초)
+2025-08-20 20:22:13,289 - core.services.trading_engine - INFO - 🔄 사이클 #8 시작
+2025-08-20 20:22:13,289 - core.services.trading_engine - INFO - 🔍 BTC 신호 분석 시작 (1/5)
+2025-08-20 20:22:13,525 - core.services.trading_engine - INFO - ✅ BTC 처리 완료: success - 신호 없음
+2025-08-20 20:22:24,527 - core.services.trading_engine - INFO - 🔍 XRP 신호 분석 시작 (2/5)
+2025-08-20 20:22:24,612 - core.services.trading_engine - INFO - ✅ XRP 처리 완료: success - 신호 없음
+2025-08-20 20:22:35,614 - core.services.trading_engine - INFO - 🔍 ETH 신호 분석 시작 (3/5)
+2025-08-20 20:22:35,659 - core.services.trading_engine - INFO - ✅ ETH 처리 완료: success - 신호 없음
+2025-08-20 20:22:46,661 - core.services.trading_engine - INFO - 🔍 DOGE 신호 분석 시작 (4/5)
+2025-08-20 20:22:46,678 - core.services.trading_engine - INFO - ✅ DOGE 처리 완료: success - 신호 없음
+2025-08-20 20:22:57,681 - core.services.trading_engine - INFO - 🔍 BTT 신호 분석 시작 (5/5)
+2025-08-20 20:22:57,702 - core.services.trading_engine - INFO - ✅ BTT 처리 완료: success - 신호 없음
+2025-08-20 20:23:05,703 - core.services.trading_engine - INFO - ✅ 사이클 #8 완료: 5/5 코인 처리 (52.4초)
+2025-08-20 20:24:05,705 - core.services.trading_engine - INFO - 🔄 사이클 #9 시작
+2025-08-20 20:24:05,706 - core.services.trading_engine - INFO - 🔍 BTC 신호 분석 시작 (1/5)
+2025-08-20 20:24:05,786 - core.services.trading_engine - INFO - ✅ BTC 처리 완료: success - 신호 없음
+2025-08-20 20:24:16,789 - core.services.trading_engine - INFO - 🔍 XRP 신호 분석 시작 (2/5)
+2025-08-20 20:24:16,834 - core.services.trading_engine - INFO - ✅ XRP 처리 완료: success - 신호 없음
+2025-08-20 20:24:27,837 - core.services.trading_engine - INFO - 🔍 ETH 신호 분석 시작 (3/5)
+2025-08-20 20:24:27,859 - core.services.trading_engine - INFO - ✅ ETH 처리 완료: success - 신호 없음
+2025-08-20 20:24:38,861 - core.services.trading_engine - INFO - 🔍 DOGE 신호 분석 시작 (4/5)
+2025-08-20 20:24:39,021 - core.services.trading_engine - INFO - ✅ DOGE 처리 완료: success - 신호 없음
+2025-08-20 20:24:50,024 - core.services.trading_engine - INFO - 🔍 BTT 신호 분석 시작 (5/5)
+2025-08-20 20:24:50,075 - core.services.trading_engine - INFO - ✅ BTT 처리 완료: success - 신호 없음
+2025-08-20 20:24:58,076 - core.services.trading_engine - INFO - ✅ 사이클 #9 완료: 5/5 코인 처리 (52.4초)
+2025-08-20 20:25:58,077 - core.services.trading_engine - INFO - 🔄 사이클 #10 시작
+2025-08-20 20:25:58,078 - core.services.trading_engine - INFO - 🔍 BTC 신호 분석 시작 (1/5)
+2025-08-20 20:25:58,543 - core.services.trading_engine - INFO - ✅ BTC 처리 완료: success - 신호 없음
+2025-08-20 20:26:09,548 - core.services.trading_engine - INFO - 🔍 XRP 신호 분석 시작 (2/5)
+2025-08-20 20:26:09,610 - core.services.trading_engine - INFO - ✅ XRP 처리 완료: success - 신호 없음
+2025-08-20 20:26:20,614 - core.services.trading_engine - INFO - 🔍 ETH 신호 분석 시작 (3/5)
+2025-08-20 20:26:20,646 - core.services.trading_engine - INFO - ✅ ETH 처리 완료: success - 신호 없음
+2025-08-20 20:26:31,649 - core.services.trading_engine - INFO - 🔍 DOGE 신호 분석 시작 (4/5)
+2025-08-20 20:26:31,666 - core.services.trading_engine - INFO - ✅ DOGE 처리 완료: success - 신호 없음
+2025-08-20 20:26:42,669 - core.services.trading_engine - INFO - 🔍 BTT 신호 분석 시작 (5/5)
+2025-08-20 20:26:42,684 - core.services.trading_engine - INFO - ✅ BTT 처리 완료: success - 신호 없음
+2025-08-20 20:26:50,686 - core.services.trading_engine - INFO - ✅ 사이클 #10 완료: 5/5 코인 처리 (52.6초)
+2025-08-20 20:27:50,688 - core.services.trading_engine - INFO - 🔄 사이클 #11 시작
+2025-08-20 20:27:50,689 - core.services.trading_engine - INFO - 🔍 BTC 신호 분석 시작 (1/5)
+2025-08-20 20:27:50,750 - core.services.trading_engine - INFO - ✅ BTC 처리 완료: success - 신호 없음
+2025-08-20 20:28:01,753 - core.services.trading_engine - INFO - 🔍 XRP 신호 분석 시작 (2/5)
+2025-08-20 20:28:01,771 - core.services.trading_engine - INFO - ✅ XRP 처리 완료: success - 신호 없음
+2025-08-20 20:28:12,774 - core.services.trading_engine - INFO - 🔍 ETH 신호 분석 시작 (3/5)
+2025-08-20 20:28:12,790 - core.services.trading_engine - INFO - ✅ ETH 처리 완료: success - 신호 없음
+2025-08-20 20:28:23,793 - core.services.trading_engine - INFO - 🔍 DOGE 신호 분석 시작 (4/5)
+2025-08-20 20:28:23,858 - core.services.trading_engine - INFO - ✅ DOGE 처리 완료: success - 신호 없음
+2025-08-20 20:28:34,860 - core.services.trading_engine - INFO - 🔍 BTT 신호 분석 시작 (5/5)
+2025-08-20 20:28:34,879 - core.services.trading_engine - INFO - ✅ BTT 처리 완료: success - 신호 없음
+2025-08-20 20:28:42,879 - core.services.trading_engine - INFO - ✅ 사이클 #11 완료: 5/5 코인 처리 (52.2초)
+2025-08-20 20:29:42,881 - core.services.trading_engine - INFO - 🔄 사이클 #12 시작
+2025-08-20 20:29:42,882 - core.services.trading_engine - INFO - 🔍 BTC 신호 분석 시작 (1/5)
+2025-08-20 20:29:42,965 - core.services.trading_engine - INFO - ✅ BTC 처리 완료: success - 신호 없음
+2025-08-20 20:29:53,968 - core.services.trading_engine - INFO - 🔍 XRP 신호 분석 시작 (2/5)
+2025-08-20 20:29:54,002 - core.services.trading_engine - INFO - ✅ XRP 처리 완료: success - 신호 없음
+2025-08-20 20:30:05,005 - core.services.trading_engine - INFO - 🔍 ETH 신호 분석 시작 (3/5)
+2025-08-20 20:30:05,049 - core.services.trading_engine - INFO - ✅ ETH 처리 완료: success - 신호 없음
+2025-08-20 20:30:06,277 - main - INFO - 🛑 시스템 종료 중...
+2025-08-20 20:30:06,278 - main - INFO - 🛡️ 슬립 방지 해제
+2025-08-20 20:30:06,278 - core.services.optimizer - INFO - 🛑 [스케줄러] 자동 최적화 스케줄러 종료
+2025-08-20 20:30:06,279 - apscheduler.scheduler - INFO - Scheduler has been shut down
+2025-08-20 20:30:18,522 - core.session.session_manager - INFO - 🎯 세션 관리자 초기화 완료
+2025-08-20 20:30:18,568 - __main__ - INFO - 🚀 업비트 자동거래 시스템 시작...
+2025-08-20 20:30:18,591 - main - INFO - 🚀 업비트 자동거래 시스템 시작
+2025-08-20 20:30:18,592 - main - WARNING - ⚠️ 프로세스 우선순위 설정 실패: [Errno 1] Operation not permitted (권한 부족)
+2025-08-20 20:30:18,594 - main - INFO - 🛡️ 슬립 방지 활성화 (PID: 11447)
+2025-08-20 20:30:18,594 - main - INFO - 🛡️ 24시간 연속 거래를 위한 슬립 방지 활성화
+2025-08-20 20:30:18,597 - main - INFO - ✅ SQLite 데이터베이스 초기화 완료
+2025-08-20 20:30:18,602 - core.database.mysql_connection - INFO - ✅ MySQL 연결 테스트 성공
+2025-08-20 20:30:18,604 - core.database.migration - INFO - ✅ users 테이블 생성/확인 완료
+2025-08-20 20:30:18,604 - core.database.migration - INFO - 🎉 데이터베이스 마이그레이션 완료 (보안 강화된 스키마)
+2025-08-20 20:30:18,604 - main - INFO - ✅ MySQL 인증 데이터베이스 초기화 완료
+2025-08-20 20:30:18,605 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-08-20 20:30:18,606 - apscheduler.scheduler - INFO - Added job "주간 자동 최적화" to job store "default"
+2025-08-20 20:30:18,606 - apscheduler.scheduler - INFO - Scheduler started
+2025-08-20 20:30:18,606 - core.services.optimizer - INFO - 🕐 [스케줄러] 자동 최적화 스케줄러 시작
+2025-08-20 20:30:18,606 - core.services.optimizer - INFO - 📅 매주 일요일 오전 2시에 자동 최적화 실행
+2025-08-20 20:30:18,606 - main - INFO - ✅ 자동 최적화 스케줄러 시작
+2025-08-20 20:30:18,606 - main - INFO - 📊 모니터링 대상 마켓: ['KRW-BTC', 'KRW-XRP', 'KRW-ETH', 'KRW-DOGE', 'KRW-BTT']
+2025-08-20 20:30:18,606 - main - INFO - 🌐 웹서버 포트: 8001
+2025-08-20 20:31:00,868 - main - INFO - 🛑 시스템 종료 중...
+2025-08-20 20:31:00,870 - main - INFO - 🛡️ 슬립 방지 해제
+2025-08-20 20:31:00,870 - core.services.optimizer - INFO - 🛑 [스케줄러] 자동 최적화 스케줄러 종료
+2025-08-20 20:31:00,870 - apscheduler.scheduler - INFO - Scheduler has been shut down
+2025-08-20 20:31:20,515 - core.session.session_manager - INFO - 🎯 세션 관리자 초기화 완료
+2025-08-20 20:31:20,557 - __main__ - INFO - 🚀 업비트 자동거래 시스템 시작...
+2025-08-20 20:31:20,578 - main - INFO - 🚀 업비트 자동거래 시스템 시작
+2025-08-20 20:31:20,578 - main - WARNING - ⚠️ 프로세스 우선순위 설정 실패: [Errno 1] Operation not permitted (권한 부족)
+2025-08-20 20:31:20,581 - main - INFO - 🛡️ 슬립 방지 활성화 (PID: 11635)
+2025-08-20 20:31:20,581 - main - INFO - 🛡️ 24시간 연속 거래를 위한 슬립 방지 활성화
+2025-08-20 20:31:20,584 - main - INFO - ✅ SQLite 데이터베이스 초기화 완료
+2025-08-20 20:31:20,588 - core.database.mysql_connection - INFO - ✅ MySQL 연결 테스트 성공
+2025-08-20 20:31:20,590 - core.database.migration - INFO - ✅ users 테이블 생성/확인 완료
+2025-08-20 20:31:20,590 - core.database.migration - INFO - 🎉 데이터베이스 마이그레이션 완료 (보안 강화된 스키마)
+2025-08-20 20:31:20,590 - main - INFO - ✅ MySQL 인증 데이터베이스 초기화 완료
+2025-08-20 20:31:20,591 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-08-20 20:31:20,591 - apscheduler.scheduler - INFO - Added job "주간 자동 최적화" to job store "default"
+2025-08-20 20:31:20,591 - apscheduler.scheduler - INFO - Scheduler started
+2025-08-20 20:31:20,591 - core.services.optimizer - INFO - 🕐 [스케줄러] 자동 최적화 스케줄러 시작
+2025-08-20 20:31:20,591 - core.services.optimizer - INFO - 📅 매주 일요일 오전 2시에 자동 최적화 실행
+2025-08-20 20:31:20,591 - main - INFO - ✅ 자동 최적화 스케줄러 시작
+2025-08-20 20:31:20,591 - main - INFO - 📊 모니터링 대상 마켓: ['KRW-BTC', 'KRW-XRP', 'KRW-ETH', 'KRW-DOGE', 'KRW-BTT']
+2025-08-20 20:31:20,591 - main - INFO - 🌐 웹서버 포트: 8001
+2025-08-20 20:37:09,527 - main - INFO - 🛑 시스템 종료 중...
+2025-08-20 20:37:09,529 - main - INFO - 🛡️ 슬립 방지 해제
+2025-08-20 20:37:09,529 - core.services.optimizer - INFO - 🛑 [스케줄러] 자동 최적화 스케줄러 종료
+2025-08-20 20:37:09,529 - apscheduler.scheduler - INFO - Scheduler has been shut down
+2025-08-20 20:37:17,523 - core.session.session_manager - INFO - 🎯 세션 관리자 초기화 완료
+2025-08-20 20:37:17,573 - __main__ - INFO - 🚀 업비트 자동거래 시스템 시작...
+2025-08-20 20:37:17,588 - main - INFO - 🚀 업비트 자동거래 시스템 시작
+2025-08-20 20:37:17,588 - main - WARNING - ⚠️ 프로세스 우선순위 설정 실패: [Errno 1] Operation not permitted (권한 부족)
+2025-08-20 20:37:17,591 - main - INFO - 🛡️ 슬립 방지 활성화 (PID: 12549)
+2025-08-20 20:37:17,591 - main - INFO - 🛡️ 24시간 연속 거래를 위한 슬립 방지 활성화
+2025-08-20 20:37:17,594 - main - INFO - ✅ SQLite 데이터베이스 초기화 완료
+2025-08-20 20:37:17,615 - core.database.mysql_connection - INFO - ✅ MySQL 연결 테스트 성공
+2025-08-20 20:37:17,617 - core.database.migration - INFO - ✅ users 테이블 생성/확인 완료
+2025-08-20 20:37:17,617 - core.database.migration - INFO - 🎉 데이터베이스 마이그레이션 완료 (보안 강화된 스키마)
+2025-08-20 20:37:17,617 - main - INFO - ✅ MySQL 인증 데이터베이스 초기화 완료
+2025-08-20 20:37:17,618 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-08-20 20:37:17,618 - apscheduler.scheduler - INFO - Added job "주간 자동 최적화" to job store "default"
+2025-08-20 20:37:17,618 - apscheduler.scheduler - INFO - Scheduler started
+2025-08-20 20:37:17,618 - core.services.optimizer - INFO - 🕐 [스케줄러] 자동 최적화 스케줄러 시작
+2025-08-20 20:37:17,618 - core.services.optimizer - INFO - 📅 매주 일요일 오전 2시에 자동 최적화 실행
+2025-08-20 20:37:17,618 - main - INFO - ✅ 자동 최적화 스케줄러 시작
+2025-08-20 20:37:17,618 - main - INFO - 📊 모니터링 대상 마켓: ['KRW-BTC', 'KRW-XRP', 'KRW-ETH', 'KRW-DOGE', 'KRW-BTT']
+2025-08-20 20:37:17,618 - main - INFO - 🌐 웹서버 포트: 8001
+2025-08-20 20:38:13,850 - main - INFO - 🛑 시스템 종료 중...
+2025-08-20 20:38:13,851 - main - INFO - 🛡️ 슬립 방지 해제
+2025-08-20 20:38:13,851 - core.services.optimizer - INFO - 🛑 [스케줄러] 자동 최적화 스케줄러 종료
+2025-08-20 20:38:13,851 - apscheduler.scheduler - INFO - Scheduler has been shut down
+2025-08-20 20:38:24,790 - core.session.session_manager - INFO - 🎯 세션 관리자 초기화 완료
+2025-08-20 20:38:24,832 - __main__ - INFO - 🚀 업비트 자동거래 시스템 시작...
+2025-08-20 20:38:24,852 - main - INFO - 🚀 업비트 자동거래 시스템 시작
+2025-08-20 20:38:24,853 - main - WARNING - ⚠️ 프로세스 우선순위 설정 실패: [Errno 1] Operation not permitted (권한 부족)
+2025-08-20 20:38:24,855 - main - INFO - 🛡️ 슬립 방지 활성화 (PID: 12703)
+2025-08-20 20:38:24,855 - main - INFO - 🛡️ 24시간 연속 거래를 위한 슬립 방지 활성화
+2025-08-20 20:38:24,858 - main - INFO - ✅ SQLite 데이터베이스 초기화 완료
+2025-08-20 20:38:24,863 - core.database.mysql_connection - INFO - ✅ MySQL 연결 테스트 성공
+2025-08-20 20:38:24,864 - core.database.migration - INFO - ✅ users 테이블 생성/확인 완료
+2025-08-20 20:38:24,864 - core.database.migration - INFO - 🎉 데이터베이스 마이그레이션 완료 (보안 강화된 스키마)
+2025-08-20 20:38:24,864 - main - INFO - ✅ MySQL 인증 데이터베이스 초기화 완료
+2025-08-20 20:38:24,865 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-08-20 20:38:24,865 - apscheduler.scheduler - INFO - Added job "주간 자동 최적화" to job store "default"
+2025-08-20 20:38:24,866 - apscheduler.scheduler - INFO - Scheduler started
+2025-08-20 20:38:24,866 - core.services.optimizer - INFO - 🕐 [스케줄러] 자동 최적화 스케줄러 시작
+2025-08-20 20:38:24,866 - core.services.optimizer - INFO - 📅 매주 일요일 오전 2시에 자동 최적화 실행
+2025-08-20 20:38:24,866 - main - INFO - ✅ 자동 최적화 스케줄러 시작
+2025-08-20 20:38:24,866 - main - INFO - 📊 모니터링 대상 마켓: ['KRW-BTC', 'KRW-XRP', 'KRW-ETH', 'KRW-DOGE', 'KRW-BTT']
+2025-08-20 20:38:24,866 - main - INFO - 🌐 웹서버 포트: 8001
+2025-08-20 20:39:32,176 - core.session.session_manager - WARNING - ⚠️ 제거할 세션이 존재하지 않음: user_id=2
+2025-08-20 20:39:32,176 - core.api.auth - INFO - ✅ 사용자 teamprime 세션 관리자에서 정리 완료
+2025-08-20 20:39:32,177 - core.api.auth - INFO - 🔗 기존 거래 시스템 상태 초기화 완료
+2025-08-20 20:39:37,522 - core.auth.auth_service - INFO - ✅ 사용자 인증 성공: teamprime
+2025-08-20 20:39:37,522 - core.auth.auth_service - INFO - 🔒 일반 로그인 모드: user_id=2, 24시간 유지
+2025-08-20 20:39:37,523 - core.auth.auth_service - INFO - ✅ JWT 토큰 생성 완료: user_id=2, 만료시간=24시간
+2025-08-20 20:39:53,442 - main - INFO - 🔑 [MAIN] API 키 인증 요청 수신 - 보안 강화 방식
+2025-08-20 20:39:53,447 - main - INFO - 🔍 [MAIN] API 키 형식 검증 시작: Access Key 길이 40, Secret Key 길이 40
+2025-08-20 20:39:53,447 - main - INFO - 🔑 [MAIN] JWT 토큰 생성 완료, 업비트 API 호출 시작
+2025-08-20 20:39:53,722 - main - INFO - 📡 [MAIN] 업비트 API 응답 수신: 200
+2025-08-20 20:39:53,723 - main - INFO - 📊 [MAIN] 계좌 데이터 파싱 성공: 14개 계좌
+2025-08-20 20:39:53,723 - core.session.session_manager - INFO - ✅ 사용자 세션 생성: teamprime (ID: 2)
+2025-08-20 20:39:53,723 - core.session.session_manager - INFO - ✅ 새 세션 생성 완료: teamprime (총 1개 활성 세션)
+2025-08-20 20:39:53,724 - core.session.session_manager - INFO - 🔑 API 키 업데이트: teamprime
+2025-08-20 20:39:53,724 - core.session.session_manager - INFO - 🔗 업비트 클라이언트 설정: teamprime
+2025-08-20 20:39:53,724 - core.session.session_manager - INFO - 🔐 로그인 상태 업데이트: teamprime -> True
+2025-08-20 20:39:53,724 - main - INFO - 🔗 [MAIN] 사용자별 세션 시스템 업데이트 완료: teamprime - 426,808 KRW
+2025-08-20 20:39:53,724 - main - WARNING - ⚠️ [MAIN] 기존 시스템 전역 변수도 업데이트됨 (다중 사용자 시 충돌 가능)
+2025-08-20 20:39:53,725 - main - INFO - ✅ [MAIN] API 키 검증 및 세션 저장 성공: 사용자 teamprime
+2025-08-20 20:39:53,725 - main - INFO - 💰 [MAIN] 계좌 정보: 14개 계좌, 12개 자산
+2025-08-20 20:39:57,139 - core.services.trading_engine - INFO - 🚀 멀티 코인 거래 엔진 시작
+2025-08-20 20:39:57,140 - core.utils.api_manager - INFO - 🚀 API 매니저 워커 시작됨
+2025-08-20 20:39:57,140 - core.api.trading - INFO - ✅ teamprime 자동거래 시작
+2025-08-20 20:39:57,141 - core.services.trading_engine - INFO - 🔄 사이클 #1 시작
+2025-08-20 20:39:57,141 - core.services.trading_engine - INFO - 🔍 BTC 신호 분석 시작 (1/5)
+2025-08-20 20:39:57,202 - core.services.trading_engine - INFO - ✅ BTC 처리 완료: success - 신호 없음
+2025-08-20 20:40:08,205 - core.services.trading_engine - INFO - 🔍 XRP 신호 분석 시작 (2/5)
+2025-08-20 20:40:08,271 - core.services.trading_engine - INFO - ✅ XRP 처리 완료: success - 신호 없음
+2025-08-20 20:40:13,849 - core.session.session_manager - INFO - 🧹 사용자 세션 정리 시작: teamprime
+2025-08-20 20:40:13,849 - core.session.session_manager - WARNING - ⚠️ teamprime의 거래 엔진이 실행 중 - 수동 중지 필요
+2025-08-20 20:40:13,850 - core.session.session_manager - INFO - ✅ 사용자 세션 정리 완료: teamprime
+2025-08-20 20:40:13,850 - core.session.session_manager - INFO - 🗑️ 세션 제거 완료: teamprime (총 0개 활성 세션)
+2025-08-20 20:40:13,850 - core.api.auth - INFO - ✅ 사용자 teamprime 세션 관리자에서 정리 완료
+2025-08-20 20:40:13,850 - core.api.auth - INFO - ✅ 사용자 teamprime 레거시 세션 데이터 삭제 완료
+2025-08-20 20:40:13,850 - core.api.auth - INFO - 🔗 기존 거래 시스템 상태 초기화 완료
+2025-08-20 20:40:19,274 - core.services.trading_engine - INFO - 🔍 ETH 신호 분석 시작 (3/5)
+2025-08-20 20:40:19,274 - core.services.trading_engine - WARNING - ⚠️ 업비트 로그인이 필요합니다. 거래를 중단합니다.
+2025-08-20 20:40:19,274 - core.services.trading_engine - INFO - ✅ ETH 처리 완료: error - 로그인 필요
+2025-08-20 20:40:20,661 - core.auth.auth_service - INFO - ✅ 사용자 인증 성공: teamprime
+2025-08-20 20:40:20,662 - core.auth.auth_service - INFO - 🔒 일반 로그인 모드: user_id=2, 24시간 유지
+2025-08-20 20:40:20,662 - core.auth.auth_service - INFO - ✅ JWT 토큰 생성 완료: user_id=2, 만료시간=24시간
+2025-08-20 20:41:19,276 - core.services.trading_engine - INFO - 🔄 사이클 #2 시작
+2025-08-20 20:41:19,277 - core.services.trading_engine - INFO - 🔍 BTC 신호 분석 시작 (1/5)
+2025-08-20 20:41:19,277 - core.services.trading_engine - WARNING - ⚠️ 업비트 로그인이 필요합니다. 거래를 중단합니다.
+2025-08-20 20:41:19,277 - core.services.trading_engine - INFO - ✅ BTC 처리 완료: error - 로그인 필요
+2025-08-20 20:42:19,279 - core.services.trading_engine - INFO - 🔄 사이클 #3 시작
+2025-08-20 20:42:19,280 - core.services.trading_engine - INFO - 🔍 BTC 신호 분석 시작 (1/5)
+2025-08-20 20:42:19,280 - core.services.trading_engine - WARNING - ⚠️ 업비트 로그인이 필요합니다. 거래를 중단합니다.
+2025-08-20 20:42:19,280 - core.services.trading_engine - INFO - ✅ BTC 처리 완료: error - 로그인 필요
+2025-08-20 20:43:08,083 - main - INFO - 🔑 [MAIN] API 키 인증 요청 수신 - 보안 강화 방식
+2025-08-20 20:43:08,090 - main - INFO - 🔍 [MAIN] API 키 형식 검증 시작: Access Key 길이 40, Secret Key 길이 40
+2025-08-20 20:43:08,090 - main - INFO - 🔑 [MAIN] JWT 토큰 생성 완료, 업비트 API 호출 시작
+2025-08-20 20:43:08,263 - main - INFO - 📡 [MAIN] 업비트 API 응답 수신: 200
+2025-08-20 20:43:08,264 - main - INFO - 📊 [MAIN] 계좌 데이터 파싱 성공: 14개 계좌
+2025-08-20 20:43:08,264 - core.session.session_manager - INFO - ✅ 사용자 세션 생성: teamprime (ID: 2)
+2025-08-20 20:43:08,265 - core.session.session_manager - INFO - ✅ 새 세션 생성 완료: teamprime (총 1개 활성 세션)
+2025-08-20 20:43:08,265 - core.session.session_manager - INFO - 🔑 API 키 업데이트: teamprime
+2025-08-20 20:43:08,265 - core.session.session_manager - INFO - 🔗 업비트 클라이언트 설정: teamprime
+2025-08-20 20:43:08,266 - core.session.session_manager - INFO - 🔐 로그인 상태 업데이트: teamprime -> True
+2025-08-20 20:43:08,266 - main - INFO - 🔗 [MAIN] 사용자별 세션 시스템 업데이트 완료: teamprime - 426,808 KRW
+2025-08-20 20:43:08,266 - main - WARNING - ⚠️ [MAIN] 기존 시스템 전역 변수도 업데이트됨 (다중 사용자 시 충돌 가능)
+2025-08-20 20:43:08,266 - main - INFO - ✅ [MAIN] API 키 검증 및 세션 저장 성공: 사용자 teamprime
+2025-08-20 20:43:08,267 - main - INFO - 💰 [MAIN] 계좌 정보: 14개 계좌, 12개 자산
+2025-08-20 20:43:19,282 - core.services.trading_engine - INFO - 🔄 사이클 #4 시작
+2025-08-20 20:43:19,282 - core.services.trading_engine - INFO - 🔍 BTC 신호 분석 시작 (1/5)
+2025-08-20 20:43:19,365 - core.services.trading_engine - INFO - ✅ BTC 처리 완료: success - 신호 없음
+2025-08-20 20:43:30,368 - core.services.trading_engine - INFO - 🔍 XRP 신호 분석 시작 (2/5)
+2025-08-20 20:43:30,386 - core.services.trading_engine - INFO - ✅ XRP 처리 완료: success - 신호 없음
+2025-08-20 20:43:41,389 - core.services.trading_engine - INFO - 🔍 ETH 신호 분석 시작 (3/5)
+2025-08-20 20:43:41,439 - core.services.trading_engine - INFO - ✅ ETH 처리 완료: success - 신호 없음
+2025-08-20 20:43:52,442 - core.services.trading_engine - INFO - 🔍 DOGE 신호 분석 시작 (4/5)
+2025-08-20 20:43:52,459 - core.services.trading_engine - INFO - ✅ DOGE 처리 완료: success - 신호 없음
+2025-08-20 20:44:03,461 - core.services.trading_engine - INFO - 🔍 BTT 신호 분석 시작 (5/5)
+2025-08-20 20:44:03,488 - core.services.trading_engine - INFO - ✅ BTT 처리 완료: success - 신호 없음
+2025-08-20 20:44:11,489 - core.services.trading_engine - INFO - ✅ 사이클 #4 완료: 5/5 코인 처리 (52.2초)
+2025-08-20 20:45:11,490 - core.services.trading_engine - INFO - 🔄 사이클 #5 시작
+2025-08-20 20:45:11,490 - core.services.trading_engine - INFO - 🔍 BTC 신호 분석 시작 (1/5)
+2025-08-20 20:45:11,672 - core.services.trading_engine - INFO - ✅ BTC 처리 완료: success - 신호 없음
+2025-08-20 20:45:22,674 - core.services.trading_engine - INFO - 🔍 XRP 신호 분석 시작 (2/5)
+2025-08-20 20:45:22,694 - core.services.trading_engine - INFO - ✅ XRP 처리 완료: success - 신호 없음
+2025-08-20 20:45:33,696 - core.services.trading_engine - INFO - 🔍 ETH 신호 분석 시작 (3/5)
+2025-08-20 20:45:33,745 - core.services.trading_engine - INFO - ✅ ETH 처리 완료: success - 신호 없음
+2025-08-20 20:45:44,748 - core.services.trading_engine - INFO - 🔍 DOGE 신호 분석 시작 (4/5)
+2025-08-20 20:45:44,772 - core.services.trading_engine - INFO - ✅ DOGE 처리 완료: success - 신호 없음
+2025-08-20 20:45:55,774 - core.services.trading_engine - INFO - 🔍 BTT 신호 분석 시작 (5/5)
+2025-08-20 20:45:55,795 - core.services.trading_engine - INFO - ✅ BTT 처리 완료: success - 신호 없음
+2025-08-20 20:46:03,796 - core.services.trading_engine - INFO - ✅ 사이클 #5 완료: 5/5 코인 처리 (52.3초)
+2025-08-20 20:46:51,331 - main - INFO - 🛑 시스템 종료 중...
+2025-08-20 20:46:51,333 - main - INFO - 🛡️ 슬립 방지 해제
+2025-08-20 20:46:51,333 - core.services.optimizer - INFO - 🛑 [스케줄러] 자동 최적화 스케줄러 종료
+2025-08-20 20:46:51,333 - apscheduler.scheduler - INFO - Scheduler has been shut down
+2025-08-20 20:47:07,814 - core.session.session_manager - INFO - 🎯 세션 관리자 초기화 완료
+2025-08-20 20:47:07,855 - __main__ - INFO - 🚀 업비트 자동거래 시스템 시작...
+2025-08-20 20:47:07,879 - main - INFO - 🚀 업비트 자동거래 시스템 시작
+2025-08-20 20:47:07,879 - main - WARNING - ⚠️ 프로세스 우선순위 설정 실패: [Errno 1] Operation not permitted (권한 부족)
+2025-08-20 20:47:07,881 - main - INFO - 🛡️ 슬립 방지 활성화 (PID: 13360)
+2025-08-20 20:47:07,881 - main - INFO - 🛡️ 24시간 연속 거래를 위한 슬립 방지 활성화
+2025-08-20 20:47:07,884 - main - INFO - ✅ SQLite 데이터베이스 초기화 완료
+2025-08-20 20:47:07,889 - core.database.mysql_connection - INFO - ✅ MySQL 연결 테스트 성공
+2025-08-20 20:47:07,890 - core.database.migration - INFO - ✅ users 테이블 생성/확인 완료
+2025-08-20 20:47:07,891 - core.database.migration - INFO - 🎉 데이터베이스 마이그레이션 완료 (보안 강화된 스키마)
+2025-08-20 20:47:07,891 - main - INFO - ✅ MySQL 인증 데이터베이스 초기화 완료
+2025-08-20 20:47:07,892 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-08-20 20:47:07,892 - apscheduler.scheduler - INFO - Added job "주간 자동 최적화" to job store "default"
+2025-08-20 20:47:07,892 - apscheduler.scheduler - INFO - Scheduler started
+2025-08-20 20:47:07,892 - core.services.optimizer - INFO - 🕐 [스케줄러] 자동 최적화 스케줄러 시작
+2025-08-20 20:47:07,892 - core.services.optimizer - INFO - 📅 매주 일요일 오전 2시에 자동 최적화 실행
+2025-08-20 20:47:07,892 - main - INFO - ✅ 자동 최적화 스케줄러 시작
+2025-08-20 20:47:07,892 - main - INFO - 📊 모니터링 대상 마켓: ['KRW-BTC', 'KRW-XRP', 'KRW-ETH', 'KRW-DOGE', 'KRW-BTT']
+2025-08-20 20:47:07,892 - main - INFO - 🌐 웹서버 포트: 8001
+2025-08-20 20:49:47,012 - main - INFO - 🛑 시스템 종료 중...
+2025-08-20 20:49:47,013 - main - INFO - 🛡️ 슬립 방지 해제
+2025-08-20 20:49:47,013 - core.services.optimizer - INFO - 🛑 [스케줄러] 자동 최적화 스케줄러 종료
+2025-08-20 20:49:47,013 - apscheduler.scheduler - INFO - Scheduler has been shut down
+2025-08-20 20:50:23,460 - core.session.session_manager - INFO - 🎯 세션 관리자 초기화 완료
+2025-08-20 20:50:23,502 - __main__ - INFO - 🚀 업비트 자동거래 시스템 시작...
+2025-08-20 20:50:23,524 - main - INFO - 🚀 업비트 자동거래 시스템 시작
+2025-08-20 20:50:23,524 - main - WARNING - ⚠️ 프로세스 우선순위 설정 실패: [Errno 1] Operation not permitted (권한 부족)
+2025-08-20 20:50:23,526 - main - INFO - 🛡️ 슬립 방지 활성화 (PID: 13545)
+2025-08-20 20:50:23,527 - main - INFO - 🛡️ 24시간 연속 거래를 위한 슬립 방지 활성화
+2025-08-20 20:50:23,529 - main - INFO - ✅ SQLite 데이터베이스 초기화 완료
+2025-08-20 20:50:23,534 - core.database.mysql_connection - INFO - ✅ MySQL 연결 테스트 성공
+2025-08-20 20:50:23,535 - core.database.migration - INFO - ✅ users 테이블 생성/확인 완료
+2025-08-20 20:50:23,535 - core.database.migration - INFO - 🎉 데이터베이스 마이그레이션 완료 (보안 강화된 스키마)
+2025-08-20 20:50:23,535 - main - INFO - ✅ MySQL 인증 데이터베이스 초기화 완료
+2025-08-20 20:50:23,536 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-08-20 20:50:23,536 - apscheduler.scheduler - INFO - Added job "주간 자동 최적화" to job store "default"
+2025-08-20 20:50:23,536 - apscheduler.scheduler - INFO - Scheduler started
+2025-08-20 20:50:23,536 - core.services.optimizer - INFO - 🕐 [스케줄러] 자동 최적화 스케줄러 시작
+2025-08-20 20:50:23,536 - core.services.optimizer - INFO - 📅 매주 일요일 오전 2시에 자동 최적화 실행
+2025-08-20 20:50:23,536 - main - INFO - ✅ 자동 최적화 스케줄러 시작
+2025-08-20 20:50:23,536 - main - INFO - 📊 모니터링 대상 마켓: ['KRW-BTC', 'KRW-XRP', 'KRW-ETH', 'KRW-DOGE', 'KRW-BTT']
+2025-08-20 20:50:23,536 - main - INFO - 🌐 웹서버 포트: 8001
+2025-08-20 20:51:10,851 - core.auth.auth_service - WARNING - ⚠️ 서버 재시작으로 인한 토큰 무효화: user_id=2
+2025-08-20 20:51:10,851 - core.auth.middleware - WARNING - 토큰 검증 실패: 서버가 재시작되어 다시 로그인해주세요
+2025-08-20 20:51:19,299 - core.auth.auth_service - INFO - ✅ 사용자 인증 성공: teamprime
+2025-08-20 20:51:19,299 - core.auth.auth_service - INFO - 🔒 일반 로그인 모드: user_id=2, 24시간 유지
+2025-08-20 20:51:19,299 - core.auth.auth_service - INFO - ✅ JWT 토큰 생성 완료: user_id=2, 만료시간=24시간
+2025-08-20 20:51:31,216 - main - INFO - 🔑 [MAIN] API 키 인증 요청 수신 - 보안 강화 방식
+2025-08-20 20:51:31,221 - main - INFO - 🔍 [MAIN] API 키 형식 검증 시작: Access Key 길이 40, Secret Key 길이 40
+2025-08-20 20:51:31,221 - main - INFO - 🔑 [MAIN] JWT 토큰 생성 완료, 업비트 API 호출 시작
+2025-08-20 20:51:31,409 - main - INFO - 📡 [MAIN] 업비트 API 응답 수신: 200
+2025-08-20 20:51:31,410 - main - INFO - 📊 [MAIN] 계좌 데이터 파싱 성공: 14개 계좌
+2025-08-20 20:51:31,410 - core.session.session_manager - INFO - ✅ 사용자 세션 생성: teamprime (ID: 2)
+2025-08-20 20:51:31,410 - core.session.session_manager - INFO - ✅ 새 세션 생성 완료: teamprime (총 1개 활성 세션)
+2025-08-20 20:51:31,411 - core.session.session_manager - INFO - 🔑 API 키 업데이트: teamprime
+2025-08-20 20:51:31,411 - core.session.session_manager - INFO - 🔗 업비트 클라이언트 설정: teamprime
+2025-08-20 20:51:31,412 - core.session.session_manager - INFO - 🔐 로그인 상태 업데이트: teamprime -> True
+2025-08-20 20:51:31,412 - main - INFO - 🔗 [MAIN] 사용자별 세션 시스템 업데이트 완료: teamprime - 426,808 KRW
+2025-08-20 20:51:31,412 - main - WARNING - ⚠️ [MAIN] 기존 시스템 전역 변수도 업데이트됨 (다중 사용자 시 충돌 가능)
+2025-08-20 20:51:31,413 - main - INFO - ✅ [MAIN] API 키 검증 및 세션 저장 성공: 사용자 teamprime
+2025-08-20 20:51:31,413 - main - INFO - 💰 [MAIN] 계좌 정보: 14개 계좌, 12개 자산
+2025-08-20 20:51:57,988 - main - INFO - 🔑 [MAIN] API 키 인증 요청 수신 - 보안 강화 방식
+2025-08-20 20:51:57,993 - main - INFO - 🔍 [MAIN] API 키 형식 검증 시작: Access Key 길이 40, Secret Key 길이 40
+2025-08-20 20:51:57,993 - main - INFO - 🔑 [MAIN] JWT 토큰 생성 완료, 업비트 API 호출 시작
+2025-08-20 20:51:58,066 - main - INFO - 📡 [MAIN] 업비트 API 응답 수신: 200
+2025-08-20 20:51:58,067 - main - INFO - 📊 [MAIN] 계좌 데이터 파싱 성공: 14개 계좌
+2025-08-20 20:51:58,067 - core.session.session_manager - INFO - 🔄 기존 세션 발견 - 정리 후 재생성: teamprime
+2025-08-20 20:51:58,067 - core.session.session_manager - INFO - 🧹 사용자 세션 정리 시작: teamprime
+2025-08-20 20:51:58,067 - core.session.session_manager - INFO - ✅ 사용자 세션 정리 완료: teamprime
+2025-08-20 20:51:58,067 - core.session.session_manager - INFO - ✅ 사용자 세션 생성: teamprime (ID: 2)
+2025-08-20 20:51:58,067 - core.session.session_manager - INFO - ✅ 새 세션 생성 완료: teamprime (총 1개 활성 세션)
+2025-08-20 20:51:58,068 - core.session.session_manager - INFO - 🔑 API 키 업데이트: teamprime
+2025-08-20 20:51:58,068 - core.session.session_manager - INFO - 🔗 업비트 클라이언트 설정: teamprime
+2025-08-20 20:51:58,068 - core.session.session_manager - INFO - 🔐 로그인 상태 업데이트: teamprime -> True
+2025-08-20 20:51:58,068 - main - INFO - 🔗 [MAIN] 사용자별 세션 시스템 업데이트 완료: teamprime - 426,808 KRW
+2025-08-20 20:51:58,068 - main - WARNING - ⚠️ [MAIN] 기존 시스템 전역 변수도 업데이트됨 (다중 사용자 시 충돌 가능)
+2025-08-20 20:51:58,068 - main - INFO - ✅ [MAIN] API 키 검증 및 세션 저장 성공: 사용자 teamprime
+2025-08-20 20:51:58,068 - main - INFO - 💰 [MAIN] 계좌 정보: 14개 계좌, 12개 자산
+2025-08-20 20:55:40,774 - main - INFO - 🛑 시스템 종료 중...
+2025-08-20 20:55:40,776 - main - INFO - 🛡️ 슬립 방지 해제
+2025-08-20 20:55:40,776 - core.services.optimizer - INFO - 🛑 [스케줄러] 자동 최적화 스케줄러 종료
+2025-08-20 20:55:40,776 - apscheduler.scheduler - INFO - Scheduler has been shut down
+2025-08-20 20:56:04,239 - core.session.session_manager - INFO - 🎯 세션 관리자 초기화 완료
+2025-08-20 20:56:04,281 - __main__ - INFO - 🚀 업비트 자동거래 시스템 시작...
+2025-08-20 20:56:04,302 - main - INFO - 🚀 업비트 자동거래 시스템 시작
+2025-08-20 20:56:04,302 - main - WARNING - ⚠️ 프로세스 우선순위 설정 실패: [Errno 1] Operation not permitted (권한 부족)
+2025-08-20 20:56:04,304 - main - INFO - 🛡️ 슬립 방지 활성화 (PID: 13974)
+2025-08-20 20:56:04,304 - main - INFO - 🛡️ 24시간 연속 거래를 위한 슬립 방지 활성화
+2025-08-20 20:56:04,307 - main - INFO - ✅ SQLite 데이터베이스 초기화 완료
+2025-08-20 20:56:04,312 - core.database.mysql_connection - INFO - ✅ MySQL 연결 테스트 성공
+2025-08-20 20:56:04,314 - core.database.migration - INFO - ✅ users 테이블 생성/확인 완료
+2025-08-20 20:56:04,314 - core.database.migration - INFO - 🎉 데이터베이스 마이그레이션 완료 (보안 강화된 스키마)
+2025-08-20 20:56:04,314 - main - INFO - ✅ MySQL 인증 데이터베이스 초기화 완료
+2025-08-20 20:56:04,315 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-08-20 20:56:04,315 - apscheduler.scheduler - INFO - Added job "주간 자동 최적화" to job store "default"
+2025-08-20 20:56:04,315 - apscheduler.scheduler - INFO - Scheduler started
+2025-08-20 20:56:04,315 - core.services.optimizer - INFO - 🕐 [스케줄러] 자동 최적화 스케줄러 시작
+2025-08-20 20:56:04,315 - core.services.optimizer - INFO - 📅 매주 일요일 오전 2시에 자동 최적화 실행
+2025-08-20 20:56:04,315 - main - INFO - ✅ 자동 최적화 스케줄러 시작
+2025-08-20 20:56:04,315 - main - INFO - 📊 모니터링 대상 마켓: ['KRW-BTC', 'KRW-XRP', 'KRW-ETH', 'KRW-DOGE', 'KRW-BTT']
+2025-08-20 20:56:04,315 - main - INFO - 🌐 웹서버 포트: 8001
+2025-08-20 20:56:40,180 - core.auth.auth_service - WARNING - ⚠️ 서버 재시작으로 인한 토큰 무효화: user_id=2
+2025-08-20 20:56:40,181 - core.auth.middleware - WARNING - 토큰 검증 실패: 서버가 재시작되어 다시 로그인해주세요
+2025-08-20 20:56:45,742 - core.auth.auth_service - INFO - ✅ 사용자 인증 성공: teamprime
+2025-08-20 20:56:45,743 - core.auth.auth_service - INFO - 🔒 일반 로그인 모드: user_id=2, 24시간 유지
+2025-08-20 20:56:45,743 - core.auth.auth_service - INFO - ✅ JWT 토큰 생성 완료: user_id=2, 만료시간=24시간
+2025-08-20 20:56:54,548 - main - INFO - 🔑 [MAIN] API 키 인증 요청 수신 - 보안 강화 방식
+2025-08-20 20:56:54,552 - main - INFO - 🔍 [MAIN] API 키 형식 검증 시작: Access Key 길이 40, Secret Key 길이 40
+2025-08-20 20:56:54,553 - main - INFO - 🔑 [MAIN] JWT 토큰 생성 완료, 업비트 API 호출 시작
+2025-08-20 20:56:54,879 - main - INFO - 📡 [MAIN] 업비트 API 응답 수신: 200
+2025-08-20 20:56:54,880 - main - INFO - 📊 [MAIN] 계좌 데이터 파싱 성공: 14개 계좌
+2025-08-20 20:56:54,880 - core.session.session_manager - INFO - ✅ 사용자 세션 생성: teamprime (ID: 2)
+2025-08-20 20:56:54,881 - core.session.session_manager - INFO - ✅ 새 세션 생성 완료: teamprime (총 1개 활성 세션)
+2025-08-20 20:56:54,881 - core.session.session_manager - INFO - 🔑 API 키 업데이트: teamprime
+2025-08-20 20:56:54,881 - core.session.session_manager - INFO - 🔗 업비트 클라이언트 설정: teamprime
+2025-08-20 20:56:54,881 - core.session.session_manager - INFO - 🔐 로그인 상태 업데이트: teamprime -> True
+2025-08-20 20:56:54,881 - main - INFO - 🔗 [MAIN] 사용자별 세션 시스템 업데이트 완료: teamprime - 426,808 KRW
+2025-08-20 20:56:54,881 - main - WARNING - ⚠️ [MAIN] 기존 시스템 전역 변수도 업데이트됨 (다중 사용자 시 충돌 가능)
+2025-08-20 20:56:54,882 - main - INFO - ✅ [MAIN] API 키 검증 및 세션 저장 성공: 사용자 teamprime
+2025-08-20 20:56:54,882 - main - INFO - 💰 [MAIN] 계좌 정보: 14개 계좌, 12개 자산
+2025-08-20 20:57:02,041 - core.services.trading_engine - INFO - 🚀 멀티 코인 거래 엔진 시작
+2025-08-20 20:57:02,041 - core.utils.api_manager - INFO - 🚀 API 매니저 워커 시작됨
+2025-08-20 20:57:02,041 - core.api.trading - INFO - ✅ teamprime 자동거래 시작
+2025-08-20 20:57:02,042 - core.services.trading_engine - INFO - 🔄 사이클 #1 시작
+2025-08-20 20:57:02,042 - core.services.trading_engine - INFO - 🔍 BTC 신호 분석 시작 (1/5)
+2025-08-20 20:57:02,096 - core.services.trading_engine - INFO - ✅ BTC 처리 완료: success - 신호 없음
+2025-08-20 20:57:13,099 - core.services.trading_engine - INFO - 🔍 XRP 신호 분석 시작 (2/5)
+2025-08-20 20:57:13,118 - core.services.trading_engine - INFO - ✅ XRP 처리 완료: success - 신호 없음
+2025-08-20 20:57:24,121 - core.services.trading_engine - INFO - 🔍 ETH 신호 분석 시작 (3/5)
+2025-08-20 20:57:24,150 - core.services.trading_engine - INFO - ✅ ETH 처리 완료: success - 신호 없음
+2025-08-20 20:57:35,152 - core.services.trading_engine - INFO - 🔍 DOGE 신호 분석 시작 (4/5)
+2025-08-20 20:57:35,176 - core.services.trading_engine - INFO - ✅ DOGE 처리 완료: success - 신호 없음
+2025-08-20 20:57:46,178 - core.services.trading_engine - INFO - 🔍 BTT 신호 분석 시작 (5/5)
+2025-08-20 20:57:46,196 - core.services.trading_engine - INFO - 📈 BTT 매수 신호 감지!
+2025-08-20 20:57:46,196 - core.services.trading_engine - INFO -    신호 강도: 85
+2025-08-20 20:57:46,196 - core.services.trading_engine - INFO -    사유: 거래량 급증 7.5배, 가격상승 0.44%
+2025-08-20 20:57:46,372 - core.services.trading_engine - INFO - 💰 BTT 매수 주문 실행
+2025-08-20 20:57:46,372 - core.services.trading_engine - INFO -    투자 금액: 85,362 KRW
+2025-08-20 20:57:46,372 - core.services.trading_engine - INFO -    매수 가격: 0 KRW
+2025-08-20 20:57:46,372 - core.services.trading_engine - INFO -    매수 수량: 94010648.32374892
+2025-08-20 20:57:46,445 - core.services.trading_engine - INFO - ✅ BTT 매수 완료!
+2025-08-20 20:57:46,445 - core.services.trading_engine - INFO -    익절가: 0 KRW
+2025-08-20 20:57:46,445 - core.services.trading_engine - INFO -    손절가: 0 KRW
+2025-08-20 20:57:46,445 - core.services.trading_engine - INFO - ✅ BTT 처리 완료: success - 매수 신호 감지
+2025-08-20 20:57:52,378 - core.utils.api_manager - INFO - ⏳ 60초 규정 준수 대기: 54.0초 (get_single_ticker)
+2025-08-20 20:57:54,447 - core.services.trading_engine - INFO - ✅ 사이클 #1 완료: 5/5 코인 처리 (52.4초)
+2025-08-20 20:58:12,050 - core.utils.api_manager - WARNING - ⏰ API 호출 타임아웃: get_single_ticker (우선순위: POSITION_MONITORING)
+2025-08-20 20:58:12,050 - core.services.trading_engine - ERROR - ⚠️ KRW-BTT 가격 조회 오류: 
+2025-08-20 20:58:42,053 - core.utils.api_manager - WARNING - ⏰ API 호출 타임아웃: get_single_ticker (우선순위: POSITION_MONITORING)
+2025-08-20 20:58:42,054 - core.services.trading_engine - ERROR - ⚠️ KRW-BTT 가격 조회 오류: 
+2025-08-20 20:58:46,487 - core.utils.api_manager - INFO - ⏳ 60초 규정 준수 대기: 60.0초 (get_single_ticker)
+2025-08-20 20:58:54,449 - core.services.trading_engine - INFO - 🔄 사이클 #2 시작
+2025-08-20 20:58:54,449 - core.services.trading_engine - INFO - 🔍 BTC 신호 분석 시작 (1/5)
+2025-08-20 20:58:54,530 - core.services.trading_engine - INFO - ✅ BTC 처리 완료: success - 신호 없음
+2025-08-20 20:59:05,532 - core.services.trading_engine - INFO - 🔍 XRP 신호 분석 시작 (2/5)
+2025-08-20 20:59:05,559 - core.services.trading_engine - INFO - ✅ XRP 처리 완료: success - 신호 없음
+2025-08-20 20:59:12,056 - core.utils.api_manager - WARNING - ⏰ API 호출 타임아웃: get_single_ticker (우선순위: POSITION_MONITORING)
+2025-08-20 20:59:12,057 - core.services.trading_engine - ERROR - ⚠️ KRW-BTT 가격 조회 오류: 
+2025-08-20 20:59:16,562 - core.services.trading_engine - INFO - 🔍 ETH 신호 분석 시작 (3/5)
+2025-08-20 20:59:16,579 - core.services.trading_engine - INFO - ✅ ETH 처리 완료: success - 신호 없음
+2025-08-20 20:59:22,058 - core.services.trading_engine - ERROR - ⚠️ KRW-BTT 가격 조회 오류: '<' not supported between instances of 'dict' and 'dict'
+2025-08-20 20:59:27,582 - core.services.trading_engine - INFO - 🔍 DOGE 신호 분석 시작 (4/5)
+2025-08-20 20:59:27,609 - core.services.trading_engine - INFO - ✅ DOGE 처리 완료: success - 신호 없음
+2025-08-20 20:59:32,059 - core.services.trading_engine - ERROR - ⚠️ KRW-BTT 가격 조회 오류: '<' not supported between instances of 'dict' and 'dict'
+2025-08-20 20:59:38,612 - core.services.trading_engine - INFO - 🔍 BTT 신호 분석 시작 (5/5)
+2025-08-20 20:59:38,613 - core.services.trading_engine - INFO - ✅ BTT 처리 완료: skipped - 거래 불가
+2025-08-20 20:59:38,613 - core.services.trading_engine - INFO - ✅ 사이클 #2 완료: 5/5 코인 처리 (44.2초)
+2025-08-20 20:59:42,061 - core.services.trading_engine - ERROR - ⚠️ KRW-BTT 가격 조회 오류: '<' not supported between instances of 'dict' and 'dict'
+2025-08-20 20:59:46,602 - core.utils.api_manager - ERROR - ⚠️ API 호출 처리 오류: '<' not supported between instances of 'dict' and 'dict'
+2025-08-20 20:59:47,603 - core.utils.api_manager - ERROR - ⚠️ API 호출 처리 오류: '<' not supported between instances of 'dict' and 'dict'
+2025-08-20 20:59:48,605 - core.utils.api_manager - INFO - ⏳ 60초 규정 준수 대기: 58.0초 (get_single_ticker)
+2025-08-20 20:59:52,063 - core.services.trading_engine - ERROR - ⚠️ KRW-BTT 가격 조회 오류: '<' not supported between instances of 'dict' and 'dict'
+2025-08-20 21:00:02,065 - core.services.trading_engine - ERROR - ⚠️ KRW-BTT 가격 조회 오류: '<' not supported between instances of 'dict' and 'dict'
+2025-08-20 21:00:12,067 - core.services.trading_engine - ERROR - ⚠️ KRW-BTT 가격 조회 오류: '<' not supported between instances of 'dict' and 'dict'
+2025-08-20 21:00:22,069 - core.services.trading_engine - ERROR - ⚠️ KRW-BTT 가격 조회 오류: '<' not supported between instances of 'dict' and 'dict'
+2025-08-20 21:00:32,070 - core.services.trading_engine - ERROR - ⚠️ KRW-BTT 가격 조회 오류: '<' not supported between instances of 'dict' and 'dict'
+2025-08-20 21:00:38,614 - core.services.trading_engine - INFO - 🔄 사이클 #3 시작
+2025-08-20 21:00:38,614 - core.services.trading_engine - INFO - 🔍 BTC 신호 분석 시작 (1/5)
+2025-08-20 21:00:38,734 - core.services.trading_engine - INFO - ✅ BTC 처리 완료: success - 신호 없음
+2025-08-20 21:00:42,072 - core.services.trading_engine - ERROR - ⚠️ KRW-BTT 가격 조회 오류: '<' not supported between instances of 'dict' and 'dict'
+2025-08-20 21:00:46,713 - core.utils.api_manager - ERROR - ⚠️ API 호출 처리 오류: '<' not supported between instances of 'dict' and 'dict'
+2025-08-20 21:00:47,714 - core.utils.api_manager - ERROR - ⚠️ API 호출 처리 오류: '<' not supported between instances of 'dict' and 'dict'
+2025-08-20 21:00:48,716 - core.utils.api_manager - ERROR - ⚠️ API 호출 처리 오류: '<' not supported between instances of 'dict' and 'dict'
+2025-08-20 21:00:49,718 - core.utils.api_manager - ERROR - ⚠️ API 호출 처리 오류: '<' not supported between instances of 'dict' and 'dict'
+2025-08-20 21:00:49,736 - core.services.trading_engine - INFO - 🔍 XRP 신호 분석 시작 (2/5)
+2025-08-20 21:00:49,800 - core.services.trading_engine - INFO - ✅ XRP 처리 완료: success - 신호 없음
+2025-08-20 21:00:50,719 - core.utils.api_manager - ERROR - ⚠️ API 호출 처리 오류: '<' not supported between instances of 'dict' and 'dict'
+2025-08-20 21:00:51,720 - core.utils.api_manager - INFO - ⏳ 60초 규정 준수 대기: 55.0초 (get_single_ticker)
+2025-08-20 21:00:52,073 - core.services.trading_engine - ERROR - ⚠️ KRW-BTT 가격 조회 오류: '<' not supported between instances of 'dict' and 'dict'
+2025-08-20 21:01:00,803 - core.services.trading_engine - INFO - 🔍 ETH 신호 분석 시작 (3/5)
+2025-08-20 21:01:00,825 - core.services.trading_engine - INFO - ✅ ETH 처리 완료: success - 신호 없음
+2025-08-20 21:01:02,074 - core.services.trading_engine - ERROR - ⚠️ KRW-BTT 가격 조회 오류: '<' not supported between instances of 'dict' and 'dict'
+2025-08-20 21:01:11,827 - core.services.trading_engine - INFO - 🔍 DOGE 신호 분석 시작 (4/5)
+2025-08-20 21:01:11,861 - core.services.trading_engine - INFO - ✅ DOGE 처리 완료: success - 신호 없음
+2025-08-20 21:01:12,076 - core.services.trading_engine - ERROR - ⚠️ KRW-BTT 가격 조회 오류: '<' not supported between instances of 'dict' and 'dict'
+2025-08-20 21:01:22,078 - core.services.trading_engine - ERROR - ⚠️ KRW-BTT 가격 조회 오류: '<' not supported between instances of 'dict' and 'dict'
+2025-08-20 21:01:22,864 - core.services.trading_engine - INFO - 🔍 BTT 신호 분석 시작 (5/5)
+2025-08-20 21:01:22,864 - core.services.trading_engine - INFO - ✅ BTT 처리 완료: skipped - 거래 불가
+2025-08-20 21:01:22,865 - core.services.trading_engine - INFO - ✅ 사이클 #3 완료: 5/5 코인 처리 (44.3초)
+2025-08-20 21:01:32,080 - core.services.trading_engine - ERROR - ⚠️ KRW-BTT 가격 조회 오류: '<' not supported between instances of 'dict' and 'dict'
+2025-08-20 21:01:42,082 - core.services.trading_engine - ERROR - ⚠️ KRW-BTT 가격 조회 오류: '<' not supported between instances of 'dict' and 'dict'
+2025-08-20 21:01:46,838 - core.utils.api_manager - ERROR - ⚠️ API 호출 처리 오류: '<' not supported between instances of 'dict' and 'dict'
+2025-08-20 21:01:47,840 - core.utils.api_manager - ERROR - ⚠️ API 호출 처리 오류: '<' not supported between instances of 'dict' and 'dict'
+2025-08-20 21:01:48,842 - core.utils.api_manager - ERROR - ⚠️ API 호출 처리 오류: '<' not supported between instances of 'dict' and 'dict'
+2025-08-20 21:01:49,843 - core.utils.api_manager - ERROR - ⚠️ API 호출 처리 오류: '<' not supported between instances of 'dict' and 'dict'
+2025-08-20 21:01:50,844 - core.utils.api_manager - ERROR - ⚠️ API 호출 처리 오류: '<' not supported between instances of 'dict' and 'dict'
+2025-08-20 21:01:51,846 - core.utils.api_manager - INFO - ⏳ 60초 규정 준수 대기: 55.0초 (get_single_ticker)
+2025-08-20 21:01:52,083 - core.services.trading_engine - ERROR - ⚠️ KRW-BTT 가격 조회 오류: '<' not supported between instances of 'dict' and 'dict'
+2025-08-20 21:02:02,085 - core.services.trading_engine - ERROR - ⚠️ KRW-BTT 가격 조회 오류: '<' not supported between instances of 'dict' and 'dict'
+2025-08-20 21:02:20,777 - core.session.session_manager - INFO - 🎯 세션 관리자 초기화 완료
+2025-08-20 21:02:20,824 - __main__ - INFO - 🚀 업비트 자동거래 시스템 시작...
+2025-08-20 21:02:20,850 - main - INFO - 🚀 업비트 자동거래 시스템 시작
+2025-08-20 21:02:20,850 - main - WARNING - ⚠️ 프로세스 우선순위 설정 실패: [Errno 1] Operation not permitted (권한 부족)
+2025-08-20 21:02:20,853 - main - INFO - 🛡️ 슬립 방지 활성화 (PID: 14706)
+2025-08-20 21:02:20,853 - main - INFO - 🛡️ 24시간 연속 거래를 위한 슬립 방지 활성화
+2025-08-20 21:02:20,856 - main - INFO - ✅ SQLite 데이터베이스 초기화 완료
+2025-08-20 21:02:20,861 - core.database.mysql_connection - INFO - ✅ MySQL 연결 테스트 성공
+2025-08-20 21:02:20,862 - core.database.migration - INFO - ✅ users 테이블 생성/확인 완료
+2025-08-20 21:02:20,862 - core.database.migration - INFO - 🎉 데이터베이스 마이그레이션 완료 (보안 강화된 스키마)
+2025-08-20 21:02:20,862 - main - INFO - ✅ MySQL 인증 데이터베이스 초기화 완료
+2025-08-20 21:02:20,863 - apscheduler.scheduler - INFO - Adding job tentatively -- it will be properly scheduled when the scheduler starts
+2025-08-20 21:02:20,864 - apscheduler.scheduler - INFO - Added job "주간 자동 최적화" to job store "default"
+2025-08-20 21:02:20,864 - apscheduler.scheduler - INFO - Scheduler started
+2025-08-20 21:02:20,864 - core.services.optimizer - INFO - 🕐 [스케줄러] 자동 최적화 스케줄러 시작
+2025-08-20 21:02:20,864 - core.services.optimizer - INFO - 📅 매주 일요일 오전 2시에 자동 최적화 실행
+2025-08-20 21:02:20,864 - main - INFO - ✅ 자동 최적화 스케줄러 시작
+2025-08-20 21:02:20,864 - main - INFO - 📊 모니터링 대상 마켓: ['KRW-BTC', 'KRW-XRP', 'KRW-ETH', 'KRW-DOGE', 'KRW-BTT']
+2025-08-20 21:02:20,864 - main - INFO - 🌐 웹서버 포트: 8001
+2025-08-20 21:03:27,608 - core.auth.auth_service - WARNING - ⚠️ 서버 재시작으로 인한 토큰 무효화: user_id=2
+2025-08-20 21:03:27,609 - core.auth.middleware - WARNING - 토큰 검증 실패: 서버가 재시작되어 다시 로그인해주세요
+2025-08-20 21:03:35,298 - core.auth.auth_service - INFO - ✅ 사용자 인증 성공: teamprime
+2025-08-20 21:03:35,298 - core.auth.auth_service - INFO - 🔒 일반 로그인 모드: user_id=2, 24시간 유지
+2025-08-20 21:03:35,298 - core.auth.auth_service - INFO - ✅ JWT 토큰 생성 완료: user_id=2, 만료시간=24시간
+2025-08-20 21:03:46,010 - main - INFO - 🔑 [MAIN] API 키 인증 요청 수신 - 보안 강화 방식
+2025-08-20 21:03:46,015 - main - INFO - 🔍 [MAIN] API 키 형식 검증 시작: Access Key 길이 40, Secret Key 길이 31
+2025-08-20 21:03:46,016 - main - INFO - 🔑 [MAIN] JWT 토큰 생성 완료, 업비트 API 호출 시작
+2025-08-20 21:03:46,257 - main - INFO - 📡 [MAIN] 업비트 API 응답 수신: 401
+2025-08-20 21:03:46,257 - main - WARNING - ⚠️ [MAIN] API 키 검증 실패: 401 - {"error":{"message":"Failed to verify Jwt token.","name":"jwt_verification"}}
+2025-08-20 21:03:55,290 - main - INFO - 🔑 [MAIN] API 키 인증 요청 수신 - 보안 강화 방식
+2025-08-20 21:03:55,296 - main - INFO - 🔍 [MAIN] API 키 형식 검증 시작: Access Key 길이 40, Secret Key 길이 40
+2025-08-20 21:03:55,297 - main - INFO - 🔑 [MAIN] JWT 토큰 생성 완료, 업비트 API 호출 시작
+2025-08-20 21:03:55,384 - main - INFO - 📡 [MAIN] 업비트 API 응답 수신: 200
+2025-08-20 21:03:55,385 - main - INFO - 📊 [MAIN] 계좌 데이터 파싱 성공: 14개 계좌
+2025-08-20 21:03:55,385 - core.session.session_manager - INFO - ✅ 사용자 세션 생성: teamprime (ID: 2)
+2025-08-20 21:03:55,386 - core.session.session_manager - INFO - ✅ 새 세션 생성 완료: teamprime (총 1개 활성 세션)
+2025-08-20 21:03:55,386 - core.session.session_manager - INFO - 🔑 API 키 업데이트: teamprime
+2025-08-20 21:03:55,386 - core.session.session_manager - INFO - 🔗 업비트 클라이언트 설정: teamprime
+2025-08-20 21:03:55,386 - core.session.session_manager - INFO - 🔐 로그인 상태 업데이트: teamprime -> True
+2025-08-20 21:03:55,386 - main - INFO - 🔗 [MAIN] 사용자별 세션 시스템 업데이트 완료: teamprime - 341,404 KRW
+2025-08-20 21:03:55,386 - main - WARNING - ⚠️ [MAIN] 기존 시스템 전역 변수도 업데이트됨 (다중 사용자 시 충돌 가능)
+2025-08-20 21:03:55,386 - main - INFO - ✅ [MAIN] API 키 검증 및 세션 저장 성공: 사용자 teamprime
+2025-08-20 21:03:55,386 - main - INFO - 💰 [MAIN] 계좌 정보: 14개 계좌, 12개 자산
+2025-08-20 21:03:58,871 - core.services.trading_engine - INFO - 🚀 멀티 코인 거래 엔진 시작
+2025-08-20 21:03:58,871 - core.utils.api_manager - INFO - 🚀 API 매니저 워커 시작됨
+2025-08-20 21:03:58,872 - core.api.trading - INFO - ✅ teamprime 자동거래 시작
+2025-08-20 21:03:58,873 - core.services.trading_engine - INFO - 🔄 사이클 #1 시작
+2025-08-20 21:03:58,873 - core.services.trading_engine - INFO - 🔍 BTC 신호 분석 시작 (1/5)
+2025-08-20 21:03:58,965 - core.services.trading_engine - INFO - ✅ BTC 처리 완료: success - 신호 없음
+2025-08-20 21:04:09,967 - core.services.trading_engine - INFO - 🔍 XRP 신호 분석 시작 (2/5)
+2025-08-20 21:04:09,988 - core.services.trading_engine - INFO - ✅ XRP 처리 완료: success - 신호 없음
+2025-08-20 21:04:20,991 - core.services.trading_engine - INFO - 🔍 ETH 신호 분석 시작 (3/5)
+2025-08-20 21:04:21,008 - core.services.trading_engine - INFO - ✅ ETH 처리 완료: success - 신호 없음
+2025-08-20 21:04:32,010 - core.services.trading_engine - INFO - 🔍 DOGE 신호 분석 시작 (4/5)
+2025-08-20 21:04:32,032 - core.services.trading_engine - INFO - ✅ DOGE 처리 완료: success - 신호 없음
+2025-08-20 21:04:43,034 - core.services.trading_engine - INFO - 🔍 BTT 신호 분석 시작 (5/5)
+2025-08-20 21:04:43,064 - core.services.trading_engine - INFO - ✅ BTT 처리 완료: success - 신호 없음
+2025-08-20 21:04:51,066 - core.services.trading_engine - INFO - ✅ 사이클 #1 완료: 5/5 코인 처리 (52.2초)
+2025-08-20 21:05:51,068 - core.services.trading_engine - INFO - 🔄 사이클 #2 시작
+2025-08-20 21:05:51,068 - core.services.trading_engine - INFO - 🔍 BTC 신호 분석 시작 (1/5)
+2025-08-20 21:05:51,142 - core.services.trading_engine - INFO - ✅ BTC 처리 완료: success - 신호 없음
+2025-08-20 21:06:02,145 - core.services.trading_engine - INFO - 🔍 XRP 신호 분석 시작 (2/5)
+2025-08-20 21:06:02,171 - core.services.trading_engine - INFO - ✅ XRP 처리 완료: success - 신호 없음
+2025-08-20 21:06:13,174 - core.services.trading_engine - INFO - 🔍 ETH 신호 분석 시작 (3/5)
+2025-08-20 21:06:13,198 - core.services.trading_engine - INFO - ✅ ETH 처리 완료: success - 신호 없음
+2025-08-20 21:06:24,201 - core.services.trading_engine - INFO - 🔍 DOGE 신호 분석 시작 (4/5)
+2025-08-20 21:06:24,221 - core.services.trading_engine - INFO - ✅ DOGE 처리 완료: success - 신호 없음
+2025-08-20 21:06:35,222 - core.services.trading_engine - INFO - 🔍 BTT 신호 분석 시작 (5/5)
+2025-08-20 21:06:35,384 - core.services.trading_engine - INFO - ✅ BTT 처리 완료: success - 신호 없음
+2025-08-20 21:06:43,386 - core.services.trading_engine - INFO - ✅ 사이클 #2 완료: 5/5 코인 처리 (52.3초)
+2025-08-20 21:07:43,388 - core.services.trading_engine - INFO - 🔄 사이클 #3 시작
+2025-08-20 21:07:43,389 - core.services.trading_engine - INFO - 🔍 BTC 신호 분석 시작 (1/5)
+2025-08-20 21:07:43,478 - core.services.trading_engine - INFO - ✅ BTC 처리 완료: success - 신호 없음
+2025-08-20 21:07:54,481 - core.services.trading_engine - INFO - 🔍 XRP 신호 분석 시작 (2/5)
+2025-08-20 21:07:54,524 - core.services.trading_engine - INFO - ✅ XRP 처리 완료: success - 신호 없음
+2025-08-20 21:08:05,527 - core.services.trading_engine - INFO - 🔍 ETH 신호 분석 시작 (3/5)
+2025-08-20 21:08:05,553 - core.services.trading_engine - INFO - ✅ ETH 처리 완료: success - 신호 없음
+2025-08-20 21:08:16,556 - core.services.trading_engine - INFO - 🔍 DOGE 신호 분석 시작 (4/5)
+2025-08-20 21:08:16,579 - core.services.trading_engine - INFO - ✅ DOGE 처리 완료: success - 신호 없음
+2025-08-20 21:08:27,582 - core.services.trading_engine - INFO - 🔍 BTT 신호 분석 시작 (5/5)
+2025-08-20 21:08:27,599 - core.services.trading_engine - INFO - ✅ BTT 처리 완료: success - 신호 없음
+2025-08-20 21:08:35,600 - core.services.trading_engine - INFO - ✅ 사이클 #3 완료: 5/5 코인 처리 (52.2초)
+2025-08-20 21:09:35,603 - core.services.trading_engine - INFO - 🔄 사이클 #4 시작
+2025-08-20 21:09:35,603 - core.services.trading_engine - INFO - 🔍 BTC 신호 분석 시작 (1/5)
+2025-08-20 21:09:35,909 - core.services.trading_engine - INFO - ✅ BTC 처리 완료: success - 신호 없음
+2025-08-20 21:09:46,911 - core.services.trading_engine - INFO - 🔍 XRP 신호 분석 시작 (2/5)
+2025-08-20 21:09:46,933 - core.services.trading_engine - INFO - ✅ XRP 처리 완료: success - 신호 없음
+2025-08-20 21:09:57,936 - core.services.trading_engine - INFO - 🔍 ETH 신호 분석 시작 (3/5)
+2025-08-20 21:09:57,959 - core.services.trading_engine - INFO - ✅ ETH 처리 완료: success - 신호 없음
+2025-08-20 21:10:08,961 - core.services.trading_engine - INFO - 🔍 DOGE 신호 분석 시작 (4/5)
+2025-08-20 21:10:08,988 - core.services.trading_engine - INFO - ✅ DOGE 처리 완료: success - 신호 없음
+2025-08-20 21:10:19,991 - core.services.trading_engine - INFO - 🔍 BTT 신호 분석 시작 (5/5)
+2025-08-20 21:10:20,023 - core.services.trading_engine - INFO - ✅ BTT 처리 완료: success - 신호 없음
+2025-08-20 21:10:28,024 - core.services.trading_engine - INFO - ✅ 사이클 #4 완료: 5/5 코인 처리 (52.4초)
+2025-08-20 21:11:28,026 - core.services.trading_engine - INFO - 🔄 사이클 #5 시작
+2025-08-20 21:11:28,027 - core.services.trading_engine - INFO - 🔍 BTC 신호 분석 시작 (1/5)
+2025-08-20 21:11:28,233 - core.services.trading_engine - INFO - ✅ BTC 처리 완료: success - 신호 없음
+2025-08-20 21:11:39,236 - core.services.trading_engine - INFO - 🔍 XRP 신호 분석 시작 (2/5)
+2025-08-20 21:11:39,265 - core.services.trading_engine - INFO - ✅ XRP 처리 완료: success - 신호 없음

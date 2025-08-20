@@ -1,10 +1,14 @@
 """시스템 설정 및 상수 정의"""
 
 import os
+from datetime import datetime
 from dotenv import load_dotenv
 
 # 환경 변수 로드
 load_dotenv()
+
+# 🚀 서버 시작 시간 (토큰 무효화용)
+SERVER_START_TIME = datetime.utcnow().timestamp()
 
 # API 설정
 UPBIT_BASE = "https://api.upbit.com"

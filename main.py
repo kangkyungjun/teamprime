@@ -356,11 +356,142 @@ async def authenticated_api_key_input_dashboard(request: Request, current_user: 
                 margin: 0;
                 background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
                 min-height: 100vh;
+                padding-top: 80px; /* 앱바 공간 확보 */
                 display: flex;
                 justify-content: center;
                 align-items: center;
-                padding: 20px;
+                padding: 100px 20px 20px 20px;
             }}
+            
+            /* 앱바 스타일 */
+            .app-bar {{
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 80px;
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(10px);
+                padding: 0 30px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                z-index: 100;
+            }}
+            
+            .app-title {{
+                font-size: 24px;
+                font-weight: 700;
+                color: #1976d2;
+                text-decoration: none;
+            }}
+            
+            .hamburger-btn {{
+                background: none;
+                border: none;
+                font-size: 24px;
+                cursor: pointer;
+                padding: 8px;
+                border-radius: 8px;
+                transition: background-color 0.2s;
+            }}
+            
+            .hamburger-btn:hover {{
+                background-color: rgba(0,0,0,0.05);
+            }}
+            
+            /* 사이드패널 스타일 */
+            .side-panel-overlay {{
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.5);
+                opacity: 0;
+                visibility: hidden;
+                transition: all 0.3s ease;
+                z-index: 200;
+            }}
+            
+            .side-panel-overlay.active {{
+                opacity: 1;
+                visibility: visible;
+            }}
+            
+            .side-panel {{
+                position: fixed;
+                top: 0;
+                right: 0;
+                width: 80%;
+                max-width: 400px;
+                height: 100%;
+                background: white;
+                transform: translateX(100%);
+                transition: transform 0.3s ease;
+                z-index: 201;
+                padding: 30px;
+                box-sizing: border-box;
+                overflow-y: auto;
+            }}
+            
+            .side-panel.active {{
+                transform: translateX(0);
+            }}
+            
+            .side-panel-header {{
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 30px;
+                padding-bottom: 15px;
+                border-bottom: 1px solid #eee;
+            }}
+            
+            .close-btn {{
+                background: none;
+                border: none;
+                font-size: 24px;
+                cursor: pointer;
+                padding: 5px;
+                border-radius: 50%;
+                width: 40px;
+                height: 40px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: background-color 0.2s;
+            }}
+            
+            .close-btn:hover {{
+                background-color: rgba(0,0,0,0.05);
+            }}
+            
+            .menu-items {{
+                list-style: none;
+                padding: 0;
+                margin: 0;
+            }}
+            
+            .menu-item {{
+                margin-bottom: 10px;
+            }}
+            
+            .menu-item a {{
+                display: block;
+                padding: 15px 20px;
+                color: #333;
+                text-decoration: none;
+                border-radius: 10px;
+                transition: background-color 0.2s;
+            }}
+            
+            .menu-item a:hover {{
+                background-color: rgba(25, 118, 210, 0.1);
+                color: #1976d2;
+            }}
+            
             .api-container {{
                 background: white;
                 padding: 40px;
@@ -483,6 +614,31 @@ async def authenticated_api_key_input_dashboard(request: Request, current_user: 
         </style>
     </head>
     <body>
+        <!-- 앱바 -->
+        <div class="app-bar">
+            <div class="app-title">Teamprime</div>
+            <button class="hamburger-btn" onclick="toggleSidePanel()">☰</button>
+        </div>
+        
+        <!-- 사이드패널 오버레이 -->
+        <div class="side-panel-overlay" onclick="closeSidePanel()"></div>
+        
+        <!-- 사이드패널 -->
+        <div class="side-panel">
+            <div class="side-panel-header">
+                <h3>메뉴</h3>
+                <button class="close-btn" onclick="closeSidePanel()">×</button>
+            </div>
+            <ul class="menu-items">
+                <li class="menu-item">
+                    <a href="/main-dashboard">🏠 대시보드</a>
+                </li>
+                <li class="menu-item">
+                    <a href="#" onclick="handleLogout(); return false;">🚪 로그아웃</a>
+                </li>
+            </ul>
+        </div>
+        
         <div class="api-container">
             <div class="header">
                 <h1>🚀 API 키 입력</h1>
@@ -536,6 +692,23 @@ async def authenticated_api_key_input_dashboard(request: Request, current_user: 
             
             function hideAlert() {{
                 alert.style.display = 'none';
+            }}
+            
+            // 사이드패널 관련 함수들
+            function toggleSidePanel() {{
+                const overlay = document.querySelector('.side-panel-overlay');
+                const panel = document.querySelector('.side-panel');
+                
+                overlay.classList.add('active');
+                panel.classList.add('active');
+            }}
+            
+            function closeSidePanel() {{
+                const overlay = document.querySelector('.side-panel-overlay');
+                const panel = document.querySelector('.side-panel');
+                
+                overlay.classList.remove('active');
+                panel.classList.remove('active');
             }}
             
             async function handleLogout() {{
@@ -655,7 +828,138 @@ async def trading_dashboard(request: Request):
                 background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
                 min-height: 100vh;
                 color: #333;
+                padding-top: 80px; /* Teamprime 앱바 공간 확보 */
             }}
+            
+            /* Teamprime 앱바 스타일 */
+            .app-bar {{
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 80px;
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(10px);
+                padding: 0 30px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                z-index: 100;
+            }}
+            
+            .app-title {{
+                font-size: 24px;
+                font-weight: 700;
+                color: #1976d2;
+                text-decoration: none;
+            }}
+            
+            .hamburger-btn {{
+                background: none;
+                border: none;
+                font-size: 24px;
+                cursor: pointer;
+                padding: 8px;
+                border-radius: 8px;
+                transition: background-color 0.2s;
+            }}
+            
+            .hamburger-btn:hover {{
+                background-color: rgba(0,0,0,0.05);
+            }}
+            
+            /* 사이드패널 스타일 */
+            .side-panel-overlay {{
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.5);
+                opacity: 0;
+                visibility: hidden;
+                transition: all 0.3s ease;
+                z-index: 200;
+            }}
+            
+            .side-panel-overlay.active {{
+                opacity: 1;
+                visibility: visible;
+            }}
+            
+            .side-panel {{
+                position: fixed;
+                top: 0;
+                right: 0;
+                width: 80%;
+                max-width: 400px;
+                height: 100%;
+                background: white;
+                transform: translateX(100%);
+                transition: transform 0.3s ease;
+                z-index: 201;
+                padding: 30px;
+                box-sizing: border-box;
+                overflow-y: auto;
+            }}
+            
+            .side-panel.active {{
+                transform: translateX(0);
+            }}
+            
+            .side-panel-header {{
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 30px;
+                padding-bottom: 15px;
+                border-bottom: 1px solid #eee;
+            }}
+            
+            .close-btn {{
+                background: none;
+                border: none;
+                font-size: 24px;
+                cursor: pointer;
+                padding: 5px;
+                border-radius: 50%;
+                width: 40px;
+                height: 40px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: background-color 0.2s;
+            }}
+            
+            .close-btn:hover {{
+                background-color: rgba(0,0,0,0.05);
+            }}
+            
+            .menu-items {{
+                list-style: none;
+                padding: 0;
+                margin: 0;
+            }}
+            
+            .menu-item {{
+                margin-bottom: 10px;
+            }}
+            
+            .menu-item a {{
+                display: block;
+                padding: 15px 20px;
+                color: #333;
+                text-decoration: none;
+                border-radius: 10px;
+                transition: background-color 0.2s;
+            }}
+            
+            .menu-item a:hover {{
+                background-color: rgba(25, 118, 210, 0.1);
+                color: #1976d2;
+            }}
+            
             .header {{
                 background: rgba(255,255,255,0.95);
                 padding: 15px 0;
@@ -773,6 +1077,31 @@ async def trading_dashboard(request: Request):
         </style>
     </head>
     <body>
+        <!-- Teamprime 앱바 -->
+        <div class="app-bar">
+            <div class="app-title">Teamprime</div>
+            <button class="hamburger-btn" onclick="toggleSidePanel()">☰</button>
+        </div>
+        
+        <!-- 사이드패널 오버레이 -->
+        <div class="side-panel-overlay" onclick="closeSidePanel()"></div>
+        
+        <!-- 사이드패널 -->
+        <div class="side-panel">
+            <div class="side-panel-header">
+                <h3>메뉴</h3>
+                <button class="close-btn" onclick="closeSidePanel()">×</button>
+            </div>
+            <ul class="menu-items">
+                <li class="menu-item">
+                    <a href="/main-dashboard">🏠 메인 대시보드</a>
+                </li>
+                <li class="menu-item">
+                    <a href="#" onclick="handleLogout(); return false;">🚪 로그아웃</a>
+                </li>
+            </ul>
+        </div>
+        
         <header class="header">
             <div class="header-content">
                 <div class="logo">🚀 업비트 자동거래 시스템</div>
@@ -804,6 +1133,23 @@ async def trading_dashboard(request: Request):
         </footer>
         
         <script>
+            // 사이드패널 관련 함수들
+            function toggleSidePanel() {{
+                const overlay = document.querySelector('.side-panel-overlay');
+                const panel = document.querySelector('.side-panel');
+                
+                overlay.classList.add('active');
+                panel.classList.add('active');
+            }}
+            
+            function closeSidePanel() {{
+                const overlay = document.querySelector('.side-panel-overlay');
+                const panel = document.querySelector('.side-panel');
+                
+                overlay.classList.remove('active');
+                panel.classList.remove('active');
+            }}
+            
             async function handleLogout() {{
                 try {{
                     await fetch('/api/auth/logout', {{
@@ -1151,9 +1497,70 @@ async def main_dashboard(request: Request):
                 background-color: rgba(25, 118, 210, 0.1);
                 color: #1976d2;
             }}
+            
+            /* 🔔 토스트 알림 스타일 */
+            .toast-container {{
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                z-index: 10000;
+            }}
+            
+            .toast {{
+                background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+                color: white;
+                padding: 15px 20px;
+                border-radius: 10px;
+                box-shadow: 0 10px 30px rgba(255, 107, 107, 0.3);
+                margin-bottom: 10px;
+                transform: translateX(400px);
+                opacity: 0;
+                transition: all 0.3s ease;
+                max-width: 350px;
+                font-weight: 500;
+            }}
+            
+            .toast.show {{
+                transform: translateX(0);
+                opacity: 1;
+            }}
+            
+            .toast.warning {{
+                background: linear-gradient(135deg, #ffa726, #ff9800);
+                box-shadow: 0 10px 30px rgba(255, 167, 38, 0.3);
+            }}
+            
+            .toast.success {{
+                background: linear-gradient(135deg, #66bb6a, #4caf50);
+                box-shadow: 0 10px 30px rgba(102, 187, 106, 0.3);
+            }}
+            
+            .toast-header {{
+                display: flex;
+                align-items: center;
+                margin-bottom: 5px;
+            }}
+            
+            .toast-icon {{
+                font-size: 20px;
+                margin-right: 10px;
+            }}
+            
+            .toast-title {{
+                font-weight: 600;
+                font-size: 16px;
+            }}
+            
+            .toast-message {{
+                font-size: 14px;
+                line-height: 1.4;
+            }}
         </style>
     </head>
     <body>
+        <!-- 🔔 토스트 알림 컨테이너 -->
+        <div class="toast-container" id="toastContainer"></div>
+        
         <!-- 앱바 -->
         <div class="app-bar">
             <div class="app-title">Teamprime</div>
@@ -1221,6 +1628,182 @@ async def main_dashboard(request: Request):
             function goToTrading() {{
                 window.location.href = '/trading-flow';
             }}
+            
+            // 🔔 토스트 알림 시스템
+            function showToast(title, message, type = 'error', duration = 5000) {{
+                const container = document.getElementById('toastContainer');
+                
+                const toast = document.createElement('div');
+                toast.className = `toast ${{type}}`;
+                
+                const iconMap = {{
+                    'error': '🚨',
+                    'warning': '⚠️',
+                    'success': '✅',
+                    'info': 'ℹ️'
+                }};
+                
+                toast.innerHTML = `
+                    <div class="toast-header">
+                        <span class="toast-icon">${{iconMap[type] || '📢'}}</span>
+                        <span class="toast-title">${{title}}</span>
+                    </div>
+                    <div class="toast-message">${{message}}</div>
+                `;
+                
+                container.appendChild(toast);
+                
+                // 애니메이션으로 표시
+                setTimeout(() => {{
+                    toast.classList.add('show');
+                }}, 100);
+                
+                // 자동 제거
+                setTimeout(() => {{
+                    toast.classList.remove('show');
+                    setTimeout(() => {{
+                        if (toast.parentNode) {{
+                            toast.parentNode.removeChild(toast);
+                        }}
+                    }}, 300);
+                }}, duration);
+                
+                return toast;
+            }}
+            
+            // 🔄 자동 토큰 갱신 시스템
+            function getCookie(name) {{
+                const value = `; ${{document.cookie}}`;
+                const parts = value.split(`; ${{name}}=`);
+                if (parts.length === 2) return parts.pop().split(';').shift();
+            }}
+            
+            function parseJWT(token) {{
+                try {{
+                    const base64Url = token.split('.')[1];
+                    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                    const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {{
+                        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                    }}).join(''));
+                    return JSON.parse(jsonPayload);
+                }} catch (error) {{
+                    console.error('JWT 파싱 오류:', error);
+                    return null;
+                }}
+            }}
+            
+            function checkTokenExpiration() {{
+                const token = getCookie('auth_token');
+                if (!token) {{
+                    console.log('토큰이 없습니다');
+                    return;
+                }}
+                
+                const payload = parseJWT(token);
+                if (!payload) {{
+                    console.log('토큰 파싱 실패');
+                    return;
+                }}
+                
+                const now = Math.floor(Date.now() / 1000);
+                const expirationTime = payload.exp;
+                const timeUntilExpiry = expirationTime - now;
+                
+                console.log(`토큰 만료까지 남은 시간: ${{Math.floor(timeUntilExpiry / 60)}}분`);
+                
+                // 토큰이 30분 내에 만료될 예정이면 갱신 시도
+                if (timeUntilExpiry > 0 && timeUntilExpiry < 30 * 60) {{
+                    renewToken();
+                }}
+            }}
+            
+            async function renewToken() {{
+                try {{
+                    const response = await fetch('/api/auth/refresh-token', {{
+                        method: 'POST',
+                        headers: {{
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${{getCookie('auth_token')}}`
+                        }}
+                    }});
+                    
+                    const result = await response.json();
+                    
+                    if (result.success && result.token) {{
+                        // 새 토큰으로 쿠키 업데이트
+                        const maxAge = result.remember_me ? (7 * 24 * 60 * 60) : (24 * 60 * 60);
+                        const cookieOptions = `path=/; max-age=${{maxAge}}; SameSite=Lax` + (location.protocol === 'https:' ? '; Secure' : '');
+                        document.cookie = `auth_token=${{result.token}}; ${{cookieOptions}}`;
+                        
+                        console.log('✅ 토큰 갱신 완료');
+                    }} else {{
+                        console.log('❌ 토큰 갱신 실패:', result.message);
+                        // 갱신 실패시 로그인 페이지로 이동
+                        setTimeout(() => {{
+                            window.location.href = '/login';
+                        }}, 3000);
+                    }}
+                }} catch (error) {{
+                    console.error('토큰 갱신 중 오류:', error);
+                }}
+            }}
+            
+            // 🚀 서버 재시작 감지 및 자동 로그아웃
+            let lastKnownServerStartTime = null;
+            
+            async function checkServerRestart() {{
+                try {{
+                    const response = await fetch('/api/auth/server-status');
+                    const result = await response.json();
+                    
+                    if (result.success) {{
+                        const currentServerStartTime = result.server_start_time;
+                        
+                        // 처음 접속이면 서버 시작 시간 저장
+                        if (lastKnownServerStartTime === null) {{
+                            lastKnownServerStartTime = currentServerStartTime;
+                            console.log('서버 시작 시간 기록:', new Date(currentServerStartTime * 1000));
+                            return;
+                        }}
+                        
+                        // 서버가 재시작된 경우
+                        if (lastKnownServerStartTime !== currentServerStartTime) {{
+                            console.log('🚨 서버 재시작 감지!');
+                            
+                            // 쿠키 삭제
+                            document.cookie = 'auth_token=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT';
+                            
+                            // 토스트 알림으로 사용자에게 알림
+                            showToast(
+                                '서버 재시작 감지',
+                                '보안을 위해 다시 로그인해주세요. 3초 후 자동으로 이동됩니다.',
+                                'warning',
+                                8000
+                            );
+                            
+                            // 3초 후 로그인 페이지로 이동
+                            setTimeout(() => {{
+                                window.location.href = '/login';
+                            }}, 3000);
+                            return;
+                        }}
+                    }}
+                }} catch (error) {{
+                    console.error('서버 상태 확인 중 오류:', error);
+                }}
+            }}
+            
+            // 페이지 로드 시 토큰 체크 및 주기적 체크 시작
+            document.addEventListener('DOMContentLoaded', function() {{
+                checkServerRestart();
+                checkTokenExpiration();
+                
+                // 서버 재시작 체크 (30초마다)
+                setInterval(checkServerRestart, 30 * 1000);
+                
+                // 10분마다 토큰 만료 체크
+                setInterval(checkTokenExpiration, 10 * 60 * 1000);
+            }});
         </script>
     </body>
     </html>

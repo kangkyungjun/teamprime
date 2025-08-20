@@ -17,6 +17,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from .models import User
 from ..database.mysql_connection import get_mysql_session
+from config import SERVER_START_TIME
 
 logger = logging.getLogger(__name__)
 
@@ -135,22 +136,35 @@ class AuthService:
             return False, f"로그인 중 오류가 발생했습니다: {str(e)}", None
     
     @classmethod
-    async def create_session(cls, user_id: int) -> Tuple[bool, str, Optional[str]]:
+    async def create_session(cls, user_id: int, remember_me: bool = False) -> Tuple[bool, str, Optional[str]]:
         """
         사용자 세션 생성 - JWT 토큰만 사용 (DB 저장 제거)
+        Args:
+            user_id: 사용자 ID
+            remember_me: 로그인 유지 옵션 (True시 7일, False시 24시간)
         Returns: (success, message, session_token)
         """
         try:
-            # JWT 토큰 생성 (간소화)
+            # 로그인 유지 옵션에 따른 만료 시간 설정
+            if remember_me:
+                expire_hours = 7 * 24  # 7일
+                logger.info(f"🔒 로그인 유지 모드: user_id={user_id}, 7일간 유지")
+            else:
+                expire_hours = cls.JWT_EXPIRE_HOURS  # 24시간 (기본값)
+                logger.info(f"🔒 일반 로그인 모드: user_id={user_id}, 24시간 유지")
+            
+            # JWT 토큰 생성 (동적 만료 시간 + 서버 시작 시간)
             payload = {
                 'user_id': user_id,
-                'exp': datetime.utcnow() + timedelta(hours=cls.JWT_EXPIRE_HOURS),
-                'iat': datetime.utcnow()
+                'exp': datetime.utcnow() + timedelta(hours=expire_hours),
+                'iat': datetime.utcnow(),
+                'remember_me': remember_me,
+                'server_start_time': SERVER_START_TIME  # 🚀 서버 재시작 감지용
             }
             
             token = jwt.encode(payload, cls.JWT_SECRET_KEY, algorithm=cls.JWT_ALGORITHM)
             
-            logger.info(f"✅ JWT 토큰 생성 완료: user_id={user_id}")
+            logger.info(f"✅ JWT 토큰 생성 완료: user_id={user_id}, 만료시간={expire_hours}시간")
             return True, "세션 생성 완료", token
             
         except Exception as e:
@@ -167,9 +181,15 @@ class AuthService:
             # JWT 토큰 검증
             payload = jwt.decode(token, cls.JWT_SECRET_KEY, algorithms=[cls.JWT_ALGORITHM])
             user_id = payload.get('user_id')
+            token_server_start_time = payload.get('server_start_time')
             
             if not user_id:
                 return False, "유효하지 않은 토큰입니다", None
+            
+            # 🚀 서버 재시작 감지 - 토큰이 이전 서버 세션에서 생성된 경우 무효화
+            if token_server_start_time and token_server_start_time != SERVER_START_TIME:
+                logger.warning(f"⚠️ 서버 재시작으로 인한 토큰 무효화: user_id={user_id}")
+                return False, "서버가 재시작되어 다시 로그인해주세요", None
             
             async with get_mysql_session() as session:
                 # 사용자 정보 조회
@@ -190,6 +210,45 @@ class AuthService:
         except Exception as e:
             logger.error(f"❌ 세션 검증 실패: {str(e)}")
             return False, f"세션 검증 중 오류가 발생했습니다: {str(e)}", None
+    
+    @classmethod
+    async def refresh_token(cls, current_token: str) -> Tuple[bool, str, Optional[str], bool]:
+        """
+        토큰 갱신 - 기존 토큰의 remember_me 설정 유지
+        Returns: (success, message, new_token, remember_me)
+        """
+        try:
+            # 현재 토큰 검증 및 정보 추출
+            success, message, user_data = await cls.verify_session(current_token)
+            
+            if not success or not user_data:
+                return False, "유효하지 않은 토큰입니다", None, False
+            
+            # 기존 토큰에서 remember_me 설정 추출
+            try:
+                payload = jwt.decode(current_token, cls.JWT_SECRET_KEY, algorithms=[cls.JWT_ALGORITHM])
+                remember_me = payload.get('remember_me', False)
+            except:
+                remember_me = False  # 기본값
+            
+            # 새 토큰 생성 (기존 설정 유지)
+            new_success, new_message, new_token = await cls.create_session(
+                user_data['id'], 
+                remember_me=remember_me
+            )
+            
+            if new_success and new_token:
+                logger.info(f"🔄 토큰 갱신 완료: user_id={user_data['id']}, remember_me={remember_me}")
+                return True, "토큰 갱신 완료", new_token, remember_me
+            else:
+                return False, new_message, None, remember_me
+            
+        except jwt.ExpiredSignatureError:
+            logger.warning("만료된 토큰으로 갱신 요청됨")
+            return False, "토큰이 만료되어 갱신할 수 없습니다", None, False
+        except Exception as e:
+            logger.error(f"❌ 토큰 갱신 실패: {str(e)}")
+            return False, f"토큰 갱신 중 오류가 발생했습니다: {str(e)}", None, False
     
     @classmethod
     async def logout_user(cls, token: str) -> Tuple[bool, str]:
