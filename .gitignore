@@ -2,10 +2,12 @@
 *.db
 *.sqlite
 *.sqlite3
+upbit_candles.db
 
 # 로그 파일
 *.log
 logs/
+trading_system.log*
 
 # Python 관련
 __pycache__/
@@ -15,9 +17,11 @@ __pycache__/
 .Python
 env/
 venv/
+.venv/
 
 # 환경 설정 (민감 정보)
 .env
+.env.local
 
 # IDE/편집기
 .vscode/
@@ -33,6 +37,7 @@ Thumbs.db
 *_backup.py
 *.backup
 *.bak
+main_legacy_backup.py
 
 # 임시 파일
 *.tmp
@@ -41,3 +46,13 @@ temp/
 
 # Jupyter 노트북 체크포인트
 .ipynb_checkpoints/
+*.ipynb
+
+# Cafe24 배포시 제외할 개발 파일들
+practice.ipynb
+test_*.py
+debug_*.py
+
+# 캐시 및 세션 파일
+*.session
+cache/
