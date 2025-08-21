@@ -36,7 +36,7 @@ async def login_page(request: Request, next: str = "/main-dashboard"):
     <html lang="ko">
     <head>
         <meta charset="UTF-8">
-        <title>🚀 로그인 - 업비트 자동거래 시스템</title>
+        <title>로그인 - 업비트 자동거래 시스템</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <style>
             body {{
@@ -156,8 +156,7 @@ async def login_page(request: Request, next: str = "/main-dashboard"):
     <body>
         <div class="login-container">
             <div class="login-header">
-                <h1>🚀 로그인</h1>
-                <p>업비트 자동거래 시스템</p>
+                <h1>로그인</h1>
             </div>
             
             <div id="alert" class="alert alert-error"></div>
@@ -267,7 +266,7 @@ async def register_page():
     <html lang="ko">
     <head>
         <meta charset="UTF-8">
-        <title>🚀 회원가입 - 업비트 자동거래 시스템</title>
+        <title>회원가입 - 업비트 자동거래 시스템</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <style>
             body {
@@ -392,8 +391,7 @@ async def register_page():
     <body>
         <div class="register-container">
             <div class="register-header">
-                <h1>🚀 회원가입</h1>
-                <p>업비트 자동거래 시스템</p>
+                <h1>회원가입</h1>
             </div>
             
             <div id="alert" class="alert alert-error"></div>

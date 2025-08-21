@@ -631,10 +631,7 @@ async def authenticated_api_key_input_dashboard(request: Request, current_user: 
             </div>
             <ul class="menu-items">
                 <li class="menu-item">
-                    <a href="/main-dashboard">🏠 대시보드</a>
-                </li>
-                <li class="menu-item">
-                    <a href="#" onclick="handleLogout(); return false;">🚪 로그아웃</a>
+                    <a href="/dashboard">🏠 대시보드</a>
                 </li>
             </ul>
         </div>
@@ -1093,10 +1090,7 @@ async def trading_dashboard(request: Request):
             
             <ul class="menu-items">
                 <li class="menu-item">
-                    <a href="/main-dashboard">🏠 메인 대시보드</a>
-                </li>
-                <li class="menu-item">
-                    <a href="#" onclick="handleLogout(); return false;">🚪 로그아웃</a>
+                    <a href="/dashboard">🏠 대시보드</a>
                 </li>
             </ul>
         </div>
@@ -1591,13 +1585,10 @@ async def main_dashboard(request: Request):
             
             <ul class="menu-items">
                 <li class="menu-item">
-                    <a href="/main-dashboard">🏠 대시보드</a>
+                    <a href="/dashboard">🏠 대시보드</a>
                 </li>
                 <li class="menu-item">
                     <a href="/trading-flow">📈 자동거래</a>
-                </li>
-                <li class="menu-item">
-                    <a href="/api/auth/logout">🚪 로그아웃</a>
                 </li>
             </ul>
         </div>
@@ -2151,6 +2142,23 @@ async def profile_page(request: Request):
                 background: #d32f2f;
             }}
             
+            .logout-link {{
+                color: #666;
+                text-decoration: underline;
+                background: none;
+                border: none;
+                cursor: pointer;
+                font-size: 16px;
+                padding: 8px 12px;
+                display: inline-block;
+                margin-top: 10px;
+            }}
+            
+            .logout-link:hover {{
+                color: #333;
+                text-decoration: underline;
+            }}
+            
             @media (max-width: 768px) {{
                 .main-content {{
                     padding: 0 15px;
@@ -2198,23 +2206,16 @@ async def profile_page(request: Request):
             </div>
             
             <ul class="menu-items">
-                <li><a href="/">🏠 대시보드</a></li>
+                <li><a href="/dashboard">🏠 대시보드</a></li>
                 <li><a href="/dashboard">📊 거래 현황</a></li>
                 <li><a href="/profile" class="active">👤 개인정보</a></li>
-                <li><a href="#" onclick="logout()">🚪 로그아웃</a></li>
             </ul>
         </div>
         
         <!-- 메인 컨텐츠 -->
         <div class="main-content">
-            <div class="profile-header">
-                <h1>👤 개인정보</h1>
-                <p>계정 정보를 확인하고 관리할 수 있습니다</p>
-            </div>
-            
             <div class="profile-card">
                 <div class="profile-section">
-                    <h2 class="section-title">기본 정보</h2>
                     <div class="profile-field">
                         <span class="field-label">사용자명</span>
                         <span class="field-value">{username}</span>
@@ -2260,9 +2261,9 @@ async def profile_page(request: Request):
                         <button class="btn btn-outline" onclick="showApiKeyModal()">
                             🔑 API 키 관리
                         </button>
-                        <button class="btn btn-danger" onclick="confirmLogout()">
+                        <a href="#" class="logout-link" onclick="confirmLogout(); return false;">
                             🚪 로그아웃
-                        </button>
+                        </a>
                     </div>
                 </div>
             </div>

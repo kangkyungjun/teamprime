@@ -1,0 +1,147 @@
+# =============================================================================
+# 🛡️ TEAMPRIME GIT 파일 속성 설정
+# =============================================================================
+# 파일 타입별 처리 방식을 정의하여 Git 저장소를 최적화합니다.
+
+# =============================================================================
+# 📊 대용량 데이터 파일 - Git LFS 권장
+# =============================================================================
+# 참고: Git LFS 설정 시 아래 주석을 제거하세요
+# *.db filter=lfs diff=lfs merge=lfs -text
+# *.sqlite filter=lfs diff=lfs merge=lfs -text
+# *.sqlite3 filter=lfs diff=lfs merge=lfs -text
+
+# =============================================================================
+# 📝 텍스트 파일 인코딩 설정
+# =============================================================================
+# Python 파일
+*.py text eol=lf encoding=utf-8
+*.pyx text eol=lf encoding=utf-8
+
+# 웹 파일
+*.html text eol=lf encoding=utf-8
+*.css text eol=lf encoding=utf-8
+*.js text eol=lf encoding=utf-8
+*.json text eol=lf encoding=utf-8
+*.xml text eol=lf encoding=utf-8
+
+# 마크다운 및 문서
+*.md text eol=lf encoding=utf-8
+*.txt text eol=lf encoding=utf-8
+*.rst text eol=lf encoding=utf-8
+
+# 설정 파일
+*.yml text eol=lf encoding=utf-8
+*.yaml text eol=lf encoding=utf-8
+*.ini text eol=lf encoding=utf-8
+*.cfg text eol=lf encoding=utf-8
+*.conf text eol=lf encoding=utf-8
+*.toml text eol=lf encoding=utf-8
+
+# 쉘 스크립트
+*.sh text eol=lf encoding=utf-8
+*.bash text eol=lf encoding=utf-8
+
+# SQL 파일
+*.sql text eol=lf encoding=utf-8
+
+# Docker 파일
+Dockerfile text eol=lf encoding=utf-8
+*.dockerfile text eol=lf encoding=utf-8
+docker-compose*.yml text eol=lf encoding=utf-8
+
+# Git 파일
+.gitignore text eol=lf encoding=utf-8
+.gitattributes text eol=lf encoding=utf-8
+.gitmodules text eol=lf encoding=utf-8
+
+# =============================================================================
+# 🔒 바이너리 파일 명시적 선언
+# =============================================================================
+# 데이터베이스 파일
+*.db binary
+*.sqlite binary
+*.sqlite3 binary
+
+# 압축 파일
+*.zip binary
+*.tar binary
+*.gz binary
+*.rar binary
+*.7z binary
+
+# 이미지 파일
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.bmp binary
+*.ico binary
+*.tiff binary
+*.webp binary
+
+# 실행 파일
+*.exe binary
+*.dll binary
+*.so binary
+*.dylib binary
+
+# 폰트 파일
+*.ttf binary
+*.otf binary
+*.woff binary
+*.woff2 binary
+*.eot binary
+
+# =============================================================================
+# 📊 Diff 설정
+# =============================================================================
+# JSON 파일 - 예쁜 출력
+*.json diff=json
+
+# Python 파일 - 함수 컨텍스트 표시
+*.py diff=python
+
+# =============================================================================
+# 🧹 줄 끝 정규화
+# =============================================================================
+# 텍스트 파일은 LF로 통일
+* text=auto eol=lf
+
+# Windows 배치 파일은 CRLF 유지
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# =============================================================================
+# 🔐 민감한 파일 보호
+# =============================================================================
+# API 키 파일들
+*.key binary
+*.pem binary
+*.crt binary
+.env binary
+
+# =============================================================================
+# 📈 언어별 특수 설정
+# =============================================================================
+# Python - __pycache__ 폴더는 추적 안함
+__pycache__/ export-ignore
+
+# Jupyter 노트북 - 출력 제거
+*.ipynb filter=nbstripout
+
+# =============================================================================
+# 💾 백업 파일 처리
+# =============================================================================
+# 백업 파일들은 diff 대상에서 제외
+*.backup export-ignore
+*_backup.* export-ignore
+*.bak export-ignore
+
+# =============================================================================
+# 🚀 배포 최적화
+# =============================================================================
+# 개발 전용 파일들은 배포에서 제외
+test_*.py export-ignore
+debug_*.py export-ignore
+*.test.* export-ignore
