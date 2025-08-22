@@ -35,8 +35,8 @@ class UserSession:
         # 거래 상태 (사용자별 독립적인 인스턴스)
         self.trading_state = TradingState()
         
-        # 거래 엔진 (사용자별 독립적인 인스턴스)
-        self.trading_engine = MultiCoinTradingEngine()
+        # 거래 엔진 (사용자별 독립적인 인스턴스) - 세션 참조 전달
+        self.trading_engine = MultiCoinTradingEngine(user_session=self)
         
         # 세션 생성 시간
         self.created_at = datetime.now()

@@ -1,9 +1,11 @@
 """분석 관련 API 라우터"""
 
-from fastapi import APIRouter, Query
-from typing import Dict, List, Optional
+from fastapi import APIRouter, Query, Depends
+from typing import Dict, List, Optional, Any
 import logging
 import time
+
+from ..auth.middleware import require_auth
 
 logger = logging.getLogger(__name__)
 
@@ -12,7 +14,8 @@ router = APIRouter(tags=["analysis"])
 @router.get("/volume-surge-analysis")
 async def volume_surge_analysis(
     market: str = Query(..., description="마켓 코드 (예: KRW-BTC)"),
-    hours: int = Query(24, description="분석 기간 (시간)")
+    hours: int = Query(24, description="분석 기간 (시간)"),
+    current_user: Dict[str, Any] = Depends(require_auth)
 ):
     """거래량 급증 분석"""
     try:
@@ -31,7 +34,8 @@ async def volume_surge_analysis(
 @router.get("/advanced-volume-surge-analysis")
 async def advanced_volume_surge_analysis(
     market: str = Query(..., description="마켓 코드"),
-    hours: int = Query(24, description="분석 기간")
+    hours: int = Query(24, description="분석 기간"),
+    current_user: Dict[str, Any] = Depends(require_auth)
 ):
     """고급 거래량 급증 분석"""
     try:
@@ -53,7 +57,8 @@ async def advanced_volume_surge_analysis(
 @router.get("/backtest-performance")
 async def backtest_performance(
     market: str = Query(..., description="마켓 코드"),
-    days: int = Query(30, description="백테스트 기간 (일)")
+    days: int = Query(30, description="백테스트 기간 (일)"),
+    current_user: Dict[str, Any] = Depends(require_auth)
 ):
     """백테스트 성과 분석"""
     try:
@@ -75,7 +80,8 @@ async def backtest_performance(
 
 @router.get("/multi-coin-analysis")
 async def multi_coin_analysis(
-    hours: int = Query(24, description="분석 기간 (시간)")
+    hours: int = Query(24, description="분석 기간 (시간)"),
+    current_user: Dict[str, Any] = Depends(require_auth)
 ):
     """멀티 코인 종합 분석"""
     try:
@@ -96,7 +102,8 @@ async def multi_coin_analysis(
 
 @router.get("/coin-comparison")
 async def coin_comparison(
-    markets: str = Query(..., description="비교할 마켓들 (쉼표로 구분)")
+    markets: str = Query(..., description="비교할 마켓들 (쉼표로 구분)"),
+    current_user: Dict[str, Any] = Depends(require_auth)
 ):
     """코인 비교 분석"""
     try:
@@ -114,20 +121,29 @@ async def coin_comparison(
         return {"error": str(e)}
 
 @router.get("/real-time-buy-conditions")
-async def real_time_buy_conditions():
+async def real_time_buy_conditions(current_user: Dict[str, Any] = Depends(require_auth)):
     """실시간 매수 조건 상태 확인 - 상세 분석 포함 (API 호출 간격 최적화)"""
     import asyncio
     try:
         from ..services.signal_analyzer import signal_analyzer
-        from ..services.trading_engine import trading_engine
+        from ..session import session_manager
         from config import DEFAULT_MARKETS
+        
+        user_id = current_user.get("id")
+        username = current_user.get("username")
+        
+        # 사용자 세션 조회
+        user_session = session_manager.get_session(user_id)
+        if not user_session:
+            logger.error(f"⚠️ 실시간 매수 조건 조회 - 사용자 {username} 세션이 존재하지 않습니다")
+            return {"success": False, "message": "세션이 만료되었습니다. 다시 로그인해주세요."}
         
         results = []
         
         # 코인별 순차 처리 (간격을 두고 API 호출)
         for i, market in enumerate(DEFAULT_MARKETS):
             coin_symbol = market.split('-')[1]
-            params = trading_engine.optimized_params.get(coin_symbol, trading_engine.optimized_params["BTC"])
+            params = user_session.trading_engine.optimized_params.get(coin_symbol, user_session.trading_engine.optimized_params["BTC"])
             
             # 상세 분석으로 변경하여 실제 가격과 조건별 상태 확인
             detailed_analysis = await signal_analyzer.analyze_buy_conditions_detailed(market, params)
@@ -152,17 +168,26 @@ async def real_time_buy_conditions():
         return {"error": str(e)}
 
 @router.get("/buy-conditions-summary")
-async def buy_conditions_summary():
-    """매수 조건 요약 정보"""
+async def buy_conditions_summary(current_user: Dict[str, Any] = Depends(require_auth)):
+    """매수 조건 요약 정보 - 세션별"""
     try:
         from ..services.signal_analyzer import signal_analyzer
-        from ..services.trading_engine import trading_engine
+        from ..session import session_manager
         from config import DEFAULT_MARKETS
+        
+        user_id = current_user.get("id")
+        username = current_user.get("username")
+        
+        # 사용자 세션 조회
+        user_session = session_manager.get_session(user_id)
+        if not user_session:
+            logger.error(f"⚠️ 매수 조건 요약 조회 - 사용자 {username} 세션이 존재하지 않습니다")
+            return {"success": False, "message": "세션이 만료되었습니다. 다시 로그인해주세요."}
         
         results = []
         for market in DEFAULT_MARKETS:
             coin_symbol = market.split('-')[1]
-            params = trading_engine.optimized_params.get(coin_symbol, trading_engine.optimized_params["BTC"])
+            params = user_session.trading_engine.optimized_params.get(coin_symbol, user_session.trading_engine.optimized_params["BTC"])
             signal = await signal_analyzer.check_buy_signal(market, params)
             
             results.append({

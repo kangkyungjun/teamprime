@@ -83,6 +83,12 @@ trading_logs_table = Table(
 # 데이터베이스 엔진
 async_engine: AsyncEngine = create_async_engine(DB_URL, future=True, echo=False)
 
+# FastAPI 의존성용 데이터베이스 세션
+async def get_db():
+    """FastAPI 의존성용 데이터베이스 세션 생성"""
+    async with async_engine.begin() as conn:
+        yield conn
+
 # 유틸리티 함수들
 UTC = timezone.utc
 

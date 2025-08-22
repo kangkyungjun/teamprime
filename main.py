@@ -11,6 +11,7 @@ from datetime import datetime
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 
 # 설정 로드
@@ -29,7 +30,12 @@ logger = logging.getLogger(__name__)
 
 # Core 모듈 import
 from core.api import trading_router, analysis_router, system_router
+from core.api.resilience import router as resilience_router
+from core.api.monitoring import router as monitoring_router
 from core.api.auth import router as auth_router
+from core.api.ux import router as ux_router
+from core.api.account import router as account_router
+from core.api.trading_history import router as trading_history_router
 from core.services import auto_scheduler
 from core.database import run_migration, test_mysql_connection
 from config import DEFAULT_MARKETS, WEB_CONFIG
@@ -115,6 +121,22 @@ async def lifespan(app: FastAPI):
         auto_scheduler.start()
         logger.info("✅ 자동 최적화 스케줄러 시작")
         
+        # 모니터링 및 알림 서비스 시작
+        try:
+            from core.services.monitoring_service import monitoring_service
+            from core.services.notification_service import notification_service
+            
+            # 백그라운드에서 모니터링 시작
+            import asyncio
+            asyncio.create_task(monitoring_service.start_monitoring())
+            
+            # 시스템 시작 알림
+            await notification_service.notify_system_start()
+            
+            logger.info("📊 모니터링 및 알림 서비스 시작")
+        except Exception as e:
+            logger.warning(f"⚠️ 모니터링 서비스 시작 실패: {str(e)}")
+        
         # 시스템 상태 로깅
         logger.info(f"📊 모니터링 대상 마켓: {DEFAULT_MARKETS}")
         logger.info(f"🌐 웹서버 포트: {WEB_CONFIG['port']}")
@@ -123,6 +145,17 @@ async def lifespan(app: FastAPI):
         
         # 종료 시 정리
         logger.info("🛑 시스템 종료 중...")
+        
+        # 시스템 종료 알림
+        try:
+            from core.services.notification_service import notification_service
+            from core.services.monitoring_service import monitoring_service
+            
+            await notification_service.notify_system_stop()
+            await monitoring_service.stop_monitoring()
+        except Exception as e:
+            logger.warning(f"⚠️ 모니터링 서비스 종료 실패: {str(e)}")
+        
         stop_sleep_prevention()
         auto_scheduler.shutdown()
         
@@ -139,11 +172,37 @@ app = FastAPI(
     lifespan=lifespan
 )
 
+# CORS 설정 (Flutter 앱 지원)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        "http://localhost:3000",  # Flutter 웹 개발서버
+        "http://127.0.0.1:3000",
+        "https://localhost:3000",
+        "capacitor://localhost",  # Capacitor 앱
+        "ionic://localhost",      # Ionic 앱
+        "http://localhost",       # 개발용
+        "https://localhost",
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 # 라우터 등록
 app.include_router(trading_router)
 app.include_router(analysis_router)  
 app.include_router(system_router)
+app.include_router(resilience_router, prefix="/api/resilience")  # 복원력 API 추가
+app.include_router(monitoring_router, prefix="/api/monitoring")  # 모니터링 API 추가
 app.include_router(auth_router)  # 새로운 인증 라우터 추가
+app.include_router(ux_router, prefix="/api/ux")  # 사용자 경험 개선 API 추가
+app.include_router(account_router, prefix="/api/account")  # 계좌 정보 API 추가
+app.include_router(trading_history_router, prefix="/api/trading-history")  # 거래 내역 API 추가
+
+# 실시간 API 라우터 추가
+from core.api.realtime import router as realtime_router
+app.include_router(realtime_router, prefix="/api/realtime")  # 실시간 데이터 및 알림 API
 
 @app.post("/api/collect-recent-data")
 async def collect_recent_data_endpoint():
@@ -631,7 +690,7 @@ async def authenticated_api_key_input_dashboard(request: Request, current_user: 
             </div>
             <ul class="menu-items">
                 <li class="menu-item">
-                    <a href="/dashboard">🏠 대시보드</a>
+                    <a href="/main-dashboard">🏠 대시보드</a>
                 </li>
             </ul>
         </div>
@@ -1061,6 +1120,198 @@ async def trading_dashboard(request: Request):
                 color: rgba(255,255,255,0.7);
                 font-size: 12px;
             }}
+            
+            /* 새로운 대시보드 섹션 스타일 */
+            .dashboard-section {{
+                background: rgba(255, 255, 255, 0.95);
+                border-radius: 15px;
+                margin-bottom: 20px;
+                padding: 25px;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            }}
+            
+            .section-title {{
+                font-size: 18px;
+                font-weight: 600;
+                color: #333;
+                margin-bottom: 20px;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }}
+            
+            /* 계좌 정보 카드 스타일 */
+            .account-cards {{
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                gap: 15px;
+            }}
+            
+            .account-card {{
+                background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+                padding: 20px;
+                border-radius: 12px;
+                text-align: center;
+                border: 1px solid #dee2e6;
+            }}
+            
+            .account-label {{
+                font-size: 14px;
+                color: #666;
+                margin-bottom: 8px;
+                font-weight: 500;
+            }}
+            
+            .account-value {{
+                font-size: 18px;
+                font-weight: 700;
+                color: #1976d2;
+            }}
+            
+            /* 거래 상태 패널 스타일 */
+            .trading-status-panel {{
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+                gap: 15px;
+            }}
+            
+            .status-card {{
+                background: linear-gradient(135deg, #e3f2fd, #f1f8ff);
+                padding: 20px;
+                border-radius: 12px;
+                text-align: center;
+                border: 1px solid #bbdefb;
+            }}
+            
+            .status-label {{
+                font-size: 14px;
+                color: #666;
+                margin-bottom: 8px;
+                font-weight: 500;
+            }}
+            
+            .status-value {{
+                font-size: 16px;
+                font-weight: 700;
+                color: #1976d2;
+            }}
+            
+            /* 실시간 가격 그리드 스타일 */
+            .price-grid {{
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                gap: 15px;
+            }}
+            
+            .price-card {{
+                background: linear-gradient(135deg, #fff3e0, #fffe54);
+                padding: 20px;
+                border-radius: 12px;
+                text-align: center;
+                border: 1px solid #ffcc02;
+                transition: transform 0.2s;
+            }}
+            
+            .price-card:hover {{
+                transform: translateY(-2px);
+            }}
+            
+            .coin-name {{
+                font-size: 16px;
+                font-weight: 700;
+                color: #e65100;
+                margin-bottom: 8px;
+            }}
+            
+            .coin-price {{
+                font-size: 18px;
+                font-weight: 700;
+                color: #333;
+                margin-bottom: 5px;
+            }}
+            
+            .coin-change {{
+                font-size: 14px;
+                font-weight: 600;
+            }}
+            
+            .coin-change.positive {{
+                color: #d32f2f;
+            }}
+            
+            .coin-change.negative {{
+                color: #1976d2;
+            }}
+            
+            /* 매수 조건 그리드 스타일 */
+            .conditions-grid {{
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+                gap: 15px;
+            }}
+            
+            .condition-card {{
+                background: linear-gradient(135deg, #e8f5e8, #f1f8e9);
+                padding: 20px;
+                border-radius: 12px;
+                text-align: center;
+                border: 1px solid #4caf50;
+                transition: transform 0.2s;
+            }}
+            
+            .condition-card:hover {{
+                transform: translateY(-2px);
+            }}
+            
+            .condition-coin {{
+                font-size: 16px;
+                font-weight: 700;
+                color: #2e7d32;
+                margin-bottom: 8px;
+            }}
+            
+            .condition-status {{
+                font-size: 14px;
+                font-weight: 600;
+                margin-bottom: 5px;
+            }}
+            
+            .condition-status.possible {{
+                color: #4caf50;
+            }}
+            
+            .condition-status.not-possible {{
+                color: #ff5722;
+            }}
+            
+            .condition-score {{
+                font-size: 12px;
+                color: #666;
+            }}
+            
+            /* 반응형 디자인 */
+            @media (max-width: 768px) {{
+                .main-content {{
+                    padding: 15px;
+                }}
+                
+                .dashboard-section {{
+                    padding: 15px;
+                }}
+                
+                .account-cards, .trading-status-panel, .price-grid, .conditions-grid {{
+                    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+                    gap: 10px;
+                }}
+                
+                .section-title {{
+                    font-size: 16px;
+                }}
+                
+                .account-card, .status-card, .price-card, .condition-card {{
+                    padding: 15px;
+                }}
+            }}
         </style>
     </head>
     <body>
@@ -1090,20 +1341,112 @@ async def trading_dashboard(request: Request):
             
             <ul class="menu-items">
                 <li class="menu-item">
-                    <a href="/dashboard">🏠 대시보드</a>
+                    <a href="/main-dashboard">🏠 대시보드</a>
                 </li>
             </ul>
         </div>
         
         <main class="main-content">
-            <div class="trading-status">
-                <div class="status-title">✅ API 연결 완료</div>
-                <div class="status-desc">업비트 API 키 인증이 성공적으로 완료되었습니다.</div>
+            <!-- 📊 계좌 정보 섹션 -->
+            <div class="dashboard-section">
+                <h2 class="section-title">💰 계좌 정보</h2>
+                <div class="account-cards">
+                    <div class="account-card">
+                        <div class="account-label">KRW 잔고</div>
+                        <div class="account-value" id="krwBalance">로딩 중...</div>
+                    </div>
+                    <div class="account-card">
+                        <div class="account-label">보유 코인</div>
+                        <div class="account-value" id="coinCount">로딩 중...</div>
+                    </div>
+                    <div class="account-card">
+                        <div class="account-label">총 평가금액</div>
+                        <div class="account-value" id="totalValue">로딩 중...</div>
+                    </div>
+                </div>
             </div>
-            
-            <div class="trading-controls">
-                <h2 style="text-align: center; margin-bottom: 30px; color: #333; font-size: 24px;">🎯 거래 제어</h2>
-                <div style="text-align: center;">
+
+            <!-- 📈 거래 상태 섹션 -->
+            <div class="dashboard-section">
+                <h2 class="section-title">📈 거래 상태</h2>
+                <div class="trading-status-panel" id="tradingStatusPanel">
+                    <div class="status-card">
+                        <div class="status-label">시스템 상태</div>
+                        <div class="status-value" id="systemStatus">로딩 중...</div>
+                    </div>
+                    <div class="status-card">
+                        <div class="status-label">현재 포지션</div>
+                        <div class="status-value" id="positionCount">로딩 중...</div>
+                    </div>
+                    <div class="status-card">
+                        <div class="status-label">일일 수익률</div>
+                        <div class="status-value" id="dailyProfitRate">로딩 중...</div>
+                    </div>
+                    <div class="status-card">
+                        <div class="status-label">일일 거래 수</div>
+                        <div class="status-value" id="dailyTrades">로딩 중...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 💲 실시간 가격 섹션 -->
+            <div class="dashboard-section">
+                <h2 class="section-title">💲 실시간 가격</h2>
+                <div class="price-grid" id="priceGrid">
+                    <div class="price-card">
+                        <div class="coin-name">BTC</div>
+                        <div class="coin-price" id="btcPrice">로딩 중...</div>
+                        <div class="coin-change" id="btcChange">-</div>
+                    </div>
+                    <div class="price-card">
+                        <div class="coin-name">ETH</div>
+                        <div class="coin-price" id="ethPrice">로딩 중...</div>
+                        <div class="coin-change" id="ethChange">-</div>
+                    </div>
+                    <div class="price-card">
+                        <div class="coin-name">XRP</div>
+                        <div class="coin-price" id="xrpPrice">로딩 중...</div>
+                        <div class="coin-change" id="xrpChange">-</div>
+                    </div>
+                    <div class="price-card">
+                        <div class="coin-name">DOGE</div>
+                        <div class="coin-price" id="dogePrice">로딩 중...</div>
+                        <div class="coin-change" id="dogeChange">-</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 🎯 매수 조건 분석 섹션 -->
+            <div class="dashboard-section">
+                <h2 class="section-title">🎯 실시간 매수 조건</h2>
+                <div class="conditions-grid" id="conditionsGrid">
+                    <div class="condition-card">
+                        <div class="condition-coin">BTC</div>
+                        <div class="condition-status" id="btcCondition">분석 중...</div>
+                        <div class="condition-score" id="btcScore">-</div>
+                    </div>
+                    <div class="condition-card">
+                        <div class="condition-coin">ETH</div>
+                        <div class="condition-status" id="ethCondition">분석 중...</div>
+                        <div class="condition-score" id="ethScore">-</div>
+                    </div>
+                    <div class="condition-card">
+                        <div class="condition-coin">XRP</div>
+                        <div class="condition-status" id="xrpCondition">분석 중...</div>
+                        <div class="condition-score" id="xrpScore">-</div>
+                    </div>
+                    <div class="condition-card">
+                        <div class="condition-coin">DOGE</div>
+                        <div class="condition-status" id="dogeCondition">분석 중...</div>
+                        <div class="condition-score" id="dogeScore">-</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 🎯 거래 제어 섹션 -->
+            <div class="dashboard-section">
+                <h2 class="section-title">🎯 거래 제어</h2>
+                <div class="trading-controls">
                     <button class="control-btn trading-off" id="tradingToggleBtn" onclick="toggleTrading()">
                         🚀 자동거래 시작
                     </button>
@@ -1232,10 +1575,252 @@ async def trading_dashboard(request: Request):
                 }}
             }}
             
-            // 페이지 로드 시 초기화
+            // 🔄 실시간 데이터 업데이트 시스템
+            
+            // 계좌 정보 업데이트
+            async function updateAccountInfo() {{
+                try {{
+                    const response = await fetch('/api/account-balances');
+                    const data = await response.json();
+                    
+                    if (data.success) {{
+                        // KRW 잔고 표시
+                        document.getElementById('krwBalance').textContent = 
+                            data.krw_balance ? `₩ ${{Number(data.krw_balance).toLocaleString()}}` : '₩ 0';
+                        
+                        // 보유 코인 수
+                        document.getElementById('coinCount').textContent = 
+                            `${{data.total_balances}}개`;
+                        
+                        // 총 평가금액 계산 (KRW 잔고 + 보유 코인 가치)
+                        let totalValue = data.krw_balance || 0;
+                        Object.values(data.coin_balances || {{}}).forEach(coin => {{
+                            totalValue += coin.current_value || 0;
+                        }});
+                        
+                        document.getElementById('totalValue').textContent = 
+                            `₩ ${{Math.round(totalValue).toLocaleString()}}`;
+                    }} else {{
+                        document.getElementById('krwBalance').textContent = '오류';
+                        document.getElementById('coinCount').textContent = '오류';
+                        document.getElementById('totalValue').textContent = '오류';
+                    }}
+                }} catch (error) {{
+                    console.error('계좌 정보 업데이트 오류:', error);
+                    document.getElementById('krwBalance').textContent = '오류';
+                    document.getElementById('coinCount').textContent = '오류';
+                    document.getElementById('totalValue').textContent = '오류';
+                }}
+            }}
+            
+            // 거래 상태 패널 업데이트
+            async function updateTradingStatusPanel() {{
+                try {{
+                    const response = await fetch('/api/trading-status');
+                    const data = await response.json();
+                    
+                    // 시스템 상태
+                    document.getElementById('systemStatus').textContent = 
+                        data.is_running ? '🟢 실행 중' : '🔴 중지됨';
+                    
+                    // 현재 포지션 수
+                    const positionCount = Object.keys(data.positions || {{}}).length;
+                    document.getElementById('positionCount').textContent = `${{positionCount}}개`;
+                    
+                    // 일일 수익률 (계산 필요)
+                    document.getElementById('dailyProfitRate').textContent = '계산 중...';
+                    
+                    // 일일 거래 수
+                    document.getElementById('dailyTrades').textContent = 
+                        `${{data.daily_trades || 0}}회`;
+                        
+                }} catch (error) {{
+                    console.error('거래 상태 패널 업데이트 오류:', error);
+                    document.getElementById('systemStatus').textContent = '오류';
+                    document.getElementById('positionCount').textContent = '오류';
+                    document.getElementById('dailyProfitRate').textContent = '오류';
+                    document.getElementById('dailyTrades').textContent = '오류';
+                }}
+            }}
+            
+            // 실시간 가격 업데이트
+            async function updatePrices() {{
+                try {{
+                    const markets = ['KRW-BTC', 'KRW-ETH', 'KRW-XRP', 'KRW-DOGE'];
+                    const response = await fetch('/api/current-prices', {{
+                        method: 'POST',
+                        headers: {{ 'Content-Type': 'application/json' }},
+                        body: JSON.stringify({{ markets: markets }})
+                    }});
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {{
+                        // 각 코인별 가격 업데이트
+                        Object.entries(data.prices).forEach(([market, priceData]) => {{
+                            const coin = market.split('-')[1].toLowerCase();
+                            
+                            // 가격 표시
+                            const priceElement = document.getElementById(`${{coin}}Price`);
+                            const changeElement = document.getElementById(`${{coin}}Change`);
+                            
+                            if (priceElement) {{
+                                priceElement.textContent = 
+                                    `₩ ${{Number(priceData.trade_price).toLocaleString()}}`;
+                            }}
+                            
+                            if (changeElement) {{
+                                const changeRate = priceData.change_rate || 0;
+                                changeElement.textContent = `${{changeRate >= 0 ? '+' : ''}}${{changeRate.toFixed(2)}}%`;
+                                changeElement.className = changeRate >= 0 ? 'coin-change positive' : 'coin-change negative';
+                            }}
+                        }});
+                    }}
+                }} catch (error) {{
+                    console.error('가격 업데이트 오류:', error);
+                }}
+            }}
+            
+            // 매수 조건 분석 업데이트
+            async function updateBuyConditions() {{
+                try {{
+                    const response = await fetch('/buy-conditions-summary');
+                    const data = await response.json();
+                    
+                    if (data.conditions) {{
+                        data.conditions.forEach(condition => {{
+                            const coin = condition.coin.toLowerCase();
+                            const statusElement = document.getElementById(`${{coin}}Condition`);
+                            const scoreElement = document.getElementById(`${{coin}}Score`);
+                            
+                            if (statusElement) {{
+                                statusElement.textContent = condition.status;
+                                statusElement.className = condition.status.includes('가능') ? 
+                                    'condition-status possible' : 'condition-status not-possible';
+                            }}
+                            
+                            if (scoreElement) {{
+                                scoreElement.textContent = `${{condition.signal_strength || 0}}점`;
+                            }}
+                        }});
+                    }}
+                }} catch (error) {{
+                    console.error('매수 조건 업데이트 오류:', error);
+                }}
+            }}
+            
+            // 전체 대시보드 데이터 업데이트 (통합 API 사용)
+            async function updateDashboard() {{
+                console.log('대시보드 데이터 업데이트 시작 (통합 API)...');
+                
+                try {{
+                    // 새로운 통합 API 호출
+                    const response = await fetch('/api/dashboard-data');
+                    const data = await response.json();
+                    
+                    if (data.success) {{
+                        // 계좌 정보 업데이트
+                        if (data.account_info && data.account_info.success) {{
+                            const accountInfo = data.account_info;
+                            document.getElementById('krwBalance').textContent = 
+                                accountInfo.krw_balance ? `₩ ${{Number(accountInfo.krw_balance).toLocaleString()}}` : '₩ 0';
+                            document.getElementById('coinCount').textContent = `${{accountInfo.total_balances || 0}}개`;
+                            
+                            let totalValue = accountInfo.krw_balance || 0;
+                            Object.values(accountInfo.coin_balances || {{}}).forEach(coin => {{
+                                totalValue += coin.current_value || 0;
+                            }});
+                            document.getElementById('totalValue').textContent = 
+                                `₩ ${{Math.round(totalValue).toLocaleString()}}`;
+                        }}
+                        
+                        // 거래 상태 업데이트
+                        if (data.trading_status) {{
+                            const tradingStatus = data.trading_status;
+                            document.getElementById('systemStatus').textContent = 
+                                tradingStatus.is_running ? '🟢 실행 중' : '🔴 중지됨';
+                            
+                            const positionCount = Object.keys(tradingStatus.positions || {{}}).length;
+                            document.getElementById('positionCount').textContent = `${{positionCount}}개`;
+                            document.getElementById('dailyTrades').textContent = `${{tradingStatus.daily_trades || 0}}회`;
+                            
+                            // 실제 거래 상태 버튼 업데이트
+                            isTradingActive = tradingStatus.is_running;
+                            updateTradingButton();
+                        }}
+                        
+                        // 가격 정보 업데이트
+                        if (data.current_prices) {{
+                            Object.entries(data.current_prices).forEach(([market, priceData]) => {{
+                                const coin = priceData.coin_symbol.toLowerCase();
+                                
+                                const priceElement = document.getElementById(`${{coin}}Price`);
+                                const changeElement = document.getElementById(`${{coin}}Change`);
+                                
+                                if (priceElement) {{
+                                    priceElement.textContent = `₩ ${{Number(priceData.trade_price).toLocaleString()}}`;
+                                }}
+                                
+                                if (changeElement) {{
+                                    const changeRate = priceData.change_rate || 0;
+                                    changeElement.textContent = `${{changeRate >= 0 ? '+' : ''}}${{changeRate.toFixed(2)}}%`;
+                                    changeElement.className = changeRate >= 0 ? 'coin-change positive' : 'coin-change negative';
+                                }}
+                            }});
+                        }}
+                        
+                        // 매수 조건 업데이트
+                        if (data.buy_conditions) {{
+                            data.buy_conditions.forEach(condition => {{
+                                const coin = condition.coin.toLowerCase();
+                                const statusElement = document.getElementById(`${{coin}}Condition`);
+                                const scoreElement = document.getElementById(`${{coin}}Score`);
+                                
+                                if (statusElement) {{
+                                    statusElement.textContent = condition.status;
+                                    statusElement.className = condition.status.includes('가능') ? 
+                                        'condition-status possible' : 'condition-status not-possible';
+                                }}
+                                
+                                if (scoreElement) {{
+                                    scoreElement.textContent = `${{condition.signal_strength || 0}}점`;
+                                }}
+                            }});
+                        }}
+                        
+                        // 마지막 업데이트 시간 표시
+                        const now = new Date();
+                        console.log(`통합 API 대시보드 업데이트 완료: ${{now.toLocaleTimeString()}}`);
+                    }} else {{
+                        throw new Error(data.error || '통합 API 오류');
+                    }}
+                }} catch (error) {{
+                    console.warn('통합 API 실패, 개별 API로 폴백:', error);
+                    
+                    // 개별 API 폴백
+                    await Promise.all([
+                        updateAccountInfo(),
+                        updateTradingStatusPanel(), 
+                        updatePrices(),
+                        updateBuyConditions(),
+                        checkTradingStatus()
+                    ]);
+                    
+                    console.log('개별 API 대시보드 업데이트 완료');
+                }}
+            }}
+            
+            // 페이지 로드 시 초기화 및 주기적 업데이트
             document.addEventListener('DOMContentLoaded', function() {{
-                console.log('페이지 로드 완료 - 거래 상태 확인');
-                checkTradingStatus();
+                console.log('페이지 로드 완료 - 대시보드 초기화');
+                
+                // 즉시 첫 업데이트
+                updateDashboard();
+                
+                // 10초마다 자동 업데이트 (실시간 느낌)
+                setInterval(updateDashboard, 10000);
+                
+                console.log('자동 업데이트 타이머 시작 (10초 주기)');
             }});
             
         </script>
@@ -1585,7 +2170,7 @@ async def main_dashboard(request: Request):
             
             <ul class="menu-items">
                 <li class="menu-item">
-                    <a href="/dashboard">🏠 대시보드</a>
+                    <a href="/main-dashboard">🏠 대시보드</a>
                 </li>
                 <li class="menu-item">
                     <a href="/trading-flow">📈 자동거래</a>
@@ -2206,7 +2791,7 @@ async def profile_page(request: Request):
             </div>
             
             <ul class="menu-items">
-                <li><a href="/dashboard">🏠 대시보드</a></li>
+                <li><a href="/main-dashboard">🏠 대시보드</a></li>
                 <li><a href="/dashboard">📊 거래 현황</a></li>
                 <li><a href="/profile" class="active">👤 개인정보</a></li>
             </ul>

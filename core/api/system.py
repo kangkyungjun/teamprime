@@ -8,6 +8,7 @@ from datetime import datetime
 
 from ..services.optimizer import auto_scheduler
 from ..services.trading_engine import trading_state
+from ..services.resilience_config import resilience_configurator
 from ..auth.middleware import get_current_user, require_auth
 from ..session import session_manager
 from api_client import UpbitAPI
@@ -159,15 +160,25 @@ async def health_check():
 
 @router.get("/api/system-status")
 async def get_system_status():
-    """시스템 상태 조회"""
+    """시스템 상태 조회 - 복원력 정보 포함"""
     try:
+        # 복원력 설정 상태 조회
+        resilience_status = resilience_configurator.get_configuration_status()
+        
         return {
             "status": "running",
             "timestamp": time.time(),
             "components": {
                 "database": "connected",
                 "api": "running", 
-                "scheduler": "running" if auto_scheduler.is_running else "stopped"
+                "scheduler": "running" if auto_scheduler.is_running else "stopped",
+                "resilience": {
+                    "configured": resilience_status.get("configured", False),
+                    "monitoring_active": resilience_status.get("monitoring_active", False),
+                    "system_status": resilience_status.get("system_status", "unknown"),
+                    "circuit_breakers": resilience_status.get("circuit_breakers_count", 0),
+                    "health_checks": resilience_status.get("health_checks_count", 0)
+                }
             },
             "message": "시스템이 정상 작동 중입니다"
         }
@@ -208,7 +219,7 @@ async def get_cache_status():
         return {"error": str(e)}
 
 @router.post("/api/run-manual-optimization")
-async def run_manual_optimization():
+async def run_manual_optimization(current_user: Dict = Depends(require_auth)):
     """수동 최적화 실행"""
     try:
         result = await auto_scheduler.run_manual_optimization()
@@ -346,4 +357,35 @@ def get_user_upbit_client(user_id: int):
     user_session = session_manager.get_session(user_id)
     if user_session:
         return user_session.upbit_client
-    return None
+
+@router.post("/api/initialize-resilience")
+async def initialize_resilience(current_user: dict = Depends(require_auth)):
+    """복원력 시스템 초기화"""
+    try:
+        user_id = current_user.get('id')
+        if not user_id:
+            return {"success": False, "message": "사용자 인증이 필요합니다"}
+        
+        # 사용자 세션의 업비트 클라이언트 가져오기
+        user_session = session_manager.get_session(user_id)
+        upbit_client = user_session.upbit_client if user_session else None
+        
+        # 복원력 시스템 초기화
+        await resilience_configurator.initialize_resilience_system(upbit_client)
+        
+        # 구성 요소 테스트 수행
+        await resilience_configurator.test_resilience_components()
+        
+        # 설정 상태 반환
+        config_status = resilience_configurator.get_configuration_status()
+        
+        return {
+            "success": True,
+            "message": "복원력 시스템이 성공적으로 초기화되었습니다",
+            "configuration": config_status,
+            "timestamp": datetime.now().isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"❌ 복원력 시스템 초기화 오류: {str(e)}")
+        return {"success": False, "message": f"복원력 시스템 초기화 실패: {str(e)}"}

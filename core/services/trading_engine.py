@@ -8,6 +8,9 @@ from typing import Dict, Optional, List
 
 from ..models.trading import Position, TradingState
 from .signal_analyzer import signal_analyzer
+from .trade_verifier import trade_verifier
+from .resilience_service import resilience_service
+from .monitoring_service import monitoring_service, AlertSeverity, MetricType
 from ..utils.api_manager import api_manager, APIPriority
 from config import DEFAULT_MARKETS
 
@@ -22,12 +25,6 @@ def get_upbit_client():
     except ImportError:
         return None
 
-# 사용자별 업비트 클라이언트 참조
-def get_user_upbit_client(user_session):
-    """사용자별 업비트 클라이언트 참조 가져오기"""
-    if user_session and hasattr(user_session, 'upbit_client'):
-        return user_session.upbit_client
-    return None
 
 # 거래 상태 인스턴스 (싱글톤)
 trading_state = TradingState()
@@ -35,13 +32,16 @@ trading_state = TradingState()
 class MultiCoinTradingEngine:
     """멀티 코인 동시 거래 엔진 - 초고속 단타 최적화"""
     
-    def __init__(self):
+    def __init__(self, user_session=None):
         self.is_running = False
         self.signal_check_interval = 60   # 🕐 1분마다 신호 확인 (REST API 기반)
         self.monitoring_task = None
         self.signal_task = None
         self.trading_start_time = None  # 거래 시작 시간 추적 (자동 중단시 초기화될 수 있음)
         self.session_start_time = None  # 세션 시작 시간 추적 (수동 중단시에만 초기화)
+        
+        # 사용자 세션 참조 (세션별 격리를 위해)
+        self.user_session = user_session
         
         # REST API 기반 데이터 관리
         self.rest_api_mode = True  # REST API 안정성 모드
@@ -149,6 +149,171 @@ class MultiCoinTradingEngine:
         
         logger.info("⏹️ 자동거래 중단")
     
+    async def emergency_stop(self):
+        """비상 정지 - 모든 포지션 즉시 청산 및 시스템 완전 중지"""
+        logger.critical("🚨 비상 정지 실행 시작")
+        
+        try:
+            # 1. 거래 엔진 즉시 중지
+            self.is_running = False
+            
+            # 2. 모든 진행중인 작업 취소
+            if self.signal_task and not self.signal_task.done():
+                self.signal_task.cancel()
+                try:
+                    await self.signal_task
+                except asyncio.CancelledError:
+                    pass
+            
+            if self.monitoring_task and not self.monitoring_task.done():
+                self.monitoring_task.cancel()
+                try:
+                    await self.monitoring_task
+                except asyncio.CancelledError:
+                    pass
+            
+            # 3. API 매니저 즉시 중지
+            await api_manager.stop_worker()
+            
+            # 4. 모든 활성 포지션 강제 청산
+            # 사용자 세션 거래 상태 참조
+            session_trading_state = self.user_session.trading_state if self.user_session else trading_state
+            
+            emergency_close_tasks = []
+            for coin_symbol in list(session_trading_state.positions.keys()):
+                logger.critical(f"🚨 {coin_symbol} 포지션 비상 청산 시작")
+                task = asyncio.create_task(self._emergency_close_position(coin_symbol, session_trading_state))
+                emergency_close_tasks.append(task)
+            
+            # 모든 포지션 청산 완료 대기 (최대 30초)
+            if emergency_close_tasks:
+                try:
+                    await asyncio.wait_for(
+                        asyncio.gather(*emergency_close_tasks, return_exceptions=True),
+                        timeout=30.0
+                    )
+                except asyncio.TimeoutError:
+                    logger.error("⚠️ 포지션 청산 시간 초과 - 일부 포지션이 청산되지 않았을 수 있습니다")
+            
+            # 5. 진행중인 주문 취소 시도
+            await self._cancel_all_pending_orders()
+            
+            # 6. 상태 초기화
+            self.trading_start_time = None
+            self.session_start_time = None
+            session_trading_state.positions.clear()
+            
+            logger.critical("✅ 비상 정지 완료")
+            return {"success": True, "message": "비상 정지가 성공적으로 실행되었습니다"}
+            
+        except Exception as e:
+            logger.critical(f"❌ 비상 정지 중 오류 발생: {str(e)}")
+            return {"success": False, "message": f"비상 정지 중 오류: {str(e)}"}
+    
+    async def _emergency_close_position(self, coin_symbol: str, session_trading_state=None):
+        """개별 포지션 비상 청산"""
+        try:
+            # 사용자 세션 거래 상태 사용 (매개변수로 전달된 것 우선, 없으면 self.user_session 사용)
+            if session_trading_state is None:
+                session_trading_state = self.user_session.trading_state if self.user_session else trading_state
+            
+            if coin_symbol not in session_trading_state.positions:
+                return
+            
+            position = session_trading_state.positions[coin_symbol]
+            market = f"KRW-{coin_symbol}"
+            
+            upbit_client = self.user_session.upbit_client if self.user_session else get_upbit_client()
+            if not upbit_client:
+                logger.error(f"⚠️ {coin_symbol} 비상 청산 실패: 업비트 클라이언트 없음")
+                return
+            
+            logger.critical(f"🚨 {coin_symbol} 시장가 매도 실행 (수량: {position.amount:.8f})")
+            
+            # 시장가 매도 주문
+            sell_result = await upbit_client.place_market_sell_order(market, position.amount)
+            
+            if sell_result.get("success", False):
+                # 실제 매도 가격 및 손익 계산
+                sell_price = sell_result.get("avg_price", position.current_price)
+                realized_pnl = (sell_price - position.buy_price) * position.amount
+                
+                logger.critical(f"✅ {coin_symbol} 비상 청산 완료")
+                logger.critical(f"   매도 가격: {sell_price:,.0f} KRW")
+                logger.critical(f"   실현 손익: {realized_pnl:+,.0f} KRW")
+                
+                # 포지션 제거
+                del session_trading_state.positions[coin_symbol]
+                
+                # 거래 기록 업데이트
+                session_trading_state.daily_trades += 1
+                if realized_pnl < 0:
+                    session_trading_state.daily_loss += abs(realized_pnl)
+                
+            else:
+                logger.error(f"❌ {coin_symbol} 비상 청산 실패: {sell_result.get('message', '알 수 없는 오류')}")
+                
+        except Exception as e:
+            logger.error(f"❌ {coin_symbol} 비상 청산 중 오류: {str(e)}")
+    
+    async def _cancel_all_pending_orders(self):
+        """모든 미체결 주문 취소"""
+        try:
+            upbit_client = self.user_session.upbit_client if self.user_session else get_upbit_client()
+            if not upbit_client:
+                return
+            
+            # 미체결 주문 조회
+            pending_orders = await upbit_client.get_orders(state='wait')
+            
+            if pending_orders and len(pending_orders) > 0:
+                logger.critical(f"🚨 미체결 주문 {len(pending_orders)}개 취소 시작")
+                
+                for order in pending_orders:
+                    try:
+                        order_id = order.get('uuid')
+                        market = order.get('market')
+                        
+                        cancel_result = await upbit_client.cancel_order(order_id)
+                        if cancel_result.get("success", False):
+                            logger.critical(f"✅ 주문 취소 완료: {market} ({order_id})")
+                        else:
+                            logger.error(f"❌ 주문 취소 실패: {market} ({order_id})")
+                            
+                    except Exception as e:
+                        logger.error(f"❌ 개별 주문 취소 오류: {str(e)}")
+            
+        except Exception as e:
+            logger.error(f"❌ 미체결 주문 취소 중 오류: {str(e)}")
+    
+    async def check_emergency_conditions(self):
+        """비상정지 자동 트리거 조건 확인"""
+        try:
+            # 사용자 세션 거래 상태 참조
+            session_trading_state = self.user_session.trading_state if self.user_session else trading_state
+            
+            # 1. 일일 손실 한도 확인
+            if session_trading_state.daily_loss >= 50000:  # 5만원 손실
+                logger.critical(f"🚨 일일 손실 한도 도달: {session_trading_state.daily_loss:,.0f}원")
+                await self.emergency_stop()
+                return True
+            
+            # 2. 연속 거래 실패 확인 (향후 구현용)
+            consecutive_failures = getattr(self, '_consecutive_failures', 0)
+            if consecutive_failures >= 5:
+                logger.critical(f"🚨 연속 거래 실패 {consecutive_failures}회 도달")
+                await self.emergency_stop()
+                return True
+            
+            # 3. 시스템 과부하 확인 (향후 구현용)
+            # API 응답시간, 메모리 사용량 등 모니터링
+            
+            return False
+            
+        except Exception as e:
+            logger.error(f"❌ 비상정지 조건 확인 오류: {str(e)}")
+            return False
+    
     async def _signal_monitoring_loop(self):
         """신호 모니터링 루프"""
         while self.is_running:
@@ -165,8 +330,13 @@ class MultiCoinTradingEngine:
         """포지션 모니터링 루프"""
         while self.is_running:
             try:
+                # 비상정지 조건 확인 (우선순위)
+                emergency_triggered = await self.check_emergency_conditions()
+                if emergency_triggered:
+                    break  # 비상정지가 실행되면 루프 중단
+                
                 await self._monitor_positions()
-                await asyncio.sleep(10)  # 10초마다 포지션 체크
+                await asyncio.sleep(5)  # 5초마다 포지션 체크 (강화)
             except asyncio.CancelledError:
                 break
             except Exception as e:
@@ -183,6 +353,9 @@ class MultiCoinTradingEngine:
         # 전체 코인 리스트 준비
         all_markets = list(DEFAULT_MARKETS)
         total_coins = len(all_markets)
+        
+        # 사용자 세션 거래 상태 참조
+        session_trading_state = self.user_session.trading_state if self.user_session else trading_state
         
         for i, market in enumerate(all_markets):
             try:
@@ -209,14 +382,14 @@ class MultiCoinTradingEngine:
                 self._start_coin_processing(coin_symbol, i, total_coins)
                 
                 # 로그인 상태 및 거래 가능 여부 확인
-                if trading_state.available_budget <= 0:
+                if session_trading_state.available_budget <= 0:
                     logger.warning("⚠️ 업비트 로그인이 필요합니다. 거래를 중단합니다.")
                     self._complete_coin_processing(coin_symbol, "error", "로그인 필요")
                     return
                 
-                investment_amount = min(200000, trading_state.available_budget * 0.2)
+                investment_amount = min(200000, session_trading_state.available_budget * 0.2)
                 
-                if not trading_state.can_trade_coin(coin_symbol, investment_amount):
+                if not session_trading_state.can_trade_coin(coin_symbol, investment_amount):
                     self._complete_coin_processing(coin_symbol, "skipped", "거래 불가")
                     continue
                 
@@ -234,7 +407,7 @@ class MultiCoinTradingEngine:
                     logger.info(f"   사유: {signal['reason']}")
                     
                     # 매수 주문 실행
-                    await self._execute_buy_order(market, coin_symbol, investment_amount, signal)
+                    await self._execute_buy_order(market, coin_symbol, investment_amount, signal, session_trading_state)
                     self.api_call_scheduler["last_global_call"] = time.time()  # 주문 후 시간 갱신
                     self._complete_coin_processing(coin_symbol, "success", "매수 신호 감지")
                 else:
@@ -253,56 +426,185 @@ class MultiCoinTradingEngine:
         self._complete_cycle()
     
     async def _monitor_positions(self):
-        """보유 포지션 모니터링 및 청산 신호 확인"""
+        """고급 포지션 모니터링 및 자동 손익실현"""
         positions_to_close = []
+        positions_for_partial_sale = []
         
-        for coin, position in trading_state.positions.items():
+        # 사용자 세션 거래 상태 참조
+        session_trading_state = self.user_session.trading_state if self.user_session else trading_state
+        
+        for coin, position in session_trading_state.positions.items():
             try:
                 market = f"KRW-{coin}"
                 
                 # 현재 가격 업데이트
                 current_price = await self._get_current_price(market)
-                if current_price:
-                    position.update_current_price(current_price)
+                if not current_price:
+                    continue
                     
-                    # 익절 조건 확인
-                    if current_price >= position.profit_target:
-                        logger.info(f"🎯 {coin} 익절 조건 달성 (목표가: {position.profit_target:,.0f})")
-                        positions_to_close.append(coin)
-                        continue
+                position.update_current_price(current_price)
+                
+                # 수익률 및 보유시간 계산
+                profit_percent = ((current_price - position.buy_price) / position.buy_price) * 100
+                holding_time = (datetime.now() - position.timestamp).total_seconds()
+                
+                # 고급 포지션 분석 및 액션 결정
+                recommended_action = position.get_recommended_action()
+                profit_stage_action = position.get_profit_stage_action()
+                risk_assessment = position.get_risk_assessment()
+                
+                # 💎 고급 액션 처리
+                if recommended_action == "immediate_sell":
+                    logger.warning(f"🚨 {coin} 즉시 매도 - 고위험 상황 (손실: {profit_percent:.2f}%)")
+                    positions_to_close.append((coin, "high_risk_sell"))
+                    continue
                     
-                    # 손절 조건 확인
-                    if current_price <= position.stop_loss:
-                        logger.info(f"🛑 {coin} 손절 조건 달성 (손절가: {position.stop_loss:,.0f})")
-                        positions_to_close.append(coin)
-                        continue
+                elif recommended_action == "trailing_stop_sell":
+                    trailing_price = position.get_trailing_stop_price()
+                    logger.info(f"📉 {coin} 트레일링 스탑 실행 (트레일링가: {trailing_price:,.0f})")
+                    positions_to_close.append((coin, "trailing_stop"))
+                    continue
                     
-                    # 최대 보유 시간 확인 (5분)
-                    holding_time = (datetime.now() - position.timestamp).total_seconds()
-                    if holding_time > self.scalping_params["max_hold_time"]:
-                        logger.info(f"⏰ {coin} 최대 보유 시간 초과 ({holding_time:.0f}초)")
-                        positions_to_close.append(coin)
-                        continue
+                elif recommended_action == "target_reached":
+                    logger.success(f"🎯 {coin} 목표 수익률 달성! (수익: {profit_percent:.2f}%)")
+                    positions_to_close.append((coin, "target_profit"))
+                    continue
                     
-                    # 로그 출력 (30초마다)
-                    if int(holding_time) % 30 == 0:
-                        pnl_percent = ((current_price - position.buy_price) / position.buy_price) * 100
-                        logger.info(f"📊 {coin} 포지션 상태: {pnl_percent:+.2f}% (보유시간: {holding_time:.0f}초)")
+                elif recommended_action == "partial_profit":
+                    logger.info(f"💰 {coin} 부분 익절 실행 (수익: {profit_percent:.2f}%)")
+                    positions_for_partial_sale.append(coin)
+                    
+                elif recommended_action == "take_profit_now":
+                    logger.info(f"⏰ {coin} 시간 기반 익절 (보유시간: {holding_time:.0f}초, 수익: {profit_percent:.2f}%)")
+                    positions_to_close.append((coin, "time_based_profit"))
+                    continue
+                
+                # 🎚️ 수익 단계별 알림 처리
+                if profit_stage_action == "enable_trailing_stop":
+                    logger.info(f"🔄 {coin} 트레일링 스탑 활성화 (수익: {profit_percent:.2f}%)")
+                    
+                elif profit_stage_action == "suggest_partial_profit":
+                    logger.info(f"💡 {coin} 부분 익절 제안 (수익: {profit_percent:.2f}%)")
+                    
+                elif profit_stage_action == "suggest_full_profit":
+                    logger.info(f"💡 {coin} 전체 익절 강력 제안 (수익: {profit_percent:.2f}%)")
+                
+                # 기존 조건들도 유지 (안전장치)
+                if current_price >= position.profit_target:
+                    logger.info(f"🎯 {coin} 익절 조건 달성 (목표가: {position.profit_target:,.0f})")
+                    positions_to_close.append((coin, "profit_target"))
+                    continue
+                
+                if current_price <= position.stop_loss:
+                    logger.info(f"🛑 {coin} 손절 조건 달성 (손절가: {position.stop_loss:,.0f})")
+                    positions_to_close.append((coin, "stop_loss"))
+                    continue
+                
+                if holding_time > self.scalping_params["max_hold_time"]:
+                    logger.info(f"⏰ {coin} 최대 보유 시간 초과 ({holding_time:.0f}초)")
+                    positions_to_close.append((coin, "max_time"))
+                    continue
+                
+                # 📊 상세 포지션 로깅 (30초마다)
+                if int(holding_time) % 30 == 0:
+                    trend_icon = "📈" if position.trend_direction == "up" else "📉" if position.trend_direction == "down" else "➡️"
+                    logger.info(f"{trend_icon} {coin} 포지션: {profit_percent:+.2f}% | 위험도: {risk_assessment} | 추세: {position.trend_direction} | 시간: {holding_time:.0f}초")
                 
             except Exception as e:
                 logger.error(f"⚠️ {coin} 포지션 모니터링 오류: {str(e)}")
         
-        # 청산할 포지션들 처리
-        for coin in positions_to_close:
+        # 부분 익절 처리
+        for coin in positions_for_partial_sale:
             try:
-                await self._close_position(coin)
+                await self._execute_partial_sale(coin, 0.5)  # 50% 부분 익절
+            except Exception as e:
+                logger.error(f"⚠️ {coin} 부분 익절 오류: {str(e)}")
+        
+        # 전체 청산 처리
+        for coin, reason in positions_to_close:
+            try:
+                await self._close_position(coin, reason)
             except Exception as e:
                 logger.error(f"⚠️ {coin} 포지션 청산 오류: {str(e)}")
     
-    async def _execute_buy_order(self, market: str, coin_symbol: str, investment_amount: float, signal: Dict):
+    async def _execute_partial_sale(self, coin: str, sell_ratio: float = 0.5):
+        """부분 익절 실행"""
+        try:
+            session_trading_state = self.user_session.trading_state if self.user_session else trading_state
+            if coin not in session_trading_state.positions:
+                return
+                
+            position = session_trading_state.positions[coin]
+            market = f"KRW-{coin}"
+            
+            # 부분 매도 수량 계산
+            sell_amount = position.amount * sell_ratio
+            remaining_amount = position.amount - sell_amount
+            
+            upbit_client = self.user_session.upbit_client if self.user_session else get_upbit_client()
+            if not upbit_client:
+                logger.error(f"⚠️ {coin} 부분 익절 실패: 업비트 클라이언트 없음")
+                return
+            
+            logger.info(f"💰 {coin} 부분 익절 실행 ({sell_ratio*100:.0f}%)")
+            logger.info(f"   판매 수량: {sell_amount:.8f}")
+            logger.info(f"   잔여 수량: {remaining_amount:.8f}")
+            
+            # 시장가 매도 주문 실행
+            sell_result = await upbit_client.place_market_sell_order(market, sell_amount)
+            
+            if sell_result.get("success", False):
+                # 거래 검증 생성
+                order_id = sell_result.get("uuid", f"partial_{int(time.time())}")
+                verification = await trade_verifier.create_verification(
+                    order_id=order_id,
+                    market=market,
+                    side="ask",
+                    order_type="market",
+                    requested_amount=sell_amount,
+                    requested_price=position.current_price,
+                    upbit_client=upbit_client
+                )
+                
+                sell_price = sell_result.get("avg_price", position.current_price)
+                realized_pnl = (sell_price - position.buy_price) * sell_amount
+                
+                logger.info(f"✅ {coin} 부분 익절 주문 실행")
+                logger.info(f"   주문 ID: {order_id}")
+                logger.info(f"   매도 가격: {sell_price:,.0f} KRW")
+                logger.info(f"   실현 수익: {realized_pnl:+,.0f} KRW")
+                
+                # 포지션 수량 업데이트
+                position.amount = remaining_amount
+                position.partial_profit_taken = True
+                
+                # 잔여 포지션이 너무 작으면 전체 정리
+                if remaining_amount < 0.00001:  # 아주 작은 수량
+                    logger.info(f"🧹 {coin} 잔여 수량 미미 - 전체 정리")
+                    del session_trading_state.positions[coin]
+                    session_trading_state.reserved_budget = 0  # 정리
+                else:
+                    # 예산 일부 해제
+                    released_budget = sell_amount * position.buy_price
+                    session_trading_state.available_budget += released_budget
+                    session_trading_state.reserved_budget -= released_budget
+                
+                # 거래 통계 업데이트
+                session_trading_state.daily_trades += 1
+                
+                # 비동기로 주문 검증 시작 (1초 후)
+                asyncio.create_task(self._verify_order_after_delay(order_id, upbit_client, 1))
+                
+            else:
+                logger.error(f"❌ {coin} 부분 익절 실패: {sell_result.get('message', '알 수 없는 오류')}")
+                
+        except Exception as e:
+            logger.error(f"❌ {coin} 부분 익절 중 오류: {str(e)}")
+    
+    async def _execute_buy_order(self, market: str, coin_symbol: str, investment_amount: float, signal: Dict, session_trading_state):
         """매수 주문 실행"""
         try:
-            upbit_client = get_upbit_client()
+            upbit_client = self.user_session.upbit_client if self.user_session else get_upbit_client()
             if not upbit_client:
                 logger.error("⚠️ 업비트 클라이언트가 연결되지 않았습니다")
                 return
@@ -325,6 +627,20 @@ class MultiCoinTradingEngine:
             order_result = await upbit_client.place_market_buy_order(market, investment_amount)
             
             if order_result.get("success", False):
+                # 거래 검증 생성
+                order_id = order_result.get("uuid", f"manual_{int(time.time())}")
+                verification = await trade_verifier.create_verification(
+                    order_id=order_id,
+                    market=market,
+                    side="bid",
+                    order_type="market",
+                    requested_amount=buy_amount,
+                    requested_price=current_price,
+                    upbit_client=upbit_client
+                )
+                
+                logger.info(f"📋 {coin_symbol} 매수 주문 검증 시작 (ID: {order_id})")
+                
                 # 포지션 생성
                 profit_target_price = current_price * (1 + self.scalping_params["quick_profit_target"] / 100)
                 stop_loss_price = current_price * (1 + self.scalping_params["tight_stop_loss"] / 100)
@@ -338,16 +654,23 @@ class MultiCoinTradingEngine:
                     stop_loss=stop_loss_price
                 )
                 
-                # 거래 상태 업데이트
-                trading_state.positions[coin_symbol] = position
-                trading_state.available_budget -= investment_amount
-                trading_state.reserved_budget += investment_amount
-                trading_state.daily_trades += 1
-                trading_state.last_trade_time[coin_symbol] = datetime.now()
+                # 포지션에 주문 ID 추가 (검증 추적용)
+                position.order_id = order_id
                 
-                logger.info(f"✅ {coin_symbol} 매수 완료!")
+                # 거래 상태 업데이트
+                session_trading_state.positions[coin_symbol] = position
+                session_trading_state.available_budget -= investment_amount
+                session_trading_state.reserved_budget += investment_amount
+                session_trading_state.daily_trades += 1
+                session_trading_state.last_trade_time[coin_symbol] = datetime.now()
+                
+                logger.info(f"✅ {coin_symbol} 매수 주문 실행!")
+                logger.info(f"   주문 ID: {order_id}")
                 logger.info(f"   익절가: {profit_target_price:,.0f} KRW")
                 logger.info(f"   손절가: {stop_loss_price:,.0f} KRW")
+                
+                # 비동기로 주문 검증 시작 (1초 후)
+                asyncio.create_task(self._verify_order_after_delay(order_id, upbit_client, 1))
                 
             else:
                 logger.error(f"❌ {coin_symbol} 매수 주문 실패: {order_result.get('error', '알 수 없는 오류')}")
@@ -358,7 +681,7 @@ class MultiCoinTradingEngine:
     async def _get_current_price(self, market: str) -> Optional[float]:
         """현재 가격 조회 (API 매니저 사용)"""
         try:
-            upbit_client = get_upbit_client()
+            upbit_client = self.user_session.upbit_client if self.user_session else get_upbit_client()
             if not upbit_client:
                 return None
             
@@ -379,15 +702,18 @@ class MultiCoinTradingEngine:
             logger.error(f"⚠️ {market} 가격 조회 오류: {str(e)}")
             return None
     
-    async def _close_position(self, coin: str):
-        """포지션 청산"""
+    async def _close_position(self, coin: str, reason: str = "manual"):
+        """고급 포지션 청산 - 매도 이유 기록"""
         try:
-            if coin not in trading_state.positions:
+            # 사용자 세션 거래 상태 참조
+            session_trading_state = self.user_session.trading_state if self.user_session else trading_state
+            
+            if coin not in session_trading_state.positions:
                 logger.warning(f"⚠️ {coin} 포지션이 존재하지 않습니다")
                 return
             
-            position = trading_state.positions[coin]
-            upbit_client = get_upbit_client()
+            position = session_trading_state.positions[coin]
+            upbit_client = self.user_session.upbit_client if self.user_session else get_upbit_client()
             
             if not upbit_client:
                 logger.error("⚠️ 업비트 클라이언트가 연결되지 않았습니다")
@@ -395,46 +721,136 @@ class MultiCoinTradingEngine:
             
             market = f"KRW-{coin}"
             
-            logger.info(f"💰 {coin} 포지션 청산 시도")
+            # 청산 전 상태 분석
+            profit_percent = ((position.current_price - position.buy_price) / position.buy_price) * 100
+            holding_time = (datetime.now() - position.timestamp).total_seconds()
+            
+            # 매도 이유별 로그 메시지
+            reason_messages = {
+                "profit_target": "🎯 목표 수익률 달성",
+                "stop_loss": "🛑 손절 실행",
+                "trailing_stop": "📉 트레일링 스탑 실행",
+                "high_risk_sell": "🚨 고위험 즉시 매도",
+                "time_based_profit": "⏰ 시간 기반 익절",
+                "target_profit": "🎯 목표가 도달",
+                "max_time": "⏰ 최대 보유시간 초과",
+                "manual": "👤 수동 청산",
+                "emergency": "🚨 비상 청산"
+            }
+            
+            reason_message = reason_messages.get(reason, f"💰 포지션 청산 ({reason})")
+            
+            logger.info(f"{reason_message}")
+            logger.info(f"   코인: {coin}")
             logger.info(f"   보유 수량: {position.amount:.8f}")
             logger.info(f"   매수 가격: {position.buy_price:,.0f} KRW")
+            logger.info(f"   현재 가격: {position.current_price:,.0f} KRW")
+            logger.info(f"   수익률: {profit_percent:+.2f}%")
+            logger.info(f"   보유시간: {holding_time:.0f}초")
+            
+            if position.trailing_stop_enabled:
+                trailing_price = position.get_trailing_stop_price()
+                logger.info(f"   트레일링가: {trailing_price:,.0f} KRW (최고가: {position.highest_price_seen:,.0f})")
             
             # 실제 매도 주문 (시장가)
             order_result = await upbit_client.place_market_sell_order(market, position.amount)
             
             if order_result.get("success", False):
-                # 수익 계산
-                current_price = position.current_price or position.buy_price
-                realized_pnl = (current_price - position.buy_price) * position.amount
+                # 거래 검증 생성
+                order_id = order_result.get("uuid", f"sell_{int(time.time())}")
+                verification = await trade_verifier.create_verification(
+                    order_id=order_id,
+                    market=market,
+                    side="ask",
+                    order_type="market",
+                    requested_amount=position.amount,
+                    requested_price=position.current_price,
+                    upbit_client=upbit_client
+                )
+                
+                logger.info(f"📋 {coin} 매도 주문 검증 시작 (ID: {order_id})")
+                
+                # 실제 매도 가격 (주문 결과에서 가져오기)
+                actual_sell_price = order_result.get("avg_price", position.current_price)
+                realized_pnl = (actual_sell_price - position.buy_price) * position.amount
+                realized_percent = ((actual_sell_price - position.buy_price) / position.buy_price) * 100
                 
                 # 거래 상태 업데이트
-                trading_state.available_budget += (current_price * position.amount)
-                trading_state.reserved_budget -= (position.buy_price * position.amount)
+                session_trading_state.available_budget += (actual_sell_price * position.amount)
+                session_trading_state.reserved_budget -= (position.buy_price * position.amount)
                 
                 if realized_pnl < 0:
-                    trading_state.daily_loss += abs(realized_pnl)
+                    session_trading_state.daily_loss += abs(realized_pnl)
                 
                 # 포지션 제거
-                del trading_state.positions[coin]
+                del session_trading_state.positions[coin]
+                session_trading_state.daily_trades += 1
                 
-                logger.info(f"✅ {coin} 매도 완료!")
-                logger.info(f"   매도 가격: {current_price:,.0f} KRW")
-                logger.info(f"   실현 손익: {realized_pnl:,.0f} KRW")
+                # 성과 분석 로깅
+                result_icon = "💚" if realized_pnl > 0 else "❤️" if realized_pnl < 0 else "💛"
+                logger.info(f"✅ {coin} 매도 주문 실행! {result_icon}")
+                logger.info(f"   주문 ID: {order_id}")
+                logger.info(f"   실제 매도가: {actual_sell_price:,.0f} KRW")
+                logger.info(f"   실현 손익: {realized_pnl:+,.0f} KRW ({realized_percent:+.2f}%)")
+                logger.info(f"   매도 사유: {reason}")
+                
+                # 트레일링 스탑 성과 분석
+                if reason == "trailing_stop":
+                    max_potential_profit = (position.highest_price_seen - position.buy_price) * position.amount
+                    trailing_efficiency = (realized_pnl / max_potential_profit) * 100 if max_potential_profit > 0 else 0
+                    logger.info(f"   트레일링 효율성: {trailing_efficiency:.1f}% (최대 가능 수익 대비)")
+                
+                # 부분 익절 이력이 있는 경우
+                if position.partial_profit_taken:
+                    logger.info(f"   📊 부분 익절 완료된 포지션")
+                
+                # 비동기로 주문 검증 시작 (1초 후)
+                asyncio.create_task(self._verify_order_after_delay(order_id, upbit_client, 1))
                 
             else:
                 logger.error(f"❌ {coin} 매도 주문 실패: {order_result.get('error', '알 수 없는 오류')}")
+                logger.error(f"   매도 시도 사유: {reason}")
             
         except Exception as e:
-            logger.error(f"⚠️ {coin} 포지션 청산 오류: {str(e)}")
+            logger.error(f"⚠️ {coin} 포지션 청산 오류 (사유: {reason}): {str(e)}")
+    
+    async def _verify_order_after_delay(self, order_id: str, upbit_client, delay: int):
+        """지연 후 주문 검증"""
+        try:
+            await asyncio.sleep(delay)
+            
+            # 최대 3회까지 검증 시도
+            for attempt in range(3):
+                success = await trade_verifier.verify_order_with_client(order_id, upbit_client)
+                if success:
+                    logger.debug(f"✅ 주문 검증 완료: {order_id}")
+                    break
+                
+                if attempt < 2:  # 마지막 시도가 아니면 대기
+                    await asyncio.sleep(5)  # 5초 대기 후 재시도
+            
+        except Exception as e:
+            logger.error(f"❌ 주문 검증 오류 ({order_id}): {str(e)}")
+    
+    def get_verification_summary(self) -> Dict:
+        """거래 검증 요약 정보"""
+        try:
+            return trade_verifier.get_trading_metrics()
+        except Exception as e:
+            logger.error(f"❌ 검증 요약 조회 오류: {str(e)}")
+            return {}
     
     def get_status(self) -> dict:
         """거래 엔진 상태 조회"""
+        # 사용자 세션 거래 상태 참조
+        session_trading_state = self.user_session.trading_state if self.user_session else trading_state
+        
         return {
             "is_running": self.is_running,
-            "positions_count": len(trading_state.positions),
-            "available_budget": trading_state.available_budget,
-            "daily_trades": trading_state.daily_trades,
-            "daily_loss": trading_state.daily_loss,
+            "positions_count": len(session_trading_state.positions),
+            "available_budget": session_trading_state.available_budget,
+            "daily_trades": session_trading_state.daily_trades,
+            "daily_loss": session_trading_state.daily_loss,
             "uptime_seconds": time.time() - self.session_start_time if self.session_start_time else 0
         }
     
