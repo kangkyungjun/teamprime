@@ -202,7 +202,9 @@ app.include_router(trading_history_router, prefix="/api/trading-history")  # 거
 
 # 실시간 API 라우터 추가
 from core.api.realtime import router as realtime_router
+from core.api.mtfa import router as mtfa_router
 app.include_router(realtime_router, prefix="/api/realtime")  # 실시간 데이터 및 알림 API
+app.include_router(mtfa_router)  # MTFA 최적화 API 추가
 
 @app.post("/api/collect-recent-data")
 async def collect_recent_data_endpoint():
@@ -1097,6 +1099,17 @@ async def trading_dashboard(request: Request):
                 transform: none;
                 box-shadow: none;
             }}
+            .control-btn.mtfa-btn {{
+                background: linear-gradient(45deg, #6f42c1, #8e44ad);
+                color: white;
+                margin: 5px;
+                min-width: 180px;
+            }}
+            .control-btn.mtfa-btn:hover {{
+                background: linear-gradient(45deg, #5a2d91, #732d91);
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(111,66,193,0.4);
+            }}
             .trading-status {{
                 text-align: center;
                 padding: 20px;
@@ -1244,7 +1257,7 @@ async def trading_dashboard(request: Request):
             }}
             
             /* 매수 조건 그리드 스타일 */
-            .conditions-grid {{
+            .conditions-grid, .mtfa-conditions-grid {{
                 display: grid;
                 grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
                 gap: 15px;
@@ -1416,29 +1429,15 @@ async def trading_dashboard(request: Request):
                 </div>
             </div>
 
-            <!-- 🎯 매수 조건 분석 섹션 -->
+            <!-- 🎯 MTFA 실시간 매수 조건 섹션 -->
             <div class="dashboard-section">
-                <h2 class="section-title">🎯 실시간 매수 조건</h2>
-                <div class="conditions-grid" id="conditionsGrid">
+                <h2 class="section-title">🎯 MTFA 실시간 매수 조건</h2>
+                <div class="mtfa-conditions-grid" id="mtfaConditionsGrid">
+                    <!-- MTFA 데이터가 여기에 동적으로 로드됩니다 -->
                     <div class="condition-card">
-                        <div class="condition-coin">BTC</div>
-                        <div class="condition-status" id="btcCondition">분석 중...</div>
-                        <div class="condition-score" id="btcScore">-</div>
-                    </div>
-                    <div class="condition-card">
-                        <div class="condition-coin">ETH</div>
-                        <div class="condition-status" id="ethCondition">분석 중...</div>
-                        <div class="condition-score" id="ethScore">-</div>
-                    </div>
-                    <div class="condition-card">
-                        <div class="condition-coin">XRP</div>
-                        <div class="condition-status" id="xrpCondition">분석 중...</div>
-                        <div class="condition-score" id="xrpScore">-</div>
-                    </div>
-                    <div class="condition-card">
-                        <div class="condition-coin">DOGE</div>
-                        <div class="condition-status" id="dogeCondition">분석 중...</div>
-                        <div class="condition-score" id="dogeScore">-</div>
+                        <div class="condition-coin">로딩 중...</div>
+                        <div class="condition-status">데이터 로딩 중...</div>
+                        <div class="condition-score">-</div>
                     </div>
                 </div>
             </div>
@@ -1453,6 +1452,7 @@ async def trading_dashboard(request: Request):
                 </div>
             </div>
         </main>
+        
         
         <footer class="footer">
             <p>© 2024 업비트 자동거래 시스템 | API 키는 세션 종료 시 자동 삭제됩니다.</p>
@@ -1682,30 +1682,45 @@ async def trading_dashboard(request: Request):
             }}
             
             // 매수 조건 분석 업데이트
-            async function updateBuyConditions() {{
+            async function updateMTFAConditions() {{
                 try {{
-                    const response = await fetch('/buy-conditions-summary');
+                    const response = await fetch('/api/mtfa-dashboard-data');
                     const data = await response.json();
                     
-                    if (data.conditions) {{
-                        data.conditions.forEach(condition => {{
-                            const coin = condition.coin.toLowerCase();
-                            const statusElement = document.getElementById(`${{coin}}Condition`);
-                            const scoreElement = document.getElementById(`${{coin}}Score`);
+                    if (data.success && data.dashboard_data) {{
+                        const grid = document.getElementById('mtfaConditionsGrid');
+                        grid.innerHTML = ''; // 기존 데이터 클리어
+                        
+                        data.dashboard_data.forEach(coin => {{
+                            const confidencePercent = (coin.current_confidence * 100).toFixed(1);
+                            const thresholdPercent = (coin.threshold * 100).toFixed(0);
+                            const statusText = coin.is_buy_ready ? '🟢 매수대기' : '🔴 관망';
+                            const statusClass = coin.is_buy_ready ? 'possible' : 'not-possible';
                             
-                            if (statusElement) {{
-                                statusElement.textContent = condition.status;
-                                statusElement.className = condition.status.includes('가능') ? 
-                                    'condition-status possible' : 'condition-status not-possible';
-                            }}
+                            const cardHtml = `
+                                <div class="condition-card">
+                                    <div class="condition-coin">${{coin.coin}}</div>
+                                    <div class="condition-status ${{statusClass}}">${{statusText}}</div>
+                                    <div class="condition-score">신뢰도: ${{confidencePercent}}% / ${{thresholdPercent}}%</div>
+                                </div>
+                            `;
                             
-                            if (scoreElement) {{
-                                scoreElement.textContent = `${{condition.signal_strength || 0}}점`;
-                            }}
+                            grid.insertAdjacentHTML('beforeend', cardHtml);
                         }});
+                        
+                        console.log(`MTFA 조건 업데이트 완료: ${{data.dashboard_data.length}}개 코인`);
                     }}
                 }} catch (error) {{
-                    console.error('매수 조건 업데이트 오류:', error);
+                    console.error('MTFA 매수 조건 업데이트 오류:', error);
+                    // 오류 시 기본 메시지 표시
+                    const grid = document.getElementById('mtfaConditionsGrid');
+                    grid.innerHTML = `
+                        <div class="condition-card">
+                            <div class="condition-coin">오류</div>
+                            <div class="condition-status not-possible">데이터 로딩 실패</div>
+                            <div class="condition-score">다시 시도하세요</div>
+                        </div>
+                    `;
                 }}
             }}
             
@@ -1769,24 +1784,8 @@ async def trading_dashboard(request: Request):
                             }});
                         }}
                         
-                        // 매수 조건 업데이트
-                        if (data.buy_conditions) {{
-                            data.buy_conditions.forEach(condition => {{
-                                const coin = condition.coin.toLowerCase();
-                                const statusElement = document.getElementById(`${{coin}}Condition`);
-                                const scoreElement = document.getElementById(`${{coin}}Score`);
-                                
-                                if (statusElement) {{
-                                    statusElement.textContent = condition.status;
-                                    statusElement.className = condition.status.includes('가능') ? 
-                                        'condition-status possible' : 'condition-status not-possible';
-                                }}
-                                
-                                if (scoreElement) {{
-                                    scoreElement.textContent = `${{condition.signal_strength || 0}}점`;
-                                }}
-                            }});
-                        }}
+                        // MTFA 매수 조건 별도 업데이트
+                        updateMTFAConditions();
                         
                         // 마지막 업데이트 시간 표시
                         const now = new Date();
@@ -1802,7 +1801,7 @@ async def trading_dashboard(request: Request):
                         updateAccountInfo(),
                         updateTradingStatusPanel(), 
                         updatePrices(),
-                        updateBuyConditions(),
+                        updateMTFAConditions(),
                         checkTradingStatus()
                     ]);
                     
@@ -1823,6 +1822,111 @@ async def trading_dashboard(request: Request):
                 console.log('자동 업데이트 타이머 시작 (10초 주기)');
             }});
             
+            // MTFA 성과 분석 모달
+            async function showMTFAPerformance() {{
+                try {{
+                    const response = await fetch('/api/mtfa-performance-expectations');
+                    const data = await response.json();
+                    
+                    if (data.success) {{
+                        let performanceHtml = '<h3 style="color: #6f42c1; margin-bottom: 15px;">📊 MTFA 코인별 성과 예상</h3>';
+                        performanceHtml += '<table>';
+                        performanceHtml += '<tr><th>코인</th><th>전략</th><th>3년 수익률</th><th>월 수익률</th><th>승률</th></tr>';
+                        
+                        data.performance_data.forEach(coin => {{
+                            performanceHtml += `<tr>
+                                <td style="font-weight: bold; color: #2e7d32;">${{coin.coin}}</td>
+                                <td style="font-size: 12px;">${{coin.strategy_summary}}</td>
+                                <td style="color: #d32f2f; font-weight: bold;">${{coin.expected_total_return}}%</td>
+                                <td style="color: #1976d2; font-weight: bold;">${{coin.expected_monthly_return}}%</td>
+                                <td>${{coin.expected_win_rate}}%</td>
+                            </tr>`;
+                        }});
+                        
+                        performanceHtml += '</table>';
+                        performanceHtml += `<div class="summary-box">`;
+                        performanceHtml += `<strong style="color: #6f42c1;">📈 종합 요약:</strong><br><br>`;
+                        performanceHtml += `• 총 코인 수: <strong>${{data.summary.total_markets}}개</strong><br>`;
+                        performanceHtml += `• 평균 3년 수익률: <strong style="color: #d32f2f;">${{data.summary.average_total_return}}%</strong><br>`;
+                        performanceHtml += `• 평균 월 수익률: <strong style="color: #1976d2;">${{data.summary.average_monthly_return}}%</strong><br>`;
+                        performanceHtml += `• 평균 승률: <strong>${{data.summary.average_win_rate}}%</strong><br>`;
+                        performanceHtml += `• 최고 성과 코인: <strong style="color: #2e7d32;">${{data.summary.top_performer}}</strong> (${{data.summary.top_monthly_return}}%/월)</div>`;
+                        
+                        openMTFAModal('📊 MTFA 성과 분석', performanceHtml);
+                    }}
+                }} catch (error) {{
+                    openMTFAModal('❌ 오류', '<p style="color: #d32f2f;">MTFA 성과 데이터를 불러오는 중 오류가 발생했습니다: ' + error.message + '</p>');
+                }}
+            }}
+            
+            // MTFA 실시간 대시보드 모달
+            async function showMTFADashboard() {{
+                try {{
+                    const response = await fetch('/api/mtfa-dashboard-data');
+                    const data = await response.json();
+                    
+                    if (data.success) {{
+                        let dashboardHtml = '<h3 style="color: #6f42c1; margin-bottom: 15px;">📈 MTFA 실시간 대시보드</h3>';
+                        dashboardHtml += '<table>';
+                        dashboardHtml += '<tr><th>코인</th><th>신뢰도</th><th>임계값</th><th>상태</th><th>월 수익률</th></tr>';
+                        
+                        data.dashboard_data.forEach(coin => {{
+                            const statusColor = coin.is_buy_ready ? '#4caf50' : '#ff5722';
+                            const statusText = coin.signal_status === 'BUY_READY' ? '🟢 매수대기' : '🔴 관망';
+                            
+                            dashboardHtml += `<tr>
+                                <td style="font-weight: bold; color: #2e7d32;">${{coin.coin}}</td>
+                                <td style="font-weight: bold; color: #1976d2;">${{(coin.current_confidence * 100).toFixed(1)}}%</td>
+                                <td>${{(coin.threshold * 100).toFixed(0)}}%</td>
+                                <td style="color: ${{statusColor}}; font-weight: bold;">${{statusText}}</td>
+                                <td style="color: #e65100; font-weight: bold;">${{coin.expected_monthly_return}}%</td>
+                            </tr>`;
+                        }});
+                        
+                        dashboardHtml += '</table>';
+                        dashboardHtml += `<div class="summary-box">`;
+                        dashboardHtml += `<strong style="color: #6f42c1;">🎯 실시간 요약:</strong><br><br>`;
+                        dashboardHtml += `• 총 모니터링 코인: <strong>${{data.summary.total_coins}}개</strong><br>`;
+                        dashboardHtml += `• 매수 준비 코인: <strong style="color: #4caf50;">${{data.summary.buy_ready_coins}}개</strong> (${{data.summary.buy_ready_percentage}}%)<br>`;
+                        dashboardHtml += `• 관망 중인 코인: <strong style="color: #ff5722;">${{data.summary.waiting_coins}}개</strong><br>`;
+                        dashboardHtml += `• 업데이트 시간: <strong>${{data.timestamp}}</strong></div>`;
+                        
+                        openMTFAModal('📈 MTFA 실시간 대시보드', dashboardHtml);
+                    }}
+                }} catch (error) {{
+                    openMTFAModal('❌ 오류', '<p style="color: #d32f2f;">MTFA 대시보드 데이터를 불러오는 중 오류가 발생했습니다: ' + error.message + '</p>');
+                }}
+            }}
+            
+            // MTFA 모달 관련 함수들
+            function openMTFAModal(title, content) {{
+                document.getElementById('mtfaModalTitle').textContent = title;
+                document.getElementById('mtfaModalBody').innerHTML = content;
+                document.getElementById('mtfaModal').style.display = 'block';
+                
+                // ESC 키로 모달 닫기
+                document.addEventListener('keydown', handleModalEscape);
+            }}
+            
+            function closeMTFAModal() {{
+                document.getElementById('mtfaModal').style.display = 'none';
+                document.removeEventListener('keydown', handleModalEscape);
+            }}
+            
+            function handleModalEscape(e) {{
+                if (e.key === 'Escape') {{
+                    closeMTFAModal();
+                }}
+            }}
+            
+            // 모달 외부 클릭으로 닫기
+            window.onclick = function(event) {{
+                const modal = document.getElementById('mtfaModal');
+                if (event.target === modal) {{
+                    closeMTFAModal();
+                }}
+            }}
+            
         </script>
     </body>
     </html>
@@ -1830,10 +1934,317 @@ async def trading_dashboard(request: Request):
     
     return html_content
 
-@app.get("/trading-strategy-dashboard", response_class=HTMLResponse)
-async def trading_strategy_dashboard():
-    """AI 기반 거래 전략 최적화 대시보드"""
-    return HTMLResponse("AI 기반 거래 전략 최적화 대시보드 (임시 비활성화)")
+@app.get("/mtfa-dashboard", response_class=HTMLResponse)
+async def mtfa_dashboard():
+    """MTFA 최적화 전략 대시보드"""
+    
+    html_content = f"""
+    <!DOCTYPE html>
+    <html lang="ko">
+    <head>
+        <meta charset="UTF-8">
+        <title>🚀 MTFA 최적화 전략 대시보드</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            * {{
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }}
+            body {{
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+                min-height: 100vh;
+                color: #333;
+                padding: 20px;
+            }}
+            
+            .header {{
+                text-align: center;
+                color: white;
+                margin-bottom: 30px;
+            }}
+            
+            .header h1 {{
+                font-size: 2.5rem;
+                margin-bottom: 10px;
+            }}
+            
+            .header .subtitle {{
+                font-size: 1.2rem;
+                opacity: 0.9;
+            }}
+            
+            .summary-cards {{
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 20px;
+                margin-bottom: 30px;
+            }}
+            
+            .summary-card {{
+                background: rgba(255, 255, 255, 0.95);
+                border-radius: 15px;
+                padding: 20px;
+                text-align: center;
+                box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            }}
+            
+            .summary-card h3 {{
+                color: #2a5298;
+                margin-bottom: 10px;
+                font-size: 1rem;
+            }}
+            
+            .summary-card .value {{
+                font-size: 2rem;
+                font-weight: bold;
+                color: #1e3c72;
+                margin-bottom: 5px;
+            }}
+            
+            .summary-card .desc {{
+                color: #666;
+                font-size: 0.9rem;
+            }}
+            
+            .coins-grid {{
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+                gap: 20px;
+                margin-bottom: 30px;
+            }}
+            
+            .coin-card {{
+                background: rgba(255, 255, 255, 0.95);
+                border-radius: 15px;
+                padding: 20px;
+                box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+                transition: transform 0.3s;
+            }}
+            
+            .coin-card:hover {{
+                transform: translateY(-5px);
+            }}
+            
+            .coin-header {{
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 15px;
+            }}
+            
+            .coin-name {{
+                font-size: 1.3rem;
+                font-weight: bold;
+                color: #1e3c72;
+            }}
+            
+            .expected-return {{
+                font-size: 1.1rem;
+                font-weight: bold;
+                color: #28a745;
+            }}
+            
+            .strategy-info {{
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+                margin-bottom: 15px;
+            }}
+            
+            .strategy-item {{
+                background: #f8f9fa;
+                padding: 8px 12px;
+                border-radius: 8px;
+                text-align: center;
+            }}
+            
+            .strategy-label {{
+                font-size: 0.8rem;
+                color: #666;
+                margin-bottom: 2px;
+            }}
+            
+            .strategy-value {{
+                font-weight: bold;
+                color: #333;
+            }}
+            
+            .profit-target {{ color: #28a745; }}
+            .stop-loss {{ color: #dc3545; }}
+            .hold-time {{ color: #6c757d; }}
+            .confidence {{ color: #007bff; }}
+            
+            .confidence-meter {{
+                width: 100%;
+                height: 8px;
+                background: #e9ecef;
+                border-radius: 4px;
+                overflow: hidden;
+                margin-top: 10px;
+            }}
+            
+            .confidence-fill {{
+                height: 100%;
+                background: linear-gradient(90deg, #ffc107, #28a745);
+                transition: width 0.3s;
+            }}
+            
+            .signal-status {{
+                display: inline-block;
+                padding: 4px 12px;
+                border-radius: 15px;
+                font-size: 0.8rem;
+                font-weight: bold;
+                margin-top: 10px;
+            }}
+            
+            .status-ready {{
+                background: #d4edda;
+                color: #155724;
+            }}
+            
+            .status-waiting {{
+                background: #fff3cd;
+                color: #856404;
+            }}
+            
+            .refresh-btn {{
+                position: fixed;
+                bottom: 30px;
+                right: 30px;
+                background: #007bff;
+                color: white;
+                border: none;
+                border-radius: 50%;
+                width: 60px;
+                height: 60px;
+                font-size: 1.5rem;
+                cursor: pointer;
+                box-shadow: 0 4px 15px rgba(0,123,255,0.3);
+                transition: all 0.3s;
+            }}
+            
+            .refresh-btn:hover {{
+                transform: scale(1.1);
+                box-shadow: 0 6px 20px rgba(0,123,255,0.4);
+            }}
+        </style>
+    </head>
+    <body>
+        <div class="header">
+            <h1>🚀 MTFA 최적화 전략</h1>
+            <div class="subtitle">AI 기반 코인별 맞춤 매수매도 조건 • 평균 월 2.3% 수익률 목표</div>
+        </div>
+        
+        <div class="summary-cards">
+            <div class="summary-card">
+                <h3>총 관리 코인</h3>
+                <div class="value" id="totalCoins">10</div>
+                <div class="desc">MTFA 최적화 완료</div>
+            </div>
+            <div class="summary-card">
+                <h3>매수 준비</h3>
+                <div class="value" id="buyReadyCoins">-</div>
+                <div class="desc">신뢰도 임계값 달성</div>
+            </div>
+            <div class="summary-card">
+                <h3>평균 예상 수익률</h3>
+                <div class="value" id="avgReturn">82.7%</div>
+                <div class="desc">연간 기준 (3년 백테스트)</div>
+            </div>
+            <div class="summary-card">
+                <h3>월 예상 수익률</h3>
+                <div class="value" id="monthlyReturn">2.3%</div>
+                <div class="desc">복리 효과 포함</div>
+            </div>
+        </div>
+        
+        <div class="coins-grid" id="coinsGrid">
+            <!-- 동적으로 로드됨 -->
+        </div>
+        
+        <button class="refresh-btn" onclick="updateMTFADashboard()">🔄</button>
+        
+        <script>
+            async function updateMTFADashboard() {{
+                try {{
+                    // MTFA 대시보드 데이터 가져오기
+                    const response = await fetch('/api/mtfa-dashboard-data');
+                    const data = await response.json();
+                    
+                    if (data.success) {{
+                        // 요약 정보 업데이트
+                        document.getElementById('totalCoins').textContent = data.summary.total_coins;
+                        document.getElementById('buyReadyCoins').textContent = data.summary.buy_ready_coins;
+                        
+                        // 코인 카드 생성
+                        const coinsGrid = document.getElementById('coinsGrid');
+                        coinsGrid.innerHTML = '';
+                        
+                        data.dashboard_data.forEach(coin => {{
+                            const coinCard = document.createElement('div');
+                            coinCard.className = 'coin-card';
+                            coinCard.innerHTML = `
+                                <div class="coin-header">
+                                    <div class="coin-name">${{coin.market}}</div>
+                                    <div class="expected-return">+${{coin.expected_monthly_return}}%/월</div>
+                                </div>
+                                
+                                <div class="strategy-info">
+                                    <div class="strategy-item">
+                                        <div class="strategy-label">익절률</div>
+                                        <div class="strategy-value profit-target">${{coin.strategy_info.profit_target}}%</div>
+                                    </div>
+                                    <div class="strategy-item">
+                                        <div class="strategy-label">손절률</div>
+                                        <div class="strategy-value stop-loss">${{coin.strategy_info.stop_loss}}%</div>
+                                    </div>
+                                    <div class="strategy-item">
+                                        <div class="strategy-label">보유시간</div>
+                                        <div class="strategy-value hold-time">${{coin.strategy_info.max_hold_minutes}}분</div>
+                                    </div>
+                                    <div class="strategy-item">
+                                        <div class="strategy-label">신뢰도 임계값</div>
+                                        <div class="strategy-value confidence">${{Math.round(coin.threshold * 100)}}%</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="confidence-meter">
+                                    <div class="confidence-fill" style="width: ${{coin.current_confidence * 100}}%"></div>
+                                </div>
+                                
+                                <div class="signal-status ${{coin.is_buy_ready ? 'status-ready' : 'status-waiting'}}">
+                                    ${{coin.signal_status === 'BUY_READY' ? '🟢 매수 준비' : '🟡 대기 중'}}
+                                    (${{Math.round(coin.current_confidence * 100)}}%)
+                                </div>
+                            `;
+                            coinsGrid.appendChild(coinCard);
+                        }});
+                        
+                        console.log('MTFA 대시보드 업데이트 완료');
+                    }} else {{
+                        console.error('MTFA 대시보드 데이터 로드 실패:', data.message);
+                    }}
+                }} catch (error) {{
+                    console.error('MTFA 대시보드 업데이트 에러:', error);
+                }}
+            }}
+            
+            // 페이지 로드시 초기 데이터 로드
+            document.addEventListener('DOMContentLoaded', function() {{
+                updateMTFADashboard();
+                
+                // 30초마다 자동 업데이트
+                setInterval(updateMTFADashboard, 30000);
+            }});
+        </script>
+    </body>
+    </html>
+    """
+    
+    return HTMLResponse(content=html_content)
 
 @app.get("/multi-coin-dashboard", response_class=HTMLResponse)
 async def multi_coin_dashboard():

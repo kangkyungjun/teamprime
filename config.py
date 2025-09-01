@@ -13,8 +13,8 @@ SERVER_START_TIME = datetime.utcnow().timestamp()
 # API 설정
 UPBIT_BASE = "https://api.upbit.com"
 
-# 시장 설정
-DEFAULT_MARKETS = os.getenv("MARKETS", "KRW-BTC,KRW-XRP,KRW-ETH,KRW-DOGE,KRW-BTT").split(",")
+# 시장 설정 - MTFA 최적화된 10개 코인
+DEFAULT_MARKETS = os.getenv("MARKETS", "KRW-IOTA,KRW-WCT,KRW-GMT,KRW-BTC,KRW-MEW,KRW-ETH,KRW-SHIB,KRW-PEPE,KRW-ANIME,KRW-LPT").split(",")
 DEFAULT_YEARS = int(os.getenv("YEARS", "3"))  # 최초 보장 수집 기간
 
 # 데이터 수집 설정
@@ -58,6 +58,54 @@ LOGGING_CONFIG = {
     "file": "trading_system.log",
     "max_bytes": 10485760,  # 10MB
     "backup_count": 5,
+}
+
+# MTFA 최적화 설정 (Excel 결과 기반)
+MTFA_OPTIMIZED_CONFIG = {
+    "KRW-IOTA": {
+        "profit_target": 2.5,     # 2.5% 익절
+        "stop_loss": -1.0,        # -1.0% 손절
+        "max_hold_minutes": 5,    # 5분 최대보유
+        "mtfa_threshold": 0.80,   # 80% 신뢰도
+        "expected_return": 141.3, # 예상 수익률 141.3%
+        "expected_win_rate": 50.3 # 예상 승률 50.3%
+    },
+    "KRW-WCT": {
+        "profit_target": 3.0, "stop_loss": -1.0, "max_hold_minutes": 20, 
+        "mtfa_threshold": 0.80, "expected_return": 134.5, "expected_win_rate": 50.0
+    },
+    "KRW-GMT": {
+        "profit_target": 2.5, "stop_loss": -1.0, "max_hold_minutes": 5,
+        "mtfa_threshold": 0.85, "expected_return": 121.6, "expected_win_rate": 50.8
+    },
+    "KRW-BTC": {
+        "profit_target": 3.0, "stop_loss": -1.0, "max_hold_minutes": 30,
+        "mtfa_threshold": 0.80, "expected_return": 111.2, "expected_win_rate": 52.5
+    },
+    "KRW-MEW": {
+        "profit_target": 3.0, "stop_loss": -0.2, "max_hold_minutes": 5,
+        "mtfa_threshold": 0.95, "expected_return": 110.9, "expected_win_rate": 50.8
+    },
+    "KRW-ETH": {
+        "profit_target": 2.5, "stop_loss": -1.0, "max_hold_minutes": 10,
+        "mtfa_threshold": 0.80, "expected_return": 68.8, "expected_win_rate": 50.0
+    },
+    "KRW-SHIB": {
+        "profit_target": 2.5, "stop_loss": -1.0, "max_hold_minutes": 10,
+        "mtfa_threshold": 0.95, "expected_return": 47.8, "expected_win_rate": 50.8
+    },
+    "KRW-PEPE": {
+        "profit_target": 1.5, "stop_loss": -0.6, "max_hold_minutes": 10,
+        "mtfa_threshold": 0.85, "expected_return": 32.7, "expected_win_rate": 51.8
+    },
+    "KRW-ANIME": {
+        "profit_target": 3.0, "stop_loss": -0.8, "max_hold_minutes": 5,
+        "mtfa_threshold": 0.95, "expected_return": 31.7, "expected_win_rate": 50.0
+    },
+    "KRW-LPT": {
+        "profit_target": 2.5, "stop_loss": -1.0, "max_hold_minutes": 60,
+        "mtfa_threshold": 0.80, "expected_return": 26.7, "expected_win_rate": 51.4
+    }
 }
 
 # 웹서버 설정

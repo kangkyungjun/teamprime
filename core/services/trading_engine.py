@@ -12,7 +12,7 @@ from .trade_verifier import trade_verifier
 from .resilience_service import resilience_service
 from .monitoring_service import monitoring_service, AlertSeverity, MetricType
 from ..utils.api_manager import api_manager, APIPriority
-from config import DEFAULT_MARKETS
+from config import DEFAULT_MARKETS, MTFA_OPTIMIZED_CONFIG
 
 logger = logging.getLogger(__name__)
 
@@ -92,14 +92,7 @@ class MultiCoinTradingEngine:
             "last_global_call": 0        # 마지막 전역 API 호출 시간
         }
         
-        # 최적화된 매개변수 (검증된 승률 56.7%)
-        self.optimized_params = {
-            "BTC": {"volume_mult": 1.3, "price_change": 0.15, "candle_pos": 0.6, "profit_target": 0.8, "stop_loss": -0.4},
-            "XRP": {"volume_mult": 1.4, "price_change": 0.2, "candle_pos": 0.7, "profit_target": 1.2, "stop_loss": -0.3},
-            "ETH": {"volume_mult": 1.3, "price_change": 0.15, "candle_pos": 0.6, "profit_target": 0.9, "stop_loss": -0.4},
-            "DOGE": {"volume_mult": 1.8, "price_change": 0.3, "candle_pos": 0.8, "profit_target": 1.5, "stop_loss": -0.3},
-            "BTT": {"volume_mult": 2.2, "price_change": 0.4, "candle_pos": 0.8, "profit_target": 2.0, "stop_loss": -0.3}
-        }
+        # MTFA 최적화 설정은 config.py의 MTFA_OPTIMIZED_CONFIG 사용
     
     async def start_trading(self):
         """거래 시작"""
@@ -393,9 +386,9 @@ class MultiCoinTradingEngine:
                     self._complete_coin_processing(coin_symbol, "skipped", "거래 불가")
                     continue
                 
-                # 신호 분석 실행
-                params = self.optimized_params.get(coin_symbol, self.optimized_params["BTC"])
-                signal = await signal_analyzer.check_buy_signal(market, params)
+                # 신호 분석 실행 (MTFA 최적화 설정 사용)
+                market_config = MTFA_OPTIMIZED_CONFIG.get(market, MTFA_OPTIMIZED_CONFIG["KRW-BTC"])
+                signal = await signal_analyzer.check_buy_signal(market, market_config)
                 
                 # API 호출 시간 기록 (코인별 + 전역)
                 self.api_call_scheduler["last_call_times"][coin_symbol] = current_time
@@ -500,7 +493,12 @@ class MultiCoinTradingEngine:
                     positions_to_close.append((coin, "stop_loss"))
                     continue
                 
-                if holding_time > self.scalping_params["max_hold_time"]:
+                # MTFA 최적화된 개별 코인별 최대 보유 시간 사용
+                market_config = MTFA_OPTIMIZED_CONFIG.get(f"KRW-{coin}", {})
+                max_hold_minutes = market_config.get("max_hold_minutes", 60)  # 기본값 60분
+                max_hold_seconds = max_hold_minutes * 60
+                
+                if holding_time > max_hold_seconds:
                     logger.info(f"⏰ {coin} 최대 보유 시간 초과 ({holding_time:.0f}초)")
                     positions_to_close.append((coin, "max_time"))
                     continue
@@ -642,8 +640,13 @@ class MultiCoinTradingEngine:
                 logger.info(f"📋 {coin_symbol} 매수 주문 검증 시작 (ID: {order_id})")
                 
                 # 포지션 생성
-                profit_target_price = current_price * (1 + self.scalping_params["quick_profit_target"] / 100)
-                stop_loss_price = current_price * (1 + self.scalping_params["tight_stop_loss"] / 100)
+                # MTFA 최적화된 개별 코인 설정 사용
+                market_config = MTFA_OPTIMIZED_CONFIG.get(market, {})
+                profit_target_pct = market_config.get("profit_target", 2.5)  # 기본값 2.5%
+                stop_loss_pct = market_config.get("stop_loss", -1.0)  # 기본값 -1.0%
+                
+                profit_target_price = current_price * (1 + profit_target_pct / 100)
+                stop_loss_price = current_price * (1 + stop_loss_pct / 100)
                 
                 position = Position(
                     coin=coin_symbol,

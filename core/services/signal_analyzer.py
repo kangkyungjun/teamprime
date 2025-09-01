@@ -48,7 +48,9 @@ class SignalAnalyzer:
                 volume_signal, technical_signals, candle_pattern, price_change
             )
             
-            if signal_strength >= 60:  # 최소 신호 강도
+            # MTFA 최적화된 코인별 신뢰도 임계값 사용
+            mtfa_threshold = params.get("mtfa_threshold", 0.80) * 100  # 퍼센트로 변환
+            if signal_strength >= mtfa_threshold:
                 return {
                     "should_buy": True,
                     "signal_strength": signal_strength,
