@@ -550,13 +550,19 @@ async def get_coin_trading_criteria(current_user: Dict[str, Any] = Depends(requi
             return {"success": False, "message": "세션이 만료되었습니다. 다시 로그인해주세요."}
         
         criteria = {}
-        for coin, params in user_session.trading_engine.optimized_params.items():
-            criteria[coin] = {
-                "volume_multiplier": params["volume_mult"],
-                "price_change_threshold": params["price_change"],
-                "candle_position": params["candle_pos"],
-                "profit_target": params["profit_target"],
-                "stop_loss": params["stop_loss"]
+        from config import MTFA_OPTIMIZED_CONFIG, DEFAULT_MARKETS
+        
+        for market in DEFAULT_MARKETS:
+            coin_symbol = market.split('-')[1]
+            config = MTFA_OPTIMIZED_CONFIG.get(market, {})
+            criteria[coin_symbol] = {
+                "volume_multiplier": 2.0,  # 기본값
+                "price_change_threshold": 0.5,  # 기본값
+                "candle_position": 50,  # 기본값
+                "profit_target": config.get("profit_target", 2.5),
+                "stop_loss": config.get("stop_loss", -1.0),
+                "max_hold_minutes": config.get("max_hold_minutes", 60),
+                "mtfa_threshold": config.get("mtfa_threshold", 0.80)
             }
         
         return {
@@ -849,7 +855,17 @@ async def get_dashboard_data(current_user: Dict[str, Any] = Depends(require_auth
             conditions = []
             for market in list(DEFAULT_MARKETS)[:3]:  # 처음 3개만
                 coin_symbol = market.split('-')[1]
-                params = user_session.trading_engine.optimized_params.get(coin_symbol, user_session.trading_engine.optimized_params["BTC"])
+                config = MTFA_OPTIMIZED_CONFIG.get(market, MTFA_OPTIMIZED_CONFIG.get("KRW-BTC", {}))
+                
+                # MTFA 최적화된 파라미터 사용
+                params = {
+                    "volume_surge": 2.0,
+                    "price_change": 0.5,
+                    "mtfa_threshold": config.get("mtfa_threshold", 0.80),
+                    "rsi_period": 14,
+                    "ema_periods": [5, 20],
+                    "volume_window": 24
+                }
                 signal = await signal_analyzer.check_buy_signal(market, params)
                 
                 conditions.append({

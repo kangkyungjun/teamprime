@@ -6,6 +6,7 @@ import logging
 import time
 
 from ..auth.middleware import require_auth
+from config import MTFA_OPTIMIZED_CONFIG
 
 logger = logging.getLogger(__name__)
 
@@ -143,7 +144,17 @@ async def real_time_buy_conditions(current_user: Dict[str, Any] = Depends(requir
         # 코인별 순차 처리 (간격을 두고 API 호출)
         for i, market in enumerate(DEFAULT_MARKETS):
             coin_symbol = market.split('-')[1]
-            params = user_session.trading_engine.optimized_params.get(coin_symbol, user_session.trading_engine.optimized_params["BTC"])
+            config = MTFA_OPTIMIZED_CONFIG.get(market, MTFA_OPTIMIZED_CONFIG.get("KRW-BTC", {}))
+            
+            # MTFA 최적화된 파라미터 사용
+            params = {
+                "volume_surge": 2.0,
+                "price_change": 0.5, 
+                "mtfa_threshold": config.get("mtfa_threshold", 0.80),
+                "rsi_period": 14,
+                "ema_periods": [5, 20],
+                "volume_window": 24
+            }
             
             # 상세 분석으로 변경하여 실제 가격과 조건별 상태 확인
             detailed_analysis = await signal_analyzer.analyze_buy_conditions_detailed(market, params)
@@ -187,7 +198,17 @@ async def buy_conditions_summary(current_user: Dict[str, Any] = Depends(require_
         results = []
         for market in DEFAULT_MARKETS:
             coin_symbol = market.split('-')[1]
-            params = user_session.trading_engine.optimized_params.get(coin_symbol, user_session.trading_engine.optimized_params["BTC"])
+            config = MTFA_OPTIMIZED_CONFIG.get(market, MTFA_OPTIMIZED_CONFIG.get("KRW-BTC", {}))
+            
+            # MTFA 최적화된 파라미터 사용
+            params = {
+                "volume_surge": 2.0,
+                "price_change": 0.5,
+                "mtfa_threshold": config.get("mtfa_threshold", 0.80),
+                "rsi_period": 14,
+                "ema_periods": [5, 20],
+                "volume_window": 24
+            }
             signal = await signal_analyzer.check_buy_signal(market, params)
             
             results.append({
