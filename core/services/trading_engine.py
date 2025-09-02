@@ -388,7 +388,18 @@ class MultiCoinTradingEngine:
                 
                 # 신호 분석 실행 (MTFA 최적화 설정 사용)
                 market_config = MTFA_OPTIMIZED_CONFIG.get(market, MTFA_OPTIMIZED_CONFIG["KRW-BTC"])
-                signal = await signal_analyzer.check_buy_signal(market, market_config)
+                
+                # SignalAnalyzer가 기대하는 파라미터 형식으로 변환
+                signal_params = {
+                    "volume_surge": 2.0,
+                    "price_change": 0.5, 
+                    "mtfa_threshold": market_config.get("mtfa_threshold", 0.80),
+                    "rsi_period": 14,
+                    "ema_periods": [5, 20],
+                    "volume_window": 24
+                }
+                
+                signal = await signal_analyzer.check_buy_signal(market, signal_params)
                 
                 # API 호출 시간 기록 (코인별 + 전역)
                 self.api_call_scheduler["last_call_times"][coin_symbol] = current_time
