@@ -127,7 +127,7 @@ class UpbitAPIManager:
         
         try:
             # 60초 규정 준수 체크
-            endpoint_key = f"{method_name}_{args}"
+            endpoint_key = f"{method_name}_{str(args)}"
             current_time = time.time()
             last_call = self._last_call_times.get(endpoint_key, 0)
             

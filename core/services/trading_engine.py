@@ -448,6 +448,10 @@ class MultiCoinTradingEngine:
                     
                 position.update_current_price(current_price)
                 
+                # 가격 캐시 저장 (성공시)
+                setattr(self, f'_cached_price_{market.replace("-", "_")}', current_price)
+                setattr(self, f'_cached_time_{market.replace("-", "_")}', time.time())
+                
                 # 수익률 및 보유시간 계산
                 profit_percent = ((current_price - position.buy_price) / position.buy_price) * 100
                 holding_time = (datetime.now() - position.timestamp).total_seconds()
@@ -693,13 +697,14 @@ class MultiCoinTradingEngine:
             logger.error(f"⚠️ {coin_symbol} 매수 주문 오류: {str(e)}")
     
     async def _get_current_price(self, market: str) -> Optional[float]:
-        """현재 가격 조회 (API 매니저 사용)"""
+        """현재 가격 조회 (3단계 Fallback 시스템)"""
+        
+        # 1단계: API 매니저를 통한 조회
         try:
             upbit_client = self.user_session.upbit_client if self.user_session else get_upbit_client()
             if not upbit_client:
                 return None
             
-            # API 매니저를 통한 안전한 호출 (포지션 모니터링 우선순위)
             ticker_data = await api_manager.safe_api_call(
                 upbit_client, 
                 'get_single_ticker', 
@@ -707,14 +712,46 @@ class MultiCoinTradingEngine:
                 priority=APIPriority.POSITION_MONITORING
             )
             
-            if ticker_data and "trade_price" in ticker_data:
-                return float(ticker_data["trade_price"])
-            
-            return None
+            # 응답 구조 검증 및 파싱
+            if ticker_data:
+                # dict에 error가 있으면 2단계로
+                if isinstance(ticker_data, dict) and "error" in ticker_data:
+                    logger.warning(f"⚠️ {market} 1단계 가격 조회 실패: {ticker_data.get('error')}")
+                elif isinstance(ticker_data, dict) and "trade_price" in ticker_data:
+                    return float(ticker_data["trade_price"])
+                elif isinstance(ticker_data, list) and len(ticker_data) > 0 and "trade_price" in ticker_data[0]:
+                    return float(ticker_data[0]["trade_price"])
             
         except Exception as e:
-            logger.error(f"⚠️ {market} 가격 조회 오류: {str(e)}")
-            return None
+            logger.warning(f"⚠️ {market} 1단계 가격 조회 오류: {str(e)}")
+        
+        # 2단계: 직접 업비트 클라이언트 호출
+        try:
+            upbit_client = self.user_session.upbit_client if self.user_session else get_upbit_client()
+            if upbit_client:
+                ticker_result = await upbit_client.get_ticker([market])
+                if ticker_result and len(ticker_result) > 0 and "trade_price" in ticker_result[0]:
+                    price = float(ticker_result[0]["trade_price"])
+                    logger.info(f"✅ {market} 2단계 가격 조회 성공: {price:,.0f}원")
+                    return price
+                    
+        except Exception as e:
+            logger.warning(f"⚠️ {market} 2단계 가격 조회 오류: {str(e)}")
+        
+        # 3단계: 캐시된 가격 사용 (최대 2분)
+        try:
+            cached_price = getattr(self, f'_cached_price_{market.replace("-", "_")}', None)
+            cached_time = getattr(self, f'_cached_time_{market.replace("-", "_")}', 0)
+            
+            if cached_price and (time.time() - cached_time) < 120:  # 2분 이내
+                logger.info(f"💾 {market} 캐시된 가격 사용: {cached_price:,.0f}원 (캐시 나이: {time.time() - cached_time:.0f}초)")
+                return cached_price
+                
+        except Exception as e:
+            logger.warning(f"⚠️ {market} 캐시 가격 조회 오류: {str(e)}")
+        
+        logger.error(f"❌ {market} 모든 가격 조회 방법 실패")
+        return None
     
     async def _close_position(self, coin: str, reason: str = "manual"):
         """고급 포지션 청산 - 매도 이유 기록"""
