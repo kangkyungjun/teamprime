@@ -12,6 +12,7 @@ from ..services.optimizer import auto_scheduler
 from core.api.system import get_upbit_client
 from ..auth.middleware import require_auth
 from ..session import session_manager
+from config import MTFA_OPTIMIZED_CONFIG
 
 logger = logging.getLogger(__name__)
 
@@ -607,46 +608,6 @@ async def get_coin_api_status(current_user: Dict[str, Any] = Depends(require_aut
         logger.error(f"API 상태 조회 오류: {str(e)}")
         return {"success": False, "error": str(e)}
 
-@router.post("/current-prices")
-async def get_current_prices(request: dict, current_user: Dict[str, Any] = Depends(require_auth)):
-    """여러 마켓의 현재가 한번에 조회 - 세션별"""
-    try:
-        user_id = current_user.get("id")
-        username = current_user.get("username")
-        
-        markets = request.get("markets", [])
-        if not markets:
-            return {"success": True, "prices": {}}
-        
-        # 사용자 세션 조회
-        user_session = session_manager.get_session(user_id)
-        if not user_session:
-            logger.error(f"⚠️ 현재가 조회 - 사용자 {username} 세션이 존재하지 않습니다")
-            return {"success": False, "message": "세션이 만료되었습니다. 다시 로그인해주세요."}
-        
-        # 로그인 상태 확인
-        upbit_client = user_session.upbit_client if user_session.upbit_client else get_upbit_client()
-        if not upbit_client:
-            return {"success": False, "message": "업비트 로그인이 필요합니다"}
-        
-        # 여러 마켓의 현재가 한번에 조회
-        ticker_data = await upbit_client.get_ticker(markets)
-        
-        prices = {}
-        for ticker in ticker_data:
-            market = ticker["market"]
-            prices[market] = {
-                "trade_price": float(ticker["trade_price"]),
-                "change_rate": float(ticker["change_rate"]) * 100,
-                "timestamp": ticker["timestamp"]
-            }
-            
-        
-        return {"success": True, "prices": prices}
-        
-    except Exception as e:
-        logger.error(f"현재가 조회 오류: {str(e)}")
-        return {"success": False, "error": str(e)}
 
 @router.get("/account-balances")
 async def get_account_balances(current_user: Dict[str, Any] = Depends(require_auth)):

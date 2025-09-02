@@ -1209,52 +1209,6 @@ async def trading_dashboard(request: Request):
                 color: #1976d2;
             }}
             
-            /* 실시간 가격 그리드 스타일 */
-            .price-grid {{
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-                gap: 15px;
-            }}
-            
-            .price-card {{
-                background: linear-gradient(135deg, #fff3e0, #fffe54);
-                padding: 20px;
-                border-radius: 12px;
-                text-align: center;
-                border: 1px solid #ffcc02;
-                transition: transform 0.2s;
-            }}
-            
-            .price-card:hover {{
-                transform: translateY(-2px);
-            }}
-            
-            .coin-name {{
-                font-size: 16px;
-                font-weight: 700;
-                color: #e65100;
-                margin-bottom: 8px;
-            }}
-            
-            .coin-price {{
-                font-size: 18px;
-                font-weight: 700;
-                color: #333;
-                margin-bottom: 5px;
-            }}
-            
-            .coin-change {{
-                font-size: 14px;
-                font-weight: 600;
-            }}
-            
-            .coin-change.positive {{
-                color: #d32f2f;
-            }}
-            
-            .coin-change.negative {{
-                color: #1976d2;
-            }}
             
             /* 매수 조건 그리드 스타일 */
             .conditions-grid, .mtfa-conditions-grid {{
@@ -1312,7 +1266,7 @@ async def trading_dashboard(request: Request):
                     padding: 15px;
                 }}
                 
-                .account-cards, .trading-status-panel, .price-grid, .conditions-grid {{
+                .account-cards, .trading-status-panel, .conditions-grid {{
                     grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
                     gap: 10px;
                 }}
@@ -1321,7 +1275,7 @@ async def trading_dashboard(request: Request):
                     font-size: 16px;
                 }}
                 
-                .account-card, .status-card, .price-card, .condition-card {{
+                .account-card, .status-card, .condition-card {{
                     padding: 15px;
                 }}
             }}
@@ -1402,32 +1356,6 @@ async def trading_dashboard(request: Request):
                 </div>
             </div>
 
-            <!-- 💲 실시간 가격 섹션 -->
-            <div class="dashboard-section">
-                <h2 class="section-title">💲 실시간 가격</h2>
-                <div class="price-grid" id="priceGrid">
-                    <div class="price-card">
-                        <div class="coin-name">BTC</div>
-                        <div class="coin-price" id="btcPrice">로딩 중...</div>
-                        <div class="coin-change" id="btcChange">-</div>
-                    </div>
-                    <div class="price-card">
-                        <div class="coin-name">ETH</div>
-                        <div class="coin-price" id="ethPrice">로딩 중...</div>
-                        <div class="coin-change" id="ethChange">-</div>
-                    </div>
-                    <div class="price-card">
-                        <div class="coin-name">XRP</div>
-                        <div class="coin-price" id="xrpPrice">로딩 중...</div>
-                        <div class="coin-change" id="xrpChange">-</div>
-                    </div>
-                    <div class="price-card">
-                        <div class="coin-name">DOGE</div>
-                        <div class="coin-price" id="dogePrice">로딩 중...</div>
-                        <div class="coin-change" id="dogeChange">-</div>
-                    </div>
-                </div>
-            </div>
 
             <!-- 🎯 MTFA 실시간 매수 조건 섹션 -->
             <div class="dashboard-section">
@@ -1643,43 +1571,6 @@ async def trading_dashboard(request: Request):
                 }}
             }}
             
-            // 실시간 가격 업데이트
-            async function updatePrices() {{
-                try {{
-                    const markets = ['KRW-BTC', 'KRW-ETH', 'KRW-XRP', 'KRW-DOGE'];
-                    const response = await fetch('/api/current-prices', {{
-                        method: 'POST',
-                        headers: {{ 'Content-Type': 'application/json' }},
-                        body: JSON.stringify({{ markets: markets }})
-                    }});
-                    
-                    const data = await response.json();
-                    
-                    if (data.success) {{
-                        // 각 코인별 가격 업데이트
-                        Object.entries(data.prices).forEach(([market, priceData]) => {{
-                            const coin = market.split('-')[1].toLowerCase();
-                            
-                            // 가격 표시
-                            const priceElement = document.getElementById(`${{coin}}Price`);
-                            const changeElement = document.getElementById(`${{coin}}Change`);
-                            
-                            if (priceElement) {{
-                                priceElement.textContent = 
-                                    `₩ ${{Number(priceData.trade_price).toLocaleString()}}`;
-                            }}
-                            
-                            if (changeElement) {{
-                                const changeRate = priceData.change_rate || 0;
-                                changeElement.textContent = `${{changeRate >= 0 ? '+' : ''}}${{changeRate.toFixed(2)}}%`;
-                                changeElement.className = changeRate >= 0 ? 'coin-change positive' : 'coin-change negative';
-                            }}
-                        }});
-                    }}
-                }} catch (error) {{
-                    console.error('가격 업데이트 오류:', error);
-                }}
-            }}
             
             // 매수 조건 분석 업데이트
             async function updateMTFAConditions() {{
@@ -2034,11 +1925,6 @@ async def mtfa_dashboard():
                 margin-bottom: 15px;
             }}
             
-            .coin-name {{
-                font-size: 1.3rem;
-                font-weight: bold;
-                color: #1e3c72;
-            }}
             
             .expected-return {{
                 font-size: 1.1rem;
