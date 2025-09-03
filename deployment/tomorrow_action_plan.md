@@ -41,13 +41,22 @@ IP: 172.233.87.201
 
 ### **2단계: SSH 사용자 접속 확인 (5분)**
 
-#### 2-1. SSH 연결 시도 (Claude가 수행)
+#### 2-1. SSH 연결 시도 - 다중 비밀번호 테스트 (Claude가 수행)
 ```
-ssh teamprime@teamprime.co.kr
+1차 시도: ssh teamprime@teamprime.co.kr
 비밀번호: rkdrudwns1q!Q
+
+2차 시도 (1차 실패시): 
+비밀번호: rkdrudwns1q!
+
+3차 시도 (2차 실패시):
+비밀번호: TeamPrime@
+
+4차 시도 (3차 실패시):
+비밀번호: TeamPrime5588@
 ```
 
-#### 2-2. 연결 실패시 대안 (당신이 수행)
+#### 2-2. 모든 비밀번호 실패시 대안 (당신이 수행)
 ```
 Option A: Cafe24 웹 터미널 사용
 - 콘솔에서 "웹 터미널" 메뉴 접속
@@ -76,7 +85,11 @@ CAFE24_USER
 값: teamprime
 
 CAFE24_PASSWORD
-값: rkdrudwns1q!Q
+값: [SSH 연결 성공한 비밀번호 사용]
+    • rkdrudwns1q!Q (1차)
+    • rkdrudwns1q! (2차)  
+    • TeamPrime@ (3차)
+    • TeamPrime5588@ (4차)
 
 JWT_SECRET_KEY
 값: B5kyV+90hUJE4iq3Nby7WfLpuPtktEej/mq4kKiS0GE=
@@ -184,7 +197,12 @@ teamprime 사용자 생성과 sudo 권한 부여를 도와주세요."
 
 ### **필요한 정보 정리**
 ```
-📝 SSH 정보: teamprime / rkdrudwns1q!Q
+📝 SSH 사용자: teamprime
+📝 SSH 비밀번호 후보들:
+   • rkdrudwns1q!Q (1차 시도)
+   • rkdrudwns1q! (2차 시도)
+   • TeamPrime@ (3차 시도)  
+   • TeamPrime5588@ (4차 시도)
 📝 서버 IP: 172.233.87.201
 📝 도메인: teamprime.co.kr
 ```
