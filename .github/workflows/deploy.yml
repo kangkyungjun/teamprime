@@ -1,0 +1,88 @@
+name: Deploy to Cafe24
+
+on:
+  push:
+    branches: [ master ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Setup Python 3.9
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Create deployment package
+      run: |
+        mkdir -p deploy
+        cp -r . deploy/teamprime/
+        cd deploy/teamprime
+        rm -rf .git __pycache__ *.pyc node_modules .venv
+        cp .env.cafe24 .env
+        cd ..
+        tar -czf teamprime-$(date +%Y%m%d-%H%M%S).tar.gz teamprime/
+
+    - name: Upload to server via SCP
+      if: ${{ secrets.CAFE24_HOST && secrets.CAFE24_USER && secrets.CAFE24_PASSWORD }}
+      uses: appleboy/scp-action@master
+      with:
+        host: ${{ secrets.CAFE24_HOST }}
+        username: ${{ secrets.CAFE24_USER }}
+        password: ${{ secrets.CAFE24_PASSWORD }}
+        source: "deploy/teamprime-*.tar.gz"
+        target: "/home/${{ secrets.CAFE24_USER }}/"
+
+    - name: Deploy on server
+      if: ${{ secrets.CAFE24_HOST && secrets.CAFE24_USER && secrets.CAFE24_PASSWORD }}
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.CAFE24_HOST }}
+        username: ${{ secrets.CAFE24_USER }}
+        password: ${{ secrets.CAFE24_PASSWORD }}
+        script: |
+          cd /home/${{ secrets.CAFE24_USER }}
+          
+          # Stop existing service
+          pkill -f "python.*main.py" || true
+          
+          # Backup current deployment
+          if [ -d "teamprime" ]; then
+            mv teamprime teamprime_backup_$(date +%Y%m%d_%H%M%S)
+          fi
+          
+          # Extract new deployment
+          tar -xzf teamprime-*.tar.gz
+          cd teamprime
+          
+          # Setup environment
+          python3 -m venv venv
+          source venv/bin/activate
+          pip install -r requirements.txt
+          
+          # Update environment variables
+          sed -i 's/your_mysql_username_here/${{ secrets.MYSQL_USERNAME }}/' .env
+          sed -i 's/your_mysql_password_here/${{ secrets.MYSQL_PASSWORD }}/' .env
+          sed -i 's/CHANGE_THIS_TO_STRONG_RANDOM_SECRET_KEY_FOR_PRODUCTION/${{ secrets.JWT_SECRET_KEY }}/' .env
+          
+          # Start service
+          nohup python3 main.py > teamprime.log 2>&1 &
+          
+          # Wait and check if service started
+          sleep 5
+          if pgrep -f "python.*main.py"; then
+            echo "✅ Teamprime service started successfully"
+          else
+            echo "❌ Failed to start Teamprime service"
+            exit 1
+          fi
