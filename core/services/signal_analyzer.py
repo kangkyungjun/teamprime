@@ -64,8 +64,14 @@ class SignalAnalyzer:
             
             return None
             
+        except (KeyError, IndexError) as e:
+            logger.error(f"❌ {market} 데이터 구조 오류: {str(e)}")
+            return None
+        except (ValueError, TypeError) as e:
+            logger.error(f"❌ {market} 데이터 타입 오류: {str(e)}")
+            return None
         except Exception as e:
-            logger.error(f"⚠️ {market} 신호 분석 오류: {str(e)}")
+            logger.error(f"❌ {market} 예상치 못한 신호 분석 오류: {str(e)}")
             return None
 
     async def analyze_buy_conditions_detailed(self, market: str, params: Dict) -> Dict:
@@ -174,48 +180,87 @@ class SignalAnalyzer:
     
     async def _get_candle_data(self, market: str, limit: int = 20) -> List[Dict]:
         """실시간 캔들 데이터 조회 - 업비트 API 직접 호출"""
-        try:
-            # 공개 업비트 클라이언트 가져오기 (인증 불필요)
-            from ..api.system import public_upbit_client
-            
-            if not public_upbit_client:
-                logger.error(f"⚠️ 업비트 클라이언트가 연결되지 않았습니다")
+        max_retries = 3
+        retry_delay = 1  # 초
+        
+        for attempt in range(max_retries):
+            try:
+                # 공개 업비트 클라이언트 가져오기 (인증 불필요)
+                from ..api.system import public_upbit_client
+                
+                if not public_upbit_client:
+                    logger.error(f"⚠️ {market} 업비트 클라이언트가 연결되지 않았습니다")
+                    return []
+                
+                logger.debug(f"🔍 {market} 캔들 데이터 요청 시작... (시도 {attempt + 1}/{max_retries})")
+                
+                # 업비트 API에서 직접 캔들 데이터 가져오기
+                response = await asyncio.wait_for(
+                    public_upbit_client.get_minute_candles(market, limit),
+                    timeout=10.0  # 10초 타임아웃
+                )
+                
+                logger.debug(f"📥 {market} API 응답: {type(response)}, 길이: {len(response) if response else 0}")
+                
+                if not response or not isinstance(response, list):
+                    logger.warning(f"⚠️ {market} API 응답이 비어있습니다 (시도 {attempt + 1})")
+                    if attempt < max_retries - 1:
+                        await asyncio.sleep(retry_delay)
+                        continue
+                    return []
+                
+                # 첫 번째 캔들 데이터 구조 확인 (디버깅용)
+                if response and len(response) > 0:
+                    logger.debug(f"🔍 {market} 첫 번째 캔들 데이터 구조: {list(response[0].keys())}")
+                    logger.debug(f"🔍 {market} 첫 번째 캔들 샘플: trade_price={response[0].get('trade_price')}, closing_price={response[0].get('closing_price')}")
+                
+                # 데이터 변환 (시간순 정렬 - 최신 데이터가 뒤로)
+                candle_data = []
+                for candle in reversed(response):  # API는 최신순이므로 뒤집기
+                    try:
+                        candle_data.append({
+                            "timestamp": int(candle.get("timestamp", 0) / 1000),  # 밀리초 → 초
+                            "open": float(candle.get("opening_price", 0)),
+                            "high": float(candle.get("high_price", 0)),
+                            "low": float(candle.get("low_price", 0)),
+                            "close": float(candle.get("trade_price", 0)),
+                            "volume": float(candle.get("candle_acc_trade_volume", 0))
+                        })
+                    except (ValueError, TypeError, KeyError) as e:
+                        logger.warning(f"⚠️ {market} 캔들 데이터 변환 오류: {str(e)}")
+                        continue
+                
+                if len(candle_data) >= self.min_candles:
+                    logger.debug(f"📊 {market} 실시간 캔들 데이터 {len(candle_data)}개 조회 완료")
+                    return candle_data
+                else:
+                    logger.warning(f"⚠️ {market} 유효한 캔들 데이터 부족 ({len(candle_data)}개)")
+                    if attempt < max_retries - 1:
+                        await asyncio.sleep(retry_delay)
+                        continue
+                    return []
+                
+            except asyncio.TimeoutError:
+                logger.warning(f"⚠️ {market} API 호출 타임아웃 (시도 {attempt + 1}/{max_retries})")
+                if attempt < max_retries - 1:
+                    await asyncio.sleep(retry_delay * 2)  # 타임아웃시 더 길게 대기
+                    continue
+            except ImportError as e:
+                logger.error(f"❌ {market} 업비트 클라이언트 import 오류: {str(e)}")
                 return []
-            
-            logger.debug(f"🔍 {market} 캔들 데이터 요청 시작...")
-            
-            # 업비트 API에서 직접 캔들 데이터 가져오기
-            response = await public_upbit_client.get_minute_candles(market, limit)
-            
-            logger.debug(f"📥 {market} API 응답: {type(response)}, 길이: {len(response) if response else 0}")
-            
-            if not response or not isinstance(response, list):
-                logger.warning(f"⚠️ {market} API 응답이 비어있습니다 - 응답: {response}")
-                return []
-            
-            # 첫 번째 캔들 데이터 구조 확인 (디버깅용)
-            if response and len(response) > 0:
-                logger.debug(f"🔍 {market} 첫 번째 캔들 데이터 구조: {list(response[0].keys())}")
-                logger.debug(f"🔍 {market} 첫 번째 캔들 샘플: trade_price={response[0].get('trade_price')}, closing_price={response[0].get('closing_price')}")
-            
-            # 데이터 변환 (시간순 정렬 - 최신 데이터가 뒤로)
-            candle_data = []
-            for candle in reversed(response):  # API는 최신순이므로 뒤집기
-                candle_data.append({
-                    "timestamp": int(candle.get("timestamp", 0) / 1000),  # 밀리초 → 초
-                    "open": float(candle.get("opening_price", 0)),
-                    "high": float(candle.get("high_price", 0)),
-                    "low": float(candle.get("low_price", 0)),
-                    "close": float(candle.get("trade_price", 0)),
-                    "volume": float(candle.get("candle_acc_trade_volume", 0))
-                })
-            
-            logger.debug(f"📊 {market} 실시간 캔들 데이터 {len(candle_data)}개 조회 완료")
-            return candle_data
-            
-        except Exception as e:
-            logger.error(f"⚠️ {market} 실시간 캔들 데이터 조회 오류: {str(e)}")
-            return []
+            except (ConnectionError, OSError) as e:
+                logger.warning(f"⚠️ {market} 네트워크 연결 오류 (시도 {attempt + 1}): {str(e)}")
+                if attempt < max_retries - 1:
+                    await asyncio.sleep(retry_delay * 2)
+                    continue
+            except Exception as e:
+                logger.error(f"❌ {market} 예상치 못한 캔들 데이터 조회 오류 (시도 {attempt + 1}): {str(e)}")
+                if attempt < max_retries - 1:
+                    await asyncio.sleep(retry_delay)
+                    continue
+        
+        logger.error(f"❌ {market} {max_retries}번 시도 모두 실패 - 캔들 데이터 조회 불가")
+        return []
     
     async def _check_volume_surge(self, market: str, params: Dict) -> Dict:
         """거래량 급증 확인 - 실시간 캔들 데이터 기반"""
@@ -268,13 +313,32 @@ class SignalAnalyzer:
         return ((recent_price - past_price) / past_price) * 100
     
     def _calculate_technical_indicators(self, candle_data: List[Dict], params: Dict) -> Dict:
-        """기술적 지표 계산"""
+        """기술적 지표 계산 - PDF 리뷰 적용: 데이터 검증 강화"""
         try:
-            closes = [candle["close"] for candle in candle_data]
-            volumes = [candle["volume"] for candle in candle_data]
+            # PDF 가이드: 데이터 유효성 검증 및 이상값 처리
+            closes = []
+            volumes = []
+            
+            for candle in candle_data:
+                close_price = candle.get("close", 0)
+                volume = candle.get("volume", 0)
+                
+                # NaN/무한대 값 검증
+                if (isinstance(close_price, (int, float)) and 
+                    isinstance(volume, (int, float)) and
+                    not (close_price != close_price or volume != volume) and  # NaN 체크
+                    close_price > 0 and volume >= 0 and  # 음수/0 가격 제외
+                    close_price < float('inf') and volume < float('inf')):  # 무한대 체크
+                    closes.append(float(close_price))
+                    volumes.append(float(volume))
             
             if len(closes) < 14:
+                logger.warning(f"유효한 캔들 데이터 부족: {len(closes)}개 (최소 14개 필요)")
                 return {"bullish": False, "confidence": 0, "score": 0}
+            
+            # 이상값 감지 및 처리 (PDF 권장: robust z-score 방식)
+            closes = self._handle_outliers(closes)
+            volumes = self._handle_outliers(volumes)
             
             # EMA 계산
             ema5 = self._calculate_ema(closes, 5)
@@ -464,6 +528,38 @@ class SignalAnalyzer:
             return 0.0
         
         return total_price_volume / total_volume
+    
+    def _handle_outliers(self, data: List[float], threshold: float = 3.0) -> List[float]:
+        """이상값 처리 - PDF 권장: robust z-score 방식"""
+        try:
+            if len(data) < 5:
+                return data
+            
+            import statistics
+            
+            # 중앙값과 MAD(Median Absolute Deviation) 계산
+            median = statistics.median(data)
+            mad = statistics.median([abs(x - median) for x in data])
+            
+            if mad == 0:
+                return data  # 모든 값이 같으면 이상값 없음
+            
+            # Modified Z-score 계산 및 이상값 대체
+            cleaned_data = []
+            for value in data:
+                modified_z = 0.6745 * (value - median) / mad
+                
+                if abs(modified_z) > threshold:
+                    # 이상값을 중앙값으로 대체 (PDF 권장사항)
+                    cleaned_data.append(median)
+                else:
+                    cleaned_data.append(value)
+            
+            return cleaned_data
+            
+        except Exception as e:
+            logger.warning(f"이상값 처리 중 오류: {str(e)}")
+            return data  # 오류시 원본 데이터 반환
 
 # 전역 신호 분석기 인스턴스
 signal_analyzer = SignalAnalyzer()

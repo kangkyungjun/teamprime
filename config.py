@@ -60,6 +60,23 @@ LOGGING_CONFIG = {
     "backup_count": 5,
 }
 
+# 📊 신뢰도별 TP/SL 정책 시스템 (PDF 리뷰 기반 개선)
+CONFIDENCE_RISK_POLICY = [
+    # (최소신뢰도, 최대신뢰도, (TP%, SL%))
+    (0.80, 0.85, (0.6, -0.4)),    # 낮은 신뢰도: 보수적 접근
+    (0.85, 0.92, (0.9, -0.45)),   # 중간 신뢰도: 균형 접근
+    (0.92, 1.01, (1.2, -0.5)),    # 높은 신뢰도: 적극적 접근
+]
+
+def get_risk_reward_from_confidence(confidence: float) -> tuple:
+    """신뢰도 기반 TP/SL 정책 조회"""
+    for min_conf, max_conf, (tp_pct, sl_pct) in CONFIDENCE_RISK_POLICY:
+        if min_conf <= confidence < max_conf:
+            return (tp_pct, sl_pct)
+    
+    # 기본값 (최소 신뢰도 미달시)
+    return (0.5, -0.3)  # 보수적 기본값
+
 # MTFA 최적화 설정 (Excel 결과 기반)
 MTFA_OPTIMIZED_CONFIG = {
     "KRW-IOTA": {

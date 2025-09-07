@@ -12,7 +12,7 @@ from .trade_verifier import trade_verifier
 from .resilience_service import resilience_service
 from .monitoring_service import monitoring_service, AlertSeverity, MetricType
 from ..utils.api_manager import api_manager, APIPriority
-from config import DEFAULT_MARKETS, MTFA_OPTIMIZED_CONFIG
+from config import DEFAULT_MARKETS, MTFA_OPTIMIZED_CONFIG, get_risk_reward_from_confidence
 
 logger = logging.getLogger(__name__)
 
@@ -497,13 +497,49 @@ class MultiCoinTradingEngine:
                 elif profit_stage_action == "suggest_full_profit":
                     logger.info(f"💡 {coin} 전체 익절 강력 제안 (수익: {profit_percent:.2f}%)")
                 
-                # 기존 조건들도 유지 (안전장치)
-                if current_price >= position.profit_target:
+                # PDF 가이드 적용: TP/SL 동시 발생시 더 보수적인 접근 (실제 캔들 분석 기반)
+                tp_hit = current_price >= position.profit_target
+                sl_hit = current_price <= position.stop_loss
+                
+                # PDF 리뷰 적용: TP/SL 시간 기반 우선순위 로직 (실제 캔들 시퀀스 분석)
+                if tp_hit and sl_hit:
+                    # 시간 기반 우선순위 결정 (PDF 가이드: 실제 발생 순서 추정)
+                    
+                    # 1) 급락 상황 감지: 최근 가격 변동률로 판단
+                    recent_price_change = ((current_price - position.buy_price) / position.buy_price) * 100
+                    
+                    # 2) 포지션의 최고가 대비 현재가 위치로 추세 판단
+                    if hasattr(position, 'highest_price_seen') and position.highest_price_seen > position.buy_price:
+                        max_gain_achieved = ((position.highest_price_seen - position.buy_price) / position.buy_price) * 100
+                        current_from_peak = ((current_price - position.highest_price_seen) / position.highest_price_seen) * 100
+                    else:
+                        max_gain_achieved = recent_price_change
+                        current_from_peak = 0
+                    
+                    # 3) 시간 기반 우선순위 로직 (PDF 권장사항)
+                    if recent_price_change < -0.5 and current_from_peak < -1.0:
+                        # 급락 패턴: SL이 시간상 먼저 발생했을 가능성 높음
+                        exit_reason = "time_based_stop_loss"
+                        logger.warning(f"📉 {coin} 급락 패턴 감지 - SL 우선 처리")
+                        logger.info(f"   가격변동: {recent_price_change:.2f}%, 고점대비: {current_from_peak:.2f}%")
+                    elif max_gain_achieved > 0.3 and current_from_peak > -0.3:
+                        # 상승 후 조정: TP가 먼저 달성 후 하락했을 가능성
+                        exit_reason = "time_based_profit_target"  
+                        logger.info(f"📈 {coin} 상승 후 조정 패턴 - TP 우선 처리")
+                        logger.info(f"   최대수익: {max_gain_achieved:.2f}%, 고점대비: {current_from_peak:.2f}%")
+                    else:
+                        # 불분명한 경우: 보수적 접근 (리스크 관리 우선)
+                        exit_reason = "conservative_stop_loss"
+                        logger.warning(f"⚠️ {coin} TP/SL 동시 달성 - 보수적 SL 처리")
+                        logger.info(f"   현재가: {current_price:,.0f}, 익절가: {position.profit_target:,.0f}, 손절가: {position.stop_loss:,.0f}")
+                    
+                    positions_to_close.append((coin, exit_reason))
+                    continue
+                elif tp_hit:
                     logger.info(f"🎯 {coin} 익절 조건 달성 (목표가: {position.profit_target:,.0f})")
                     positions_to_close.append((coin, "profit_target"))
                     continue
-                
-                if current_price <= position.stop_loss:
+                elif sl_hit:
                     logger.info(f"🛑 {coin} 손절 조건 달성 (손절가: {position.stop_loss:,.0f})")
                     positions_to_close.append((coin, "stop_loss"))
                     continue
@@ -654,14 +690,28 @@ class MultiCoinTradingEngine:
                 
                 logger.info(f"📋 {coin_symbol} 매수 주문 검증 시작 (ID: {order_id})")
                 
-                # 포지션 생성
-                # MTFA 최적화된 개별 코인 설정 사용
-                market_config = MTFA_OPTIMIZED_CONFIG.get(market, {})
-                profit_target_pct = market_config.get("profit_target", 2.5)  # 기본값 2.5%
-                stop_loss_pct = market_config.get("stop_loss", -1.0)  # 기본값 -1.0%
+                # 포지션 생성 - PDF 리뷰 적용: 신뢰도 기반 TP/SL 정책
+                signal_confidence = signal.get("confidence", 50) / 100  # 퍼센트를 소수점으로 변환
                 
-                profit_target_price = current_price * (1 + profit_target_pct / 100)
-                stop_loss_price = current_price * (1 + stop_loss_pct / 100)
+                # 1단계: 신뢰도 기반 TP/SL 정책 우선 적용
+                dynamic_tp_pct, dynamic_sl_pct = get_risk_reward_from_confidence(signal_confidence)
+                
+                # 2단계: MTFA 최적화 설정과 비교하여 더 보수적인 값 선택
+                market_config = MTFA_OPTIMIZED_CONFIG.get(market, {})
+                static_tp_pct = market_config.get("profit_target", 2.5)  
+                static_sl_pct = abs(market_config.get("stop_loss", -1.0))  # 절댓값 변환
+                
+                # 보수적 접근: 더 작은 TP, 더 큰 SL 선택
+                final_tp_pct = min(dynamic_tp_pct, static_tp_pct)
+                final_sl_pct = max(dynamic_sl_pct, -static_sl_pct)  # 음수 유지
+                
+                profit_target_price = current_price * (1 + final_tp_pct / 100)
+                stop_loss_price = current_price * (1 + final_sl_pct / 100)
+                
+                logger.info(f"📊 {coin_symbol} 신뢰도 기반 TP/SL 설정:")
+                logger.info(f"   신뢰도: {signal_confidence:.2f} → TP: {dynamic_tp_pct}%, SL: {dynamic_sl_pct}%")
+                logger.info(f"   MTFA 설정: TP: {static_tp_pct}%, SL: {-static_sl_pct}%")
+                logger.info(f"   최종 적용: TP: {final_tp_pct}%, SL: {final_sl_pct}%")
                 
                 position = Position(
                     coin=coin_symbol,
@@ -697,60 +747,114 @@ class MultiCoinTradingEngine:
             logger.error(f"⚠️ {coin_symbol} 매수 주문 오류: {str(e)}")
     
     async def _get_current_price(self, market: str) -> Optional[float]:
-        """현재 가격 조회 (3단계 Fallback 시스템)"""
+        """현재 가격 조회 (3단계 Fallback 시스템 - PDF 가이드 개선 적용)"""
+        max_retries = 2
         
-        # 1단계: API 매니저를 통한 조회
-        try:
-            upbit_client = self.user_session.upbit_client if self.user_session else get_upbit_client()
-            if not upbit_client:
-                return None
-            
-            ticker_data = await api_manager.safe_api_call(
-                upbit_client, 
-                'get_single_ticker', 
-                market,
-                priority=APIPriority.POSITION_MONITORING
-            )
-            
-            # 응답 구조 검증 및 파싱
-            if ticker_data:
-                # dict에 error가 있으면 2단계로
-                if isinstance(ticker_data, dict) and "error" in ticker_data:
-                    logger.warning(f"⚠️ {market} 1단계 가격 조회 실패: {ticker_data.get('error')}")
-                elif isinstance(ticker_data, dict) and "trade_price" in ticker_data:
-                    return float(ticker_data["trade_price"])
-                elif isinstance(ticker_data, list) and len(ticker_data) > 0 and "trade_price" in ticker_data[0]:
-                    return float(ticker_data[0]["trade_price"])
-            
-        except Exception as e:
-            logger.warning(f"⚠️ {market} 1단계 가격 조회 오류: {str(e)}")
+        # 1단계: API 매니저를 통한 조회 (재시도 포함)
+        for attempt in range(max_retries):
+            try:
+                upbit_client = self.user_session.upbit_client if self.user_session else get_upbit_client()
+                if not upbit_client:
+                    break  # 클라이언트 없으면 2단계로
+                
+                ticker_data = await asyncio.wait_for(
+                    api_manager.safe_api_call(
+                        upbit_client, 
+                        'get_single_ticker', 
+                        market,
+                        priority=APIPriority.POSITION_MONITORING
+                    ),
+                    timeout=5.0  # 5초 타임아웃
+                )
+                
+                # 응답 구조 검증 및 파싱
+                if ticker_data:
+                    # dict에 error가 있으면 재시도
+                    if isinstance(ticker_data, dict) and "error" in ticker_data:
+                        logger.warning(f"⚠️ {market} 1단계 가격 조회 실패 (시도 {attempt + 1}): {ticker_data.get('error')}")
+                        if attempt < max_retries - 1:
+                            await asyncio.sleep(1)
+                            continue
+                    elif isinstance(ticker_data, dict) and "trade_price" in ticker_data:
+                        price = float(ticker_data["trade_price"])
+                        if price > 0:  # 가격 유효성 검증
+                            return price
+                    elif isinstance(ticker_data, list) and len(ticker_data) > 0 and "trade_price" in ticker_data[0]:
+                        price = float(ticker_data[0]["trade_price"])
+                        if price > 0:  # 가격 유효성 검증
+                            return price
+                
+            except asyncio.TimeoutError:
+                logger.warning(f"⚠️ {market} 1단계 API 호출 타임아웃 (시도 {attempt + 1})")
+                if attempt < max_retries - 1:
+                    await asyncio.sleep(0.5)
+                    continue
+            except (ConnectionError, OSError) as e:
+                logger.warning(f"⚠️ {market} 1단계 네트워크 오류 (시도 {attempt + 1}): {str(e)}")
+                if attempt < max_retries - 1:
+                    await asyncio.sleep(1)
+                    continue
+            except (ValueError, TypeError) as e:
+                logger.warning(f"⚠️ {market} 1단계 데이터 타입 오류: {str(e)}")
+                break  # 타입 오류는 재시도 의미 없음
+            except Exception as e:
+                logger.warning(f"⚠️ {market} 1단계 예상치 못한 오류 (시도 {attempt + 1}): {str(e)}")
+                if attempt < max_retries - 1:
+                    await asyncio.sleep(0.5)
+                    continue
         
-        # 2단계: 직접 업비트 클라이언트 호출
-        try:
-            upbit_client = self.user_session.upbit_client if self.user_session else get_upbit_client()
-            if upbit_client:
-                ticker_result = await upbit_client.get_ticker([market])
+        # 2단계: 직접 업비트 클라이언트 호출 (재시도 포함)
+        for attempt in range(max_retries):
+            try:
+                upbit_client = self.user_session.upbit_client if self.user_session else get_upbit_client()
+                if not upbit_client:
+                    break  # 클라이언트 없으면 3단계로
+                
+                ticker_result = await asyncio.wait_for(
+                    upbit_client.get_ticker([market]),
+                    timeout=8.0  # 8초 타임아웃
+                )
+                
                 if ticker_result and len(ticker_result) > 0 and "trade_price" in ticker_result[0]:
                     price = float(ticker_result[0]["trade_price"])
-                    logger.info(f"✅ {market} 2단계 가격 조회 성공: {price:,.0f}원")
-                    return price
-                    
-        except Exception as e:
-            logger.warning(f"⚠️ {market} 2단계 가격 조회 오류: {str(e)}")
+                    if price > 0:  # 가격 유효성 검증
+                        logger.info(f"✅ {market} 2단계 가격 조회 성공: {price:,.0f}원")
+                        return price
+                        
+            except asyncio.TimeoutError:
+                logger.warning(f"⚠️ {market} 2단계 API 호출 타임아웃 (시도 {attempt + 1})")
+                if attempt < max_retries - 1:
+                    await asyncio.sleep(1)
+                    continue
+            except (ConnectionError, OSError) as e:
+                logger.warning(f"⚠️ {market} 2단계 네트워크 오류 (시도 {attempt + 1}): {str(e)}")
+                if attempt < max_retries - 1:
+                    await asyncio.sleep(1)
+                    continue
+            except (ValueError, TypeError, KeyError) as e:
+                logger.warning(f"⚠️ {market} 2단계 데이터 파싱 오류: {str(e)}")
+                break  # 파싱 오류는 재시도 의미 없음
+            except Exception as e:
+                logger.warning(f"⚠️ {market} 2단계 예상치 못한 오류 (시도 {attempt + 1}): {str(e)}")
+                if attempt < max_retries - 1:
+                    await asyncio.sleep(0.5)
+                    continue
         
-        # 3단계: 캐시된 가격 사용 (최대 2분)
+        # 3단계: 캐시된 가격 사용 (최대 2분, 가격 유효성 검증 포함)
         try:
             cached_price = getattr(self, f'_cached_price_{market.replace("-", "_")}', None)
             cached_time = getattr(self, f'_cached_time_{market.replace("-", "_")}', 0)
             
-            if cached_price and (time.time() - cached_time) < 120:  # 2분 이내
+            if cached_price and cached_price > 0 and (time.time() - cached_time) < 120:  # 2분 이내 + 가격 유효성
                 logger.info(f"💾 {market} 캐시된 가격 사용: {cached_price:,.0f}원 (캐시 나이: {time.time() - cached_time:.0f}초)")
                 return cached_price
                 
-        except Exception as e:
+        except (AttributeError, ValueError, TypeError) as e:
             logger.warning(f"⚠️ {market} 캐시 가격 조회 오류: {str(e)}")
+        except Exception as e:
+            logger.error(f"❌ {market} 캐시 가격 예상치 못한 오류: {str(e)}")
         
-        logger.error(f"❌ {market} 모든 가격 조회 방법 실패")
+        logger.error(f"❌ {market} 모든 가격 조회 방법 실패 - 매수/매도 신호 무시 권장")
         return None
     
     async def _close_position(self, coin: str, reason: str = "manual"):
