@@ -18,6 +18,102 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api", tags=["trading"])
 
+async def _get_optimized_account_info(upbit_client, batch_tickers=True):
+    """최적화된 계좌 정보 조회 - 배치 API 호출로 성능 향상"""
+    try:
+        accounts = await upbit_client.get_accounts()
+        if not accounts:
+            return None
+            
+        # 계좌 정보 정리
+        balances = {}
+        krw_balance = 0
+        coin_markets = []
+        
+        # 1차: 계좌 데이터 정리 및 코인 마켓 리스트 수집
+        for account in accounts:
+            currency = account.get("currency", "")
+            balance = float(account.get("balance", 0))
+            avg_buy_price = float(account.get("avg_buy_price", 0))
+            locked = float(account.get("locked", 0))
+            
+            if currency == "KRW":
+                krw_balance = balance
+            elif balance > 0:  # 잔고가 있는 코인만
+                market = f"KRW-{currency}"
+                coin_markets.append(market)
+                balances[market] = {
+                    "currency": currency,
+                    "balance": balance,
+                    "locked": locked,
+                    "avg_buy_price": avg_buy_price,
+                    "current_price": avg_buy_price,  # 기본값
+                    "current_value": balance * avg_buy_price,
+                    "profit_loss": 0,
+                    "profit_rate": 0
+                }
+        
+        # 2차: 배치로 모든 코인의 현재가 조회 (성능 최적화)
+        if coin_markets and batch_tickers:
+            try:
+                # 업비트 API 제한으로 인해 최대 10개씩 배치 처리
+                batch_size = 10
+                for i in range(0, len(coin_markets), batch_size):
+                    batch_markets = coin_markets[i:i + batch_size]
+                    ticker_data = await upbit_client.get_ticker(batch_markets)
+                    
+                    for ticker in ticker_data:
+                        market = ticker["market"]
+                        if market in balances:
+                            current_price = float(ticker.get("trade_price", balances[market]["avg_buy_price"]))
+                            balance = balances[market]["balance"]
+                            avg_buy_price = balances[market]["avg_buy_price"]
+                            
+                            balances[market]["current_price"] = current_price
+                            balances[market]["current_value"] = balance * current_price
+                            balances[market]["profit_loss"] = (balance * current_price) - (avg_buy_price * balance) if avg_buy_price > 0 else 0
+                            balances[market]["profit_rate"] = (balances[market]["profit_loss"] / (avg_buy_price * balance) * 100) if avg_buy_price > 0 and balance > 0 else 0
+                            
+            except Exception as e:
+                logger.warning(f"배치 현재가 조회 실패, 개별 조회로 전환: {str(e)}")
+                # 배치 실패시 개별 조회로 폴백
+                for market in coin_markets:
+                    try:
+                        ticker_data = await upbit_client.get_single_ticker(market)
+                        current_price = float(ticker_data.get("trade_price", balances[market]["avg_buy_price"]))
+                        balance = balances[market]["balance"]
+                        avg_buy_price = balances[market]["avg_buy_price"]
+                        
+                        balances[market]["current_price"] = current_price
+                        balances[market]["current_value"] = balance * current_price
+                        balances[market]["profit_loss"] = (balance * current_price) - (avg_buy_price * balance) if avg_buy_price > 0 else 0
+                        balances[market]["profit_rate"] = (balances[market]["profit_loss"] / (avg_buy_price * balance) * 100) if avg_buy_price > 0 and balance > 0 else 0
+                    except:
+                        continue  # 개별 조회 실패해도 다음으로 진행
+        
+        return {
+            "krw_balance": krw_balance,
+            "coin_balances": balances,
+            "total_balances": len(balances)
+        }
+        
+    except Exception as e:
+        logger.error(f"계좌 정보 조회 오류: {str(e)}")
+        return None
+
+def _get_user_session_or_error(current_user: Dict[str, Any]):
+    """사용자 세션 조회 및 에러 응답 생성 - 코드 중복 제거용 헬퍼"""
+    user_id = current_user.get("id")
+    username = current_user.get("username")
+    
+    user_session = session_manager.get_session(user_id)
+    if not user_session:
+        error_msg = f"⚠️ 사용자 {username} 세션이 존재하지 않습니다"
+        logger.error(error_msg)
+        return None, {"success": False, "message": "세션이 만료되었습니다. 다시 로그인해주세요."}
+    
+    return user_session, None
+
 @router.post("/start-trading")
 async def start_auto_trading(current_user: Dict[str, Any] = Depends(require_auth)):
     """자동거래 시작 - 세션별 사용자 격리"""
@@ -62,14 +158,10 @@ async def start_auto_trading(current_user: Dict[str, Any] = Depends(require_auth
 async def get_trading_status(current_user: Dict[str, Any] = Depends(require_auth)):
     """거래 상태 조회 - 사용자별 세션 데이터"""
     try:
-        user_id = current_user.get("id")
-        username = current_user.get("username")
-        
-        # 사용자 세션 조회
-        user_session = session_manager.get_session(user_id)
-        if not user_session:
-            logger.error(f"⚠️ 사용자 {username} 세션이 존재하지 않습니다")
-            return {"error": "세션이 만료되었습니다. 다시 로그인해주세요."}
+        # 헬퍼 함수를 사용한 세션 조회 (코드 중복 제거)
+        user_session, error_response = _get_user_session_or_error(current_user)
+        if error_response:
+            return {"error": error_response["message"]}
         
         # 사용자별 거래 엔진 상태 조회
         status = user_session.trading_engine.get_status()
@@ -124,10 +216,25 @@ async def stop_auto_trading(
         if not user_session.trading_engine.is_running:
             return {"success": False, "message": "거래가 실행 중이 아닙니다"}
         
-        # 사용자별 거래 엔진 중지
-        await user_session.trading_engine.stop_trading(manual_stop=True)
+        # 비상정지 또는 일반 중지 선택
+        if emergency:
+            logger.critical(f"🚨 비상정지 API 호출 - 사용자: {username} (stop-trading endpoint)")
+            result = await user_session.trading_engine.emergency_stop()
+            
+            if not result.get("success", False):
+                logger.error(f"❌ {username} 비상정지 실패: {result.get('message', '알 수 없는 오류')}")
+                return {
+                    "success": False,
+                    "message": f"비상정지 실패: {result.get('message', '알 수 없는 오류')}",
+                    "details": {"user": username}
+                }
+            
+            message = "긴급 자동거래 중지(비상정지)"
+        else:
+            # 일반 중지
+            await user_session.trading_engine.stop_trading(manual_stop=True)
+            message = "자동거래 중지"
         
-        message = "긴급 자동거래 중지" if emergency else "자동거래 중지"
         logger.info(f"✅ {username} {message} 완료")
         
         return {
@@ -188,14 +295,10 @@ async def emergency_stop_trading(current_user: Dict[str, Any] = Depends(require_
 async def get_positions(current_user: Dict[str, Any] = Depends(require_auth)):
     """현재 보유 포지션 조회 - 고급 분석 정보 포함"""
     try:
-        user_id = current_user.get("id")
-        username = current_user.get("username")
-        
-        # 사용자 세션 조회
-        user_session = session_manager.get_session(user_id)
-        if not user_session:
-            logger.error(f"⚠️ 포지션 조회 - 사용자 {username} 세션이 존재하지 않습니다")
-            return {"success": False, "message": "세션이 만료되었습니다. 다시 로그인해주세요."}
+        # 헬퍼 함수를 사용한 세션 조회 (코드 중복 제거)
+        user_session, error_response = _get_user_session_or_error(current_user)
+        if error_response:
+            return error_response
         
         positions_data = []
         session_trading_state = user_session.trading_state
@@ -626,52 +729,14 @@ async def get_account_balances(current_user: Dict[str, Any] = Depends(require_au
         if not upbit_client:
             return {"success": False, "message": "업비트 로그인이 필요합니다"}
         
-        accounts = await upbit_client.get_accounts()
-        if not accounts:
+        # 최적화된 계좌 정보 조회 사용
+        account_info = await _get_optimized_account_info(upbit_client, batch_tickers=True)
+        if not account_info:
             return {"success": False, "message": "계좌 정보 조회에 실패했습니다"}
-        
-        # 계좌 정보 정리
-        balances = {}
-        krw_balance = 0
-        
-        for account in accounts:
-            currency = account.get("currency", "")
-            balance = float(account.get("balance", 0))
-            avg_buy_price = float(account.get("avg_buy_price", 0))
-            locked = float(account.get("locked", 0))
-            
-            if currency == "KRW":
-                krw_balance = balance
-            elif balance > 0:  # 잔고가 있는 코인만
-                market = f"KRW-{currency}"
-                
-                # 현재가 조회
-                try:
-                    ticker_data = await upbit_client.get_single_ticker(market)
-                    current_price = float(ticker_data.get("trade_price", avg_buy_price))
-                    current_value = balance * current_price
-                    profit_loss = current_value - (avg_buy_price * balance) if avg_buy_price > 0 else 0
-                except:
-                    current_price = avg_buy_price
-                    current_value = balance * current_price
-                    profit_loss = 0
-                
-                balances[market] = {
-                    "currency": currency,
-                    "balance": balance,
-                    "locked": locked,
-                    "avg_buy_price": avg_buy_price,
-                    "current_price": current_price,
-                    "current_value": current_value,
-                    "profit_loss": profit_loss,
-                    "profit_rate": (profit_loss / (avg_buy_price * balance) * 100) if avg_buy_price > 0 and balance > 0 else 0
-                }
         
         return {
             "success": True,
-            "krw_balance": krw_balance,
-            "coin_balances": balances,
-            "total_balances": len(balances)
+            **account_info
         }
         
     except Exception as e:
@@ -704,52 +769,15 @@ async def get_dashboard_data(current_user: Dict[str, Any] = Depends(require_auth
             "system_status": "running"
         }
         
-        # 1. 계좌 정보 조회 (직접 로직 구현 - 순환 호출 방지)
+        # 1. 계좌 정보 조회 (최적화된 헬퍼 메서드 사용)
         try:
             upbit_client = user_session.upbit_client if user_session.upbit_client else get_upbit_client()
             if upbit_client:
-                accounts = await upbit_client.get_accounts()
-                if accounts:
-                    # 계좌 정보 정리
-                    balances = {}
-                    krw_balance = 0
-                    
-                    for account in accounts:
-                        currency = account.get("currency", "")
-                        balance = float(account.get("balance", 0))
-                        avg_buy_price = float(account.get("avg_buy_price", 0))
-                        locked = float(account.get("locked", 0))
-                        
-                        if currency == "KRW":
-                            krw_balance = balance
-                        elif balance > 0:  # 잔고가 있는 코인만
-                            market = f"KRW-{currency}"
-                            try:
-                                ticker_data = await upbit_client.get_single_ticker(market)
-                                current_price = float(ticker_data.get("trade_price", avg_buy_price))
-                                current_value = balance * current_price
-                                profit_loss = current_value - (avg_buy_price * balance) if avg_buy_price > 0 else 0
-                            except:
-                                current_price = avg_buy_price
-                                current_value = balance * current_price
-                                profit_loss = 0
-                            
-                            balances[market] = {
-                                "currency": currency,
-                                "balance": balance,
-                                "locked": locked,
-                                "avg_buy_price": avg_buy_price,
-                                "current_price": current_price,
-                                "current_value": current_value,
-                                "profit_loss": profit_loss,
-                                "profit_rate": (profit_loss / (avg_buy_price * balance) * 100) if avg_buy_price > 0 and balance > 0 else 0
-                            }
-                    
+                account_info = await _get_optimized_account_info(upbit_client, batch_tickers=True)
+                if account_info:
                     dashboard_data["account_info"] = {
                         "success": True,
-                        "krw_balance": krw_balance,
-                        "coin_balances": balances,
-                        "total_balances": len(balances)
+                        **account_info
                     }
                 else:
                     dashboard_data["account_info"] = {"success": False, "message": "계좌 정보 조회에 실패했습니다"}

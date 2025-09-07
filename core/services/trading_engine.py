@@ -172,8 +172,11 @@ class MultiCoinTradingEngine:
             # 사용자 세션 거래 상태 참조
             session_trading_state = self.user_session.trading_state if self.user_session else trading_state
             
+            initial_positions_count = len(session_trading_state.positions)
             emergency_close_tasks = []
-            for coin_symbol in list(session_trading_state.positions.keys()):
+            positions_to_close = list(session_trading_state.positions.keys())
+            
+            for coin_symbol in positions_to_close:
                 logger.critical(f"🚨 {coin_symbol} 포지션 비상 청산 시작")
                 task = asyncio.create_task(self._emergency_close_position(coin_symbol, session_trading_state))
                 emergency_close_tasks.append(task)
@@ -194,10 +197,34 @@ class MultiCoinTradingEngine:
             # 6. 상태 초기화
             self.trading_start_time = None
             self.session_start_time = None
-            session_trading_state.positions.clear()
             
-            logger.critical("✅ 비상 정지 완료")
-            return {"success": True, "message": "비상 정지가 성공적으로 실행되었습니다"}
+            # 7. 청산 결과 검증 및 경고
+            remaining_positions = len(session_trading_state.positions)
+            successfully_closed = initial_positions_count - remaining_positions
+            
+            if remaining_positions > 0:
+                remaining_coins = list(session_trading_state.positions.keys())
+                logger.error(f"⚠️ 비상 정지 후에도 {remaining_positions}개 포지션이 남아있습니다: {remaining_coins}")
+                logger.error("🚨 중요: 수동으로 업비트에서 해당 포지션들을 확인하고 필요시 직접 매도하세요")
+                
+                # 주의: 실제로 매도되지 않은 포지션은 메모리에서 제거하지 않음
+                # 사용자가 수동으로 처리할 수 있도록 유지
+            
+            success_message = f"비상 정지 완료 - {successfully_closed}/{initial_positions_count}개 포지션 청산"
+            if remaining_positions > 0:
+                success_message += f", {remaining_positions}개 미완료 (수동 확인 필요)"
+            
+            logger.critical(f"✅ {success_message}")
+            return {
+                "success": True, 
+                "message": success_message,
+                "details": {
+                    "initial_positions": initial_positions_count,
+                    "successfully_closed": successfully_closed,
+                    "remaining_positions": remaining_positions,
+                    "remaining_coins": list(session_trading_state.positions.keys()) if remaining_positions > 0 else []
+                }
+            }
             
         except Exception as e:
             logger.critical(f"❌ 비상 정지 중 오류 발생: {str(e)}")

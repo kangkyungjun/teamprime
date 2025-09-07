@@ -66,13 +66,20 @@ class UserSession:
         logger.info(f"🔐 로그인 상태 업데이트: {self.username} -> {logged_in}")
     
     def cleanup(self):
-        """세션 정리"""
+        """세션 정리 - 동기 버전 (즉시 정리)"""
         logger.info(f"🧹 사용자 세션 정리 시작: {self.username}")
         
-        # 거래 엔진 중지
+        # 거래 엔진 상태 기록 및 강제 정리
         if hasattr(self.trading_engine, 'is_running') and self.trading_engine.is_running:
-            # 비동기 함수이지만 동기적으로 처리하기 위해 로깅만
-            logger.warning(f"⚠️ {self.username}의 거래 엔진이 실행 중 - 수동 중지 필요")
+            logger.warning(f"⚠️ {self.username}의 거래 엔진이 실행 중 - 강제 중지")
+            # 강제로 running 상태를 False로 설정하여 추가 작업 방지
+            self.trading_engine.is_running = False
+            
+            # 활성 작업들 취소 플래그 설정 (async task는 다음 주기에서 자동 종료됨)
+            if hasattr(self.trading_engine, 'signal_task') and self.trading_engine.signal_task:
+                self.trading_engine.signal_task = None
+            if hasattr(self.trading_engine, 'monitoring_task') and self.trading_engine.monitoring_task:
+                self.trading_engine.monitoring_task = None
         
         # 메모리 정리
         self.access_key = ""
@@ -81,6 +88,23 @@ class UserSession:
         self.login_status = {"logged_in": False, "account_info": None, "login_time": None}
         
         logger.info(f"✅ 사용자 세션 정리 완료: {self.username}")
+    
+    async def async_cleanup(self):
+        """세션 정리 - 비동기 버전 (완전한 정리)"""
+        logger.info(f"🧹 사용자 세션 비동기 정리 시작: {self.username}")
+        
+        # 거래 엔진 완전 중지
+        if hasattr(self.trading_engine, 'is_running') and self.trading_engine.is_running:
+            logger.info(f"🛑 {self.username}의 거래 엔진 비동기 중지")
+            try:
+                await self.trading_engine.stop_trading(manual_stop=True)
+            except Exception as e:
+                logger.error(f"⚠️ 거래 엔진 중지 중 오류: {str(e)}")
+        
+        # 동기 정리 수행
+        self.cleanup()
+        
+        logger.info(f"✅ 사용자 세션 비동기 정리 완료: {self.username}")
 
 class SessionManager:
     """전역 세션 관리자"""
@@ -111,12 +135,22 @@ class SessionManager:
         return session
     
     def remove_session(self, user_id: int):
-        """사용자 세션 제거"""
+        """사용자 세션 제거 - 동기 버전"""
         if user_id in self._sessions:
             username = self._sessions[user_id].username
             self._sessions[user_id].cleanup()
             del self._sessions[user_id]
             logger.info(f"🗑️ 세션 제거 완료: {username} (총 {len(self._sessions)}개 활성 세션)")
+        else:
+            logger.warning(f"⚠️ 제거할 세션이 존재하지 않음: user_id={user_id}")
+    
+    async def async_remove_session(self, user_id: int):
+        """사용자 세션 제거 - 비동기 버전 (완전한 정리)"""
+        if user_id in self._sessions:
+            username = self._sessions[user_id].username
+            await self._sessions[user_id].async_cleanup()
+            del self._sessions[user_id]
+            logger.info(f"🗑️ 세션 비동기 제거 완료: {username} (총 {len(self._sessions)}개 활성 세션)")
         else:
             logger.warning(f"⚠️ 제거할 세션이 존재하지 않음: user_id={user_id}")
     
