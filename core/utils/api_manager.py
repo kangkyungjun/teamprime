@@ -151,6 +151,38 @@ class UpbitAPIManager:
             # 에러 반환
             if not future.done():
                 future.set_exception(e)
+    
+    async def get_batch_ticker(self, markets: list) -> Optional[list]:
+        """배치 ticker 요청 - PDF 제안사항: 10개 개별 호출을 1개 배치로 최적화"""
+        try:
+            # 업비트 클라이언트 가져오기
+            from ..api.system import upbit_client
+            
+            if not upbit_client:
+                logger.error("⚠️ 업비트 클라이언트를 찾을 수 없음")
+                return None
+            
+            # 배치 ticker 요청 (모든 마켓을 한 번에)
+            logger.info(f"📊 배치 ticker 요청: {len(markets)}개 마켓")
+            
+            # 업비트의 get_ticker는 마켓 리스트를 받아서 배치 처리 가능
+            result = await self.safe_api_call(
+                upbit_client,
+                "get_ticker", 
+                markets,  # 마켓 리스트를 한 번에 전달
+                priority=APIPriority.SIGNAL_ANALYSIS
+            )
+            
+            if result:
+                logger.info(f"✅ 배치 ticker 성공: {len(result)}개 응답")
+                return result
+            else:
+                logger.warning("⚠️ 배치 ticker 응답이 비어있음")
+                return None
+                
+        except Exception as e:
+            logger.error(f"❌ 배치 ticker 요청 오류: {str(e)}")
+            return None
 
 # 전역 API 매니저 인스턴스
 api_manager = UpbitAPIManager()

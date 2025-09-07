@@ -1573,7 +1573,17 @@ async def trading_dashboard(request: Request):
             
             
             // 매수 조건 분석 업데이트
-            async function updateMTFAConditions() {{
+            // 🚀 PDF 제안 3: UI 재시도 로직 개선 및 중복 호출 방지
+            let mtfaUpdateInProgress = false; // 중복 호출 방지 플래그
+            
+            async function updateMTFAConditions(retryCount = 0) {{
+                if (mtfaUpdateInProgress) {{
+                    console.log('MTFA 업데이트가 이미 진행 중입니다.');
+                    return;
+                }}
+                
+                mtfaUpdateInProgress = true;
+                
                 try {{
                     const response = await fetch('/api/mtfa-dashboard-data');
                     const data = await response.json();
@@ -1600,18 +1610,41 @@ async def trading_dashboard(request: Request):
                         }});
                         
                         console.log(`MTFA 조건 업데이트 완료: ${{data.dashboard_data.length}}개 코인`);
+                    }} else if (!data.success && data.message) {{
+                        // 서버에서 친화적인 메시지를 보낸 경우 표시
+                        throw new Error(data.message);
+                    }} else {{
+                        throw new Error('MTFA 데이터 응답이 올바르지 않습니다');
                     }}
                 }} catch (error) {{
                     console.error('MTFA 매수 조건 업데이트 오류:', error);
-                    // 오류 시 기본 메시지 표시
+                    
+                    // PDF 제안: 자동 재시도 (최대 2회)
+                    if (retryCount < 2) {{
+                        console.log(`MTFA 데이터 재시도 중... (${{retryCount + 1}}/2)`);
+                        
+                        // 재시도 전 잠시 대기 (지수 백오프)
+                        const delay = Math.min(1000 * Math.pow(2, retryCount), 3000);
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                        
+                        mtfaUpdateInProgress = false; // 플래그 해제
+                        return await updateMTFAConditions(retryCount + 1);
+                    }}
+                    
+                    // 최대 재시도 후에도 실패한 경우
                     const grid = document.getElementById('mtfaConditionsGrid');
+                    const errorMessage = error.message.includes('실시간 데이터 로딩에 실패') ? 
+                        error.message : '데이터 로딩 실패 - 다시 시도하세요';
+                    
                     grid.innerHTML = `
                         <div class="condition-card">
-                            <div class="condition-coin">오류</div>
-                            <div class="condition-status not-possible">데이터 로딩 실패</div>
-                            <div class="condition-score">다시 시도하세요</div>
+                            <div class="condition-coin">⚠️ 오류</div>
+                            <div class="condition-status not-possible">${{errorMessage}}</div>
+                            <div class="condition-score">네트워크 상태를 확인해주세요</div>
                         </div>
                     `;
+                }} finally {{
+                    mtfaUpdateInProgress = false; // 완료 후 플래그 해제
                 }}
             }}
             
