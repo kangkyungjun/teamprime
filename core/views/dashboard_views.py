@@ -645,15 +645,120 @@ async def task_list_page(request: Request):
             }}
             
             .quick-task-content {{
-                position: absolute;
-                bottom: 0;
-                left: 0;
-                right: 0;
-                background: white;
-                border-radius: 20px 20px 0 0;
-                padding: 24px;
-                max-height: 80vh;
-                overflow-y: auto;
+                background-color: white;
+                margin: 10% auto;
+                padding: 30px;
+                border-radius: 15px;
+                width: 90%;
+                max-width: 500px;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            }}
+            
+            .quick-task-header {{
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 20px;
+                padding-bottom: 15px;
+                border-bottom: 2px solid #f0f0f0;
+            }}
+            
+            .quick-task-title {{
+                font-size: 24px;
+                font-weight: 700;
+                color: #333;
+                margin: 0;
+            }}
+            
+            .quick-form-group {{
+                margin-bottom: 20px;
+            }}
+            
+            .quick-form-label {{
+                display: block;
+                margin-bottom: 8px;
+                font-weight: 600;
+                color: #555;
+            }}
+            
+            .quick-form-input {{
+                width: 100%;
+                padding: 12px 15px;
+                border: 2px solid #e0e0e0;
+                border-radius: 8px;
+                font-size: 14px;
+                transition: border-color 0.3s;
+                box-sizing: border-box;
+            }}
+            
+            .quick-form-input:focus {{
+                outline: none;
+                border-color: #667eea;
+            }}
+            
+            .quick-form-select {{
+                width: 100%;
+                padding: 12px 15px;
+                border: 2px solid #e0e0e0;
+                border-radius: 8px;
+                font-size: 14px;
+                background-color: white;
+                box-sizing: border-box;
+            }}
+            
+            .quick-form-textarea {{
+                width: 100%;
+                padding: 12px 15px;
+                border: 2px solid #e0e0e0;
+                border-radius: 8px;
+                font-size: 14px;
+                resize: vertical;
+                min-height: 100px;
+                box-sizing: border-box;
+            }}
+            
+            .quick-form-actions {{
+                display: flex;
+                gap: 10px;
+                margin-top: 25px;
+            }}
+            
+            .quick-btn {{
+                flex: 1;
+                padding: 12px 20px;
+                border: none;
+                border-radius: 8px;
+                font-size: 16px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s;
+            }}
+            
+            .quick-btn-cancel {{
+                background-color: #f8f9fa;
+                color: #6c757d;
+                border: 2px solid #dee2e6;
+            }}
+            
+            .quick-btn-cancel:hover {{
+                background-color: #e9ecef;
+                color: #5a6268;
+            }}
+            
+            .quick-btn-save {{
+                background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+                color: white;
+            }}
+            
+            .quick-btn-save:hover {{
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            }}
+            
+            .quick-btn-save:disabled {{
+                opacity: 0.6;
+                cursor: not-allowed;
+                transform: none;
             }}
             
             /* 메뉴 모달 */
@@ -918,53 +1023,53 @@ async def task_list_page(request: Request):
         <!-- 빠른 업무 등록 모달 -->
         <div class="quick-task-modal" id="quickTaskModal">
             <div class="quick-task-content">
-                <div class="menu-header">
-                    <h3 class="menu-title">빠른 업무 등록</h3>
+                <div class="quick-task-header">
+                    <h3 class="quick-task-title">➕ 빠른 업무 등록</h3>
                     <button class="close-btn" onclick="hideQuickTaskModal()">&times;</button>
                 </div>
                 <form id="quickTaskForm">
-                    <div class="mb-3">
-                        <label for="quickTaskTitle" class="form-label">
-                            <i class="fas fa-heading me-1"></i>제목 <span class="text-danger">*</span>
-                        </label>
-                        <input type="text" class="form-control" id="quickTaskTitle" required placeholder="업무 제목을 입력하세요">
+                    <div class="quick-form-group">
+                        <label class="quick-form-label">업무 제목 *</label>
+                        <input type="text" class="quick-form-input" id="quickTaskTitle" 
+                               placeholder="업무 제목을 입력하세요" maxlength="200" required>
                     </div>
-                    
-                    <div class="mb-3">
-                        <label for="quickTaskDescription" class="form-label">
-                            <i class="fas fa-align-left me-1"></i>설명
-                        </label>
-                        <textarea class="form-control" id="quickTaskDescription" rows="3" placeholder="업무 설명을 입력하세요"></textarea>
+                    <div class="quick-form-group">
+                        <label class="quick-form-label">분야</label>
+                        <select class="quick-form-select" id="quickTaskCategory">
+                            <option value="기타">기타</option>
+                            <option value="기획">기획</option>
+                            <option value="개발">개발</option>
+                            <option value="디자인">디자인</option>
+                            <option value="운영">운영</option>
+                            <option value="영업">영업</option>
+                            <option value="고객지원">고객지원</option>
+                            <option value="회계">회계</option>
+                            <option value="법무">법무</option>
+                            <option value="교육">교육</option>
+                            <option value="유지보수">유지보수</option>
+                        </select>
                     </div>
-                    
-                    <div class="row">
-                        <div class="col-6 mb-3">
-                            <label for="quickTaskStatus" class="form-label">
-                                <i class="fas fa-flag me-1"></i>상태
-                            </label>
-                            <select class="form-select" id="quickTaskStatus">
-                                <option value="대기">대기</option>
-                                <option value="진행중">진행중</option>
-                                <option value="완료">완료</option>
-                            </select>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div class="quick-form-group">
+                            <label class="quick-form-label">시작일</label>
+                            <input type="date" class="quick-form-input" id="quickTaskStartDate">
                         </div>
-                        
-                        <div class="col-6 mb-3">
-                            <label for="quickTaskPriority" class="form-label">
-                                <i class="fas fa-exclamation-circle me-1"></i>우선순위
-                            </label>
-                            <select class="form-select" id="quickTaskPriority">
-                                <option value="medium">보통</option>
-                                <option value="low">낮음</option>
-                                <option value="high">높음</option>
-                                <option value="urgent">긴급</option>
-                            </select>
+                        <div class="quick-form-group">
+                            <label class="quick-form-label">마감일</label>
+                            <input type="date" class="quick-form-input" id="quickTaskEndDate">
                         </div>
                     </div>
-                    
-                    <div class="d-grid gap-2">
-                        <button type="button" class="btn btn-primary" onclick="createQuickTask()">
-                            <i class="fas fa-plus me-1"></i>업무 등록
+                    <div class="quick-form-group">
+                        <label class="quick-form-label">간단한 설명</label>
+                        <textarea class="quick-form-textarea" id="quickTaskDescription" 
+                                  placeholder="업무에 대한 간단한 설명을 입력하세요 (선택사항)"></textarea>
+                    </div>
+                    <div class="quick-form-actions">
+                        <button type="button" class="quick-btn quick-btn-cancel" onclick="hideQuickTaskModal()">
+                            취소
+                        </button>
+                        <button type="button" class="quick-btn quick-btn-save" onclick="saveQuickTask()">
+                            등록하기
                         </button>
                     </div>
                 </form>
@@ -1625,19 +1730,42 @@ async def task_list_page(request: Request):
                 modal.style.display = 'none';
             }}
             
-            async function createQuickTask() {{
-                const form = document.getElementById('quickTaskForm');
-                if (!form.checkValidity()) {{
-                    form.reportValidity();
+            async function saveQuickTask() {{
+                const title = document.getElementById('quickTaskTitle').value.trim();
+                const startDate = document.getElementById('quickTaskStartDate').value;
+                const endDate = document.getElementById('quickTaskEndDate').value;
+                
+                if (!title) {{
+                    alert('업무 제목을 입력해주세요.');
+                    document.getElementById('quickTaskTitle').focus();
                     return;
                 }}
                 
-                const formData = {{
-                    title: document.getElementById('quickTaskTitle').value.trim(),
+                if (title.length > 200) {{
+                    alert('업무 제목은 200자를 초과할 수 없습니다.');
+                    document.getElementById('quickTaskTitle').focus();
+                    return;
+                }}
+                
+                // 날짜 유효성 검사
+                if (startDate && endDate && new Date(startDate) > new Date(endDate)) {{
+                    alert('시작일은 마감일보다 늦을 수 없습니다.');
+                    document.getElementById('quickTaskStartDate').focus();
+                    return;
+                }}
+                
+                const taskData = {{
+                    title: title,
+                    category: document.getElementById('quickTaskCategory').value,
                     description: document.getElementById('quickTaskDescription').value.trim(),
-                    status: document.getElementById('quickTaskStatus').value,
-                    priority: document.getElementById('quickTaskPriority').value
+                    start_date: startDate || null,
+                    end_date: endDate || null
                 }};
+                
+                const saveBtn = document.querySelector('.quick-btn-save');
+                const originalText = saveBtn.textContent;
+                saveBtn.disabled = true;
+                saveBtn.textContent = '등록 중...';
                 
                 try {{
                     const response = await fetch('/api/business/tasks', {{
@@ -1645,21 +1773,27 @@ async def task_list_page(request: Request):
                         headers: {{
                             'Content-Type': 'application/json'
                         }},
-                        body: JSON.stringify(formData)
+                        body: JSON.stringify(taskData)
                     }});
                     
-                    const result = await response.json();
-                    
-                    if (result.success) {{
-                        alert('업무가 성공적으로 등록되었습니다.');
+                    if (response.ok) {{
+                        const result = await response.json();
+                        alert('✅ 업무가 성공적으로 등록되었습니다!');
                         hideQuickTaskModal();
-                        loadTasks(); // 목록 새로고침
+                        loadTasks();
+                        
+                        // 폼 리셋
+                        document.getElementById('quickTaskForm').reset();
                     }} else {{
-                        alert(result.message || '업무 등록에 실패했습니다.');
+                        const errorData = await response.json();
+                        alert('❌ ' + (errorData.detail || '업무 등록에 실패했습니다.'));
                     }}
                 }} catch (error) {{
                     console.error('업무 등록 오류:', error);
-                    alert('업무 등록 중 오류가 발생했습니다.');
+                    alert('❌ 서버 연결 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+                }} finally {{
+                    saveBtn.disabled = false;
+                    saveBtn.textContent = originalText;
                 }}
             }}
             
