@@ -36,6 +36,15 @@ This is a modular cryptocurrency trading system for Upbit exchange that combines
 - **위험 관리**: 최대 5분 보유, 최대 5개 동시 포지션으로 리스크 제한
 - **자동 복구**: 장애 상황에서도 거래 기회 손실 최소화
 
+### 🎨 **UI Integrity: Preserve User Interface**
+- **🚨 기본 UI 화면 구성 절대 보존**: 기존 대시보드 레이아웃, 메뉴 구조, 네비게이션 체계 변경 금지
+- **사용자 경험 일관성**: 기존 사용자가 익숙한 인터페이스 요소들의 위치와 동작 방식 유지
+- **디자인 시스템 보존**: 색상 체계, 아이콘, 폰트, 스타일링 일관성 유지
+- **기능 버튼 보존**: 모든 기능 버튼은 원래 위치에서 원래 기능으로 정확히 작동해야 함
+- **반응형 레이아웃**: 기존 모바일/데스크톱 반응형 디자인 구조 유지
+- **⚠️ UI 변경 시 사전 확인**: UI 수정이 필요한 경우 반드시 기존 구조 영향도 분석 후 진행
+- **햄버거 메뉴 필수**: 우상단 햄버거 메뉴(☰)는 항상 유지하고 프로필, 설정, 로그아웃 기능 제공
+
 ## Architecture
 
 ### Modular Architecture (v2.0)
@@ -443,6 +452,8 @@ stop_loss = SCALPING_CONFIG["stop_loss"]
 - **MANDATORY BACKTESTING** for any parameter or logic changes
 - **PRESERVE API COMPATIBILITY** for all existing endpoints
 - **🚨 UPBIT API 60-SECOND RULE COMPLIANCE**: ALL Upbit API requests must maintain 60-second intervals between calls to the same endpoint to comply with Upbit regulations. This is MANDATORY and cannot be compromised.
+- **🎨 ABSOLUTE UI PRESERVATION**: 기본 UI 화면 구성은 절대 깨뜨리지 않음. 기존 대시보드 레이아웃, 메뉴 구조, 버튼 위치 및 기능 완전 보존 필수
+- **🍔 HAMBURGER MENU MANDATORY**: 우상단 햄버거 메뉴(☰)는 항상 유지하고 프로필, 설정, 로그아웃 기능 정상 작동 보장
 
 ### 🚨 Real-time API Architecture Rules (v2.1)
 - **NO DATA STORAGE**: 절대로 캔들 데이터, 시장 데이터를 SQLite나 다른 저장소에 저장하지 않음

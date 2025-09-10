@@ -1,9 +1,34 @@
-"""인증 패키지 - 간소화 (보안 강화)"""
+"""
+Authentication and Authorization System
+"""
 
-from .models import User
-from .auth_service import AuthService
+from .owner_system import owner_system, OwnerRecognitionSystem
+from .middleware import (
+    auth_middleware,
+    get_current_user,
+    require_auth,
+    optional_auth,
+    require_owner, 
+    require_vip_access,
+    require_promotion_permission,
+    require_expense_approval,
+    require_crypto_trading,
+    require_task_management,
+    require_income_management
+)
 
 __all__ = [
-    'User', 
-    'AuthService'
+    "owner_system",
+    "OwnerRecognitionSystem",
+    "auth_middleware",
+    "get_current_user",
+    "require_auth",
+    "optional_auth",
+    "require_owner",
+    "require_vip_access", 
+    "require_promotion_permission",
+    "require_expense_approval",
+    "require_crypto_trading",
+    "require_task_management", 
+    "require_income_management"
 ]

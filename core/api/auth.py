@@ -7,7 +7,7 @@ from fastapi.security import HTTPBearer
 from typing import Dict, Any
 from pydantic import BaseModel, EmailStr
 
-from ..auth import AuthService
+from ..auth.auth_service import AuthService
 from ..auth.middleware import get_current_user, require_auth
 
 logger = logging.getLogger(__name__)
@@ -25,6 +25,10 @@ class LoginRequest(BaseModel):
     username_or_email: str
     password: str
     remember_me: bool = False
+
+class ChangePasswordRequest(BaseModel):
+    current_password: str
+    new_password: str
 
 # API 키 업데이트 모델 제거됨 - API 키 저장하지 않음
 
@@ -696,3 +700,27 @@ async def get_current_user_info(current_user: Dict[str, Any] = Depends(require_a
     return {"success": True, "user": current_user}
 
 # API 키 업데이트 엔드포인트 제거됨 - API 키 저장하지 않음
+
+@router.post("/api/change-password")
+async def change_password(
+    request: ChangePasswordRequest,
+    current_user: Dict[str, Any] = Depends(require_auth)
+):
+    """비밀번호 변경 API"""
+    try:
+        # AuthService를 통해 비밀번호 변경 처리
+        success, message = await AuthService.change_password(
+            user_id=current_user["id"],
+            current_password=request.current_password,
+            new_password=request.new_password
+        )
+        
+        if success:
+            logger.info(f"비밀번호 변경 성공: user_id={current_user['id']}, username={current_user.get('username')}")
+            return {"success": True, "message": "비밀번호가 성공적으로 변경되었습니다"}
+        else:
+            return {"success": False, "message": message}
+            
+    except Exception as e:
+        logger.error(f"비밀번호 변경 API 오류: {str(e)}")
+        return {"success": False, "message": "비밀번호 변경 중 오류가 발생했습니다"}

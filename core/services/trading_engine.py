@@ -418,7 +418,7 @@ class MultiCoinTradingEngine:
                 
                 # SignalAnalyzer가 기대하는 파라미터 형식으로 변환
                 signal_params = {
-                    "volume_surge": 2.0,
+                    "volume_mult": 2.0,
                     "price_change": 0.5, 
                     "mtfa_threshold": market_config.get("mtfa_threshold", 0.80),
                     "rsi_period": 14,

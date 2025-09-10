@@ -163,6 +163,10 @@ async def get_trading_status(current_user: Dict[str, Any] = Depends(require_auth
         if error_response:
             return {"error": error_response["message"]}
         
+        # 사용자 정보 추출
+        user_id = current_user.get("id")
+        username = current_user.get("username")
+        
         # 사용자별 거래 엔진 상태 조회
         status = user_session.trading_engine.get_status()
         

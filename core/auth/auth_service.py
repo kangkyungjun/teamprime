@@ -268,3 +268,54 @@ class AuthService:
             return True, "로그아웃 완료"
     
     # API 키 관련 메서드들 제거됨 - 보안 강화를 위해 API 키 저장하지 않음
+    
+    @classmethod
+    async def change_password(cls, user_id: int, current_password: str, new_password: str) -> Tuple[bool, str]:
+        """
+        비밀번호 변경
+        Args:
+            user_id: 사용자 ID
+            current_password: 현재 비밀번호
+            new_password: 새 비밀번호
+        Returns:
+            (success, message)
+        """
+        try:
+            async with get_mysql_session() as session:
+                # 사용자 정보 조회
+                result = await session.execute(
+                    select(User).where(User.id == user_id)
+                )
+                user = result.scalar_one_or_none()
+                
+                if not user:
+                    return False, "사용자를 찾을 수 없습니다"
+                
+                # 현재 비밀번호 검증
+                if not bcrypt.checkpw(current_password.encode('utf-8'), user.password_hash.encode('utf-8')):
+                    return False, "현재 비밀번호가 올바르지 않습니다"
+                
+                # 새 비밀번호 강도 검증
+                is_strong, message = cls.validate_password_strength(new_password)
+                if not is_strong:
+                    return False, message
+                
+                # 현재 비밀번호와 새 비밀번호가 같은지 확인
+                if bcrypt.checkpw(new_password.encode('utf-8'), user.password_hash.encode('utf-8')):
+                    return False, "새 비밀번호는 현재 비밀번호와 달라야 합니다"
+                
+                # 새 비밀번호 해시화
+                new_password_hash = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+                
+                # 비밀번호 업데이트
+                user.password_hash = new_password_hash
+                user.updated_at = datetime.utcnow()
+                
+                await session.commit()
+                
+                logger.info(f"✅ 비밀번호 변경 완료: user_id={user_id}, username={user.username}")
+                return True, "비밀번호가 성공적으로 변경되었습니다"
+                
+        except Exception as e:
+            logger.error(f"❌ 비밀번호 변경 실패: {str(e)}")
+            return False, f"비밀번호 변경 중 오류가 발생했습니다: {str(e)}"
