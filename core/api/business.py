@@ -369,6 +369,101 @@ async def delete_task(
         logger.error(f"업무 삭제 실패: {str(e)}")
         raise HTTPException(status_code=500, detail="업무 삭제에 실패했습니다")
 
+# === 추가 업무 관리 API (지출 연동용) ===
+
+@router.get("/api/business/tasks/active")
+async def get_active_tasks(
+    request: Request,
+    user: Dict = Depends(require_task_management)
+):
+    """활성 업무 목록 조회 (지출 연동용 - 대기, 진행중 상태만)"""
+    try:
+        async with get_mysql_session() as session:
+            query = """
+                SELECT t.id, t.title, t.category, t.status,
+                       assignee.username as assignee_name
+                FROM tasks t
+                LEFT JOIN users assignee ON t.assignee_id = assignee.id
+                WHERE t.status IN ('대기', '진행중')
+                ORDER BY t.created_at DESC
+                LIMIT 50
+            """
+            
+            result = await session.execute(text(query))
+            tasks = []
+            
+            for row in result.fetchall():
+                tasks.append({
+                    "id": row[0],
+                    "title": row[1],
+                    "category": row[2],
+                    "status": row[3],
+                    "assignee_name": row[4]
+                })
+            
+            return {
+                "success": True,
+                "tasks": tasks
+            }
+            
+    except Exception as e:
+        logger.error(f"활성 업무 조회 실패: {str(e)}")
+        raise HTTPException(status_code=500, detail="활성 업무 조회에 실패했습니다")
+
+@router.get("/api/business/tasks/search")
+async def search_tasks(
+    request: Request,
+    query: str,
+    limit: int = 20,
+    user: Dict = Depends(require_task_management)
+):
+    """업무명 검색 (완료된 업무 포함)"""
+    try:
+        if not query.strip():
+            raise HTTPException(status_code=400, detail="검색어를 입력해주세요")
+        
+        async with get_mysql_session() as session:
+            search_query = """
+                SELECT t.id, t.title, t.category, t.status,
+                       assignee.username as assignee_name,
+                       t.created_at
+                FROM tasks t
+                LEFT JOIN users assignee ON t.assignee_id = assignee.id
+                WHERE t.title LIKE :search_term
+                ORDER BY t.created_at DESC
+                LIMIT :limit
+            """
+            
+            search_term = f"%{query.strip()}%"
+            result = await session.execute(text(search_query), {
+                "search_term": search_term,
+                "limit": limit
+            })
+            
+            tasks = []
+            for row in result.fetchall():
+                tasks.append({
+                    "id": row[0],
+                    "title": row[1],
+                    "category": row[2],
+                    "status": row[3],
+                    "assignee_name": row[4],
+                    "created_at": row[5].isoformat()
+                })
+            
+            return {
+                "success": True,
+                "tasks": tasks,
+                "query": query,
+                "total_found": len(tasks)
+            }
+            
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"업무 검색 실패: {str(e)}")
+        raise HTTPException(status_code=500, detail="업무 검색에 실패했습니다")
+
 # === 지출 관리 API ===
 
 @router.get("/api/business/expenses")

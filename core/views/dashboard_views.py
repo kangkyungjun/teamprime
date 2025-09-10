@@ -1847,7 +1847,7 @@ async def profit_loss_page(request: Request):
     username = current_user.get('username', '사용자')
     user_role = current_user.get('role', 'user')
     
-    # 기본 빈 페이지 템플릿 (향후 개발 예정)
+    # 실제 손익 관리 페이지 템플릿
     html_content = f"""
     <!DOCTYPE html>
     <html lang="ko">
@@ -1856,72 +1856,600 @@ async def profit_loss_page(request: Request):
         <title>손익 관리 - Teamprime</title>
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <style>
+            :root {{
+                --md-primary: #6750A4;
+                --md-on-primary: #FFFFFF;
+                --md-primary-container: #E9DDFF;
+                --md-on-primary-container: #22005D;
+                --md-secondary: #625B71;
+                --md-on-secondary: #FFFFFF;
+                --md-surface: #FFFBFF;
+                --md-on-surface: #1C1B1E;
+                --md-surface-variant: #E7E0EC;
+                --md-outline: #79747E;
+                --md-background: #FFFBFF;
+                --md-shadow: rgba(0, 0, 0, 0.15);
+                --md-elevation-1: 0 1px 2px var(--md-shadow);
+                --md-elevation-2: 0 1px 3px 1px var(--md-shadow);
+                --md-elevation-3: 0 4px 8px 3px var(--md-shadow);
+            }}
+
+            * {{
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }}
+            
             body {{
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                font-family: 'Roboto', 'Segoe UI', sans-serif;
                 background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                 min-height: 100vh;
-                margin: 0;
-                padding: 20px;
+                color: var(--md-on-surface);
+                padding-bottom: 20px;
+            }}
+            
+            .app-bar {{
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(20px);
+                -webkit-backdrop-filter: blur(20px);
+                padding: 0 20px;
+                height: 64px;
                 display: flex;
                 align-items: center;
-                justify-content: center;
+                justify-content: space-between;
+                box-shadow: var(--md-elevation-2);
+                position: sticky;
+                top: 0;
+                z-index: 1000;
             }}
-            .container {{
-                background: white;
-                border-radius: 20px;
-                padding: 40px;
-                text-align: center;
-                box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-                max-width: 600px;
-                width: 100%;
+            
+            .app-title {{
+                font-size: 24px;
+                font-weight: 700;
+                color: #333;
             }}
+            
             .back-btn {{
                 background: linear-gradient(45deg, #667eea, #764ba2);
                 color: white;
                 border: none;
-                padding: 12px 24px;
+                padding: 8px 16px;
                 border-radius: 8px;
                 text-decoration: none;
-                display: inline-block;
-                margin-top: 20px;
                 cursor: pointer;
                 transition: all 0.3s;
+                font-size: 14px;
             }}
+            
             .back-btn:hover {{
                 transform: translateY(-2px);
+                box-shadow: 0 4px 15px rgba(0,0,0,0.2);
             }}
-            .feature-list {{
-                text-align: left;
-                margin: 20px 0;
+            
+            .main-content {{
                 padding: 20px;
-                background: #f8f9fa;
-                border-radius: 10px;
+                max-width: 1200px;
+                margin: 0 auto;
             }}
-            .feature-list li {{
-                margin: 8px 0;
+            
+            /* 요약 카드 */
+            .summary-section {{
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 20px;
+                margin-bottom: 30px;
+            }}
+            
+            .summary-card {{
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(20px);
+                border-radius: 16px;
+                padding: 24px;
+                box-shadow: var(--md-elevation-2);
+                text-align: center;
+            }}
+            
+            .summary-icon {{
+                font-size: 32px;
+                margin-bottom: 12px;
+            }}
+            
+            .summary-title {{
+                font-size: 14px;
+                color: #666;
+                margin-bottom: 8px;
+                font-weight: 500;
+            }}
+            
+            .summary-amount {{
+                font-size: 28px;
+                font-weight: 700;
+                margin-bottom: 4px;
+            }}
+            
+            .income {{
+                color: #4caf50;
+            }}
+            
+            .expense {{
+                color: #f44336;
+            }}
+            
+            .profit {{
+                color: #2196f3;
+            }}
+            
+            /* 필터 섹션 */
+            .filter-section {{
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(20px);
+                border-radius: 16px;
+                padding: 20px;
+                margin-bottom: 20px;
+                box-shadow: var(--md-elevation-1);
+            }}
+            
+            .filter-title {{
+                font-size: 18px;
+                font-weight: 600;
+                margin-bottom: 15px;
+            }}
+            
+            .filter-row {{
+                display: flex;
+                gap: 15px;
+                flex-wrap: wrap;
+                align-items: center;
+            }}
+            
+            .filter-group {{
+                display: flex;
+                flex-direction: column;
+                gap: 5px;
+            }}
+            
+            .filter-label {{
+                font-size: 12px;
+                font-weight: 600;
+                color: #666;
+            }}
+            
+            .filter-select {{
+                padding: 8px 12px;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                font-size: 14px;
+                min-width: 120px;
+            }}
+            
+            .filter-btn {{
+                background: linear-gradient(45deg, #667eea, #764ba2);
+                color: white;
+                border: none;
+                padding: 8px 16px;
+                border-radius: 8px;
+                cursor: pointer;
+                font-size: 14px;
+                transition: all 0.2s;
+            }}
+            
+            .filter-btn:hover {{
+                transform: translateY(-1px);
+                box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            }}
+            
+            /* 리스트 섹션 */
+            .list-section {{
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(20px);
+                border-radius: 16px;
+                padding: 20px;
+                box-shadow: var(--md-elevation-1);
+            }}
+            
+            .list-title {{
+                font-size: 18px;
+                font-weight: 600;
+                margin-bottom: 20px;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }}
+            
+            .list-container {{
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+            }}
+            
+            .list-item {{
+                background: #f8f9fa;
+                border-radius: 12px;
+                padding: 16px;
+                border-left: 4px solid #ddd;
+                transition: all 0.2s;
+                cursor: pointer;
+            }}
+            
+            .list-item:hover {{
+                background: #e9ecef;
+                transform: translateX(4px);
+            }}
+            
+            .list-item.expense {{
+                border-left-color: #f44336;
+            }}
+            
+            .list-item.income {{
+                border-left-color: #4caf50;
+            }}
+            
+            .item-header {{
+                display: flex;
+                justify-content: between;
+                align-items: flex-start;
+                margin-bottom: 8px;
+            }}
+            
+            .item-title {{
+                font-weight: 600;
+                font-size: 16px;
+                color: #333;
+            }}
+            
+            .item-amount {{
+                font-weight: 700;
+                font-size: 18px;
+                margin-left: auto;
+            }}
+            
+            .item-meta {{
+                display: flex;
+                gap: 15px;
+                font-size: 14px;
+                color: #666;
+                margin-top: 8px;
+            }}
+            
+            .meta-item {{
+                display: flex;
+                align-items: center;
+                gap: 4px;
+            }}
+            
+            .task-tag {{
+                background: #e3f2fd;
+                color: #1976d2;
+                padding: 2px 8px;
+                border-radius: 12px;
+                font-size: 12px;
+                font-weight: 500;
+            }}
+            
+            .category-tag {{
+                background: #fff3e0;
+                color: #f57c00;
+                padding: 2px 8px;
+                border-radius: 12px;
+                font-size: 12px;
+                font-weight: 500;
+            }}
+            
+            /* 로딩 상태 */
+            .loading {{
+                text-align: center;
+                padding: 40px;
+                color: #666;
+            }}
+            
+            .spinner {{
+                width: 40px;
+                height: 40px;
+                border: 4px solid #f3f3f3;
+                border-top: 4px solid #667eea;
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+                margin: 0 auto 20px;
+            }}
+            
+            @keyframes spin {{
+                0% {{ transform: rotate(0deg); }}
+                100% {{ transform: rotate(360deg); }}
+            }}
+            
+            .empty-state {{
+                text-align: center;
+                padding: 60px 20px;
+                color: #666;
+            }}
+            
+            .empty-icon {{
+                font-size: 64px;
+                margin-bottom: 20px;
+                opacity: 0.5;
+            }}
+            
+            /* 반응형 디자인 */
+            @media (max-width: 768px) {{
+                .main-content {{
+                    padding: 15px;
+                }}
+                
+                .summary-section {{
+                    grid-template-columns: 1fr;
+                }}
+                
+                .filter-row {{
+                    flex-direction: column;
+                    align-items: stretch;
+                }}
+                
+                .filter-group {{
+                    width: 100%;
+                }}
+                
+                .item-header {{
+                    flex-direction: column;
+                    align-items: flex-start;
+                    gap: 8px;
+                }}
+                
+                .item-amount {{
+                    margin-left: 0;
+                }}
+                
+                .item-meta {{
+                    flex-wrap: wrap;
+                }}
             }}
         </style>
     </head>
     <body>
-        <div class="container">
-            <h1>💰 손익 관리</h1>
-            <p>안녕하세요, <strong>{username}</strong>님!</p>
-            <p>통합 손익 관리 페이지가 곧 개발될 예정입니다.</p>
-            
-            <div class="feature-list">
-                <h3>📋 계획된 기능들:</h3>
-                <ul>
-                    <li>💳 지출 관리 (기존 /expenses 기능)</li>
-                    <li>💰 수익 관리 (기존 /incomes 기능)</li>
-                    <li>📊 비즈니스 분석 (기존 /analytics 기능)</li>
-                    <li>📈 통합 손익 리포트</li>
-                    <li>📱 모바일 최적화된 UI</li>
-                </ul>
+        <!-- 앱바 -->
+        <div class="app-bar">
+            <div class="app-title">💰 손익 관리</div>
+            <a href="/main-dashboard" class="back-btn">🏠 대시보드</a>
+        </div>
+        
+        <!-- 메인 컨텐츠 -->
+        <div class="main-content">
+            <!-- 요약 섹션 -->
+            <div class="summary-section">
+                <div class="summary-card">
+                    <div class="summary-icon">💰</div>
+                    <div class="summary-title">총 수익</div>
+                    <div class="summary-amount income" id="totalIncome">₩0</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-icon">💳</div>
+                    <div class="summary-title">총 지출</div>
+                    <div class="summary-amount expense" id="totalExpense">₩0</div>
+                </div>
+                <div class="summary-card">
+                    <div class="summary-icon">📊</div>
+                    <div class="summary-title">순익</div>
+                    <div class="summary-amount profit" id="netProfit">₩0</div>
+                </div>
             </div>
             
-            <p>현재는 기본 대시보드에서 각 기능에 접근하실 수 있습니다.</p>
-            <a href="/main-dashboard" class="back-btn">🏠 대시보드로 돌아가기</a>
+            <!-- 필터 섹션 -->
+            <div class="filter-section">
+                <div class="filter-title">🔍 필터</div>
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label class="filter-label">기간</label>
+                        <select class="filter-select" id="periodFilter">
+                            <option value="all">전체</option>
+                            <option value="this_month">이번달</option>
+                            <option value="last_month">지난달</option>
+                            <option value="this_year">올해</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">타입</label>
+                        <select class="filter-select" id="typeFilter">
+                            <option value="all">전체</option>
+                            <option value="expense">지출만</option>
+                            <option value="income">수익만</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label class="filter-label">업무</label>
+                        <select class="filter-select" id="taskFilter">
+                            <option value="all">전체</option>
+                            <option value="general">일반</option>
+                        </select>
+                    </div>
+                    <button class="filter-btn" onclick="applyFilters()">적용</button>
+                </div>
+            </div>
+            
+            <!-- 리스트 섹션 -->
+            <div class="list-section">
+                <div class="list-title">
+                    📋 지출/수익 내역
+                    <span id="itemCount" style="font-size: 14px; color: #666; font-weight: normal;">(0건)</span>
+                </div>
+                <div class="list-container" id="listContainer">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        데이터를 불러오는 중...
+                    </div>
+                </div>
+            </div>
         </div>
+        
+        <script>
+            // 페이지 로드 시 초기화
+            document.addEventListener('DOMContentLoaded', function() {{
+                loadProfitLossData();
+                loadTasksForFilter();
+            }});
+            
+            // 손익 데이터 로드
+            async function loadProfitLossData() {{
+                try {{
+                    // 요약 데이터 로드
+                    await loadSummaryData();
+                    
+                    // 지출/수익 목록 로드
+                    await loadTransactionsList();
+                    
+                }} catch (error) {{
+                    console.error('손익 데이터 로딩 실패:', error);
+                    showError('데이터 로딩에 실패했습니다.');
+                }}
+            }}
+            
+            // 요약 데이터 로드
+            async function loadSummaryData() {{
+                try {{
+                    const response = await fetch('/api/business/dashboard-stats');
+                    const data = await response.json();
+                    
+                    if (data.success && data.summary) {{
+                        const summary = data.summary;
+                        
+                        document.getElementById('totalIncome').textContent = 
+                            '₩' + summary.total_incomes.toLocaleString();
+                        document.getElementById('totalExpense').textContent = 
+                            '₩' + summary.total_expenses.toLocaleString();
+                        document.getElementById('netProfit').textContent = 
+                            '₩' + (summary.total_incomes - summary.total_expenses).toLocaleString();
+                    }}
+                }} catch (error) {{
+                    console.error('요약 데이터 로드 실패:', error);
+                }}
+            }}
+            
+            // 거래 목록 로드
+            async function loadTransactionsList() {{
+                const container = document.getElementById('listContainer');
+                
+                try {{
+                    // 지출 데이터 로드
+                    const expenseResponse = await fetch('/api/business/expenses?limit=50');
+                    const expenseData = await expenseResponse.json();
+                    
+                    // 수익 데이터 로드 (TODO: 수익 API 구현 후 활성화)
+                    const incomes = [];
+                    
+                    const expenses = expenseData.success ? expenseData.expenses : [];
+                    
+                    // 데이터 병합 및 정렬
+                    const transactions = [
+                        ...expenses.map(exp => ({{
+                            ...exp,
+                            type: 'expense',
+                            date: exp.expense_date,
+                            title: exp.description
+                        }})),
+                        ...incomes.map(inc => ({{
+                            ...inc,
+                            type: 'income',
+                            date: inc.income_date,
+                            title: inc.title
+                        }}))
+                    ].sort((a, b) => new Date(b.date) - new Date(a.date));
+                    
+                    if (transactions.length === 0) {{
+                        container.innerHTML = `
+                            <div class="empty-state">
+                                <div class="empty-icon">📊</div>
+                                <h3>아직 등록된 지출/수익이 없습니다</h3>
+                                <p>대시보드에서 지출 내역을 등록해보세요!</p>
+                            </div>
+                        `;
+                        document.getElementById('itemCount').textContent = '(0건)';
+                        return;
+                    }}
+                    
+                    // 리스트 렌더링
+                    container.innerHTML = transactions.map(item => `
+                        <div class="list-item ${{item.type}}">
+                            <div class="item-header">
+                                <div class="item-title">${{item.title || item.description}}</div>
+                                <div class="item-amount ${{item.type}}">
+                                    ${{item.type === 'expense' ? '-' : '+'}}₩${{item.amount.toLocaleString()}}
+                                </div>
+                            </div>
+                            <div class="item-meta">
+                                <div class="meta-item">
+                                    📅 ${{formatDate(item.date)}}
+                                </div>
+                                ${{item.task_title ? `<div class="meta-item"><span class="task-tag">${{item.task_title}}</span></div>` : ''}}
+                                <div class="meta-item">
+                                    <span class="category-tag">${{item.category}}</span>
+                                </div>
+                                ${{item.status ? `<div class="meta-item">📋 ${{item.status}}</div>` : ''}}
+                            </div>
+                        </div>
+                    `).join('');
+                    
+                    document.getElementById('itemCount').textContent = `(${{transactions.length}}건)`;
+                    
+                }} catch (error) {{
+                    console.error('거래 목록 로드 실패:', error);
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-icon">❌</div>
+                            <h3>데이터 로드 실패</h3>
+                            <p>잠시 후 다시 시도해주세요.</p>
+                        </div>
+                    `;
+                }}
+            }}
+            
+            // 필터용 업무 목록 로드
+            async function loadTasksForFilter() {{
+                try {{
+                    const response = await fetch('/api/business/tasks');
+                    const data = await response.json();
+                    
+                    if (data.success && data.tasks) {{
+                        const taskFilter = document.getElementById('taskFilter');
+                        
+                        data.tasks.forEach(task => {{
+                            const option = document.createElement('option');
+                            option.value = task.id;
+                            option.textContent = `[${{task.category}}] ${{task.title}}`;
+                            taskFilter.appendChild(option);
+                        }});
+                    }}
+                }} catch (error) {{
+                    console.error('업무 목록 로드 실패:', error);
+                }}
+            }}
+            
+            // 필터 적용
+            function applyFilters() {{
+                // TODO: 필터 기능 구현
+                console.log('필터 적용 기능은 추후 구현 예정');
+                loadTransactionsList();
+            }}
+            
+            // 날짜 포맷팅
+            function formatDate(dateString) {{
+                const date = new Date(dateString);
+                return date.toLocaleDateString('ko-KR', {{
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric'
+                }});
+            }}
+            
+            // 에러 표시
+            function showError(message) {{
+                const container = document.getElementById('listContainer');
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">❌</div>
+                        <h3>오류 발생</h3>
+                        <p>${{message}}</p>
+                    </div>
+                `;
+            }}
+        </script>
     </body>
     </html>
     """

@@ -995,6 +995,200 @@ async def business_main_dashboard(request: Request):
                 font-weight: 500;
             }}
             
+            /* 지출 내역 등록 모달 */
+            .expense-modal {{
+                display: none;
+                position: fixed;
+                z-index: 1000;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0,0,0,0.5);
+            }}
+            
+            .expense-content {{
+                background-color: white;
+                margin: 5% auto;
+                padding: 30px;
+                border-radius: 15px;
+                width: 90%;
+                max-width: 600px;
+                max-height: 85vh;
+                overflow-y: auto;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            }}
+            
+            .expense-header {{
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 25px;
+                padding-bottom: 15px;
+                border-bottom: 2px solid #f0f0f0;
+            }}
+            
+            .expense-title {{
+                font-size: 24px;
+                font-weight: 700;
+                color: #333;
+                margin: 0;
+            }}
+            
+            .form-section {{
+                margin-bottom: 25px;
+                padding: 20px;
+                background: #f8f9fa;
+                border-radius: 10px;
+            }}
+            
+            .section-title {{
+                font-size: 16px;
+                font-weight: 600;
+                color: #333;
+                margin: 0 0 15px 0;
+                border-bottom: 1px solid #dee2e6;
+                padding-bottom: 8px;
+            }}
+            
+            .task-selection-row {{
+                display: flex;
+                gap: 10px;
+                align-items: end;
+            }}
+            
+            .flex-grow {{
+                flex: 1;
+            }}
+            
+            .search-container {{
+                display: flex;
+                gap: 5px;
+            }}
+            
+            .search-input {{
+                padding: 8px 12px;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                font-size: 14px;
+                width: 120px;
+            }}
+            
+            .search-btn {{
+                padding: 8px 12px;
+                background: linear-gradient(45deg, #667eea, #764ba2);
+                color: white;
+                border: none;
+                border-radius: 8px;
+                cursor: pointer;
+                font-size: 14px;
+                transition: all 0.2s;
+            }}
+            
+            .search-btn:hover {{
+                transform: translateY(-1px);
+                box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            }}
+            
+            .form-group {{
+                margin-bottom: 15px;
+            }}
+            
+            .form-label {{
+                display: block;
+                margin-bottom: 5px;
+                font-weight: 600;
+                color: #333;
+                font-size: 14px;
+            }}
+            
+            .form-input, .form-textarea {{
+                width: 100%;
+                padding: 12px;
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                font-size: 14px;
+                transition: border-color 0.2s;
+                box-sizing: border-box;
+            }}
+            
+            .form-input:focus, .form-textarea:focus {{
+                outline: none;
+                border-color: #667eea;
+                box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            }}
+            
+            .form-row {{
+                display: flex;
+                gap: 15px;
+            }}
+            
+            .flex-1 {{
+                flex: 1;
+            }}
+            
+            .flex-2 {{
+                flex: 2;
+            }}
+            
+            .category-note {{
+                margin-top: 5px;
+                padding: 8px;
+                background: #e3f2fd;
+                border-radius: 6px;
+                border-left: 3px solid #2196f3;
+            }}
+            
+            .category-note small {{
+                color: #1976d2;
+                font-weight: 500;
+            }}
+            
+            .form-actions {{
+                display: flex;
+                gap: 10px;
+                justify-content: flex-end;
+                margin-top: 25px;
+                padding-top: 20px;
+                border-top: 1px solid #eee;
+            }}
+            
+            .expense-btn {{
+                padding: 12px 24px;
+                border: none;
+                border-radius: 8px;
+                font-size: 16px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s;
+                min-width: 100px;
+            }}
+            
+            .expense-btn-cancel {{
+                background: #f5f5f5;
+                color: #666;
+            }}
+            
+            .expense-btn-cancel:hover {{
+                background: #e0e0e0;
+            }}
+            
+            .expense-btn-save {{
+                background: linear-gradient(45deg, #667eea, #764ba2);
+                color: white;
+            }}
+            
+            .expense-btn-save:hover {{
+                transform: translateY(-2px);
+                box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            }}
+            
+            .expense-btn-save:disabled {{
+                background: #ccc;
+                cursor: not-allowed;
+                transform: none;
+            }}
+
             /* 반응형 디자인 */
             @media (max-width: 768px) {{
                 .main-content {{
@@ -1021,6 +1215,26 @@ async def business_main_dashboard(request: Request):
                     margin: 5% auto;
                     width: 95%;
                     padding: 20px;
+                }}
+                
+                .expense-content {{
+                    margin: 5% auto;
+                    padding: 20px;
+                    width: 95%;
+                }}
+                
+                .task-selection-row {{
+                    flex-direction: column;
+                    gap: 15px;
+                }}
+                
+                .search-input {{
+                    width: 100%;
+                }}
+                
+                .form-row {{
+                    flex-direction: column;
+                    gap: 10px;
                 }}
             }}
         </style>
@@ -1122,6 +1336,10 @@ async def business_main_dashboard(request: Request):
             <div class="nav-item nav-fab" onclick="showQuickTaskModal()">
                 <div class="nav-icon-fab">➕</div>
             </div>
+            <div class="nav-item" onclick="showExpenseModal()">
+                <div class="nav-icon">💳</div>
+                <div class="nav-label">지출내역</div>
+            </div>
             <div class="nav-item" onclick="navigateToProfitLoss()">
                 <div class="nav-icon">💰</div>
                 <div class="nav-label">손익</div>
@@ -1206,6 +1424,97 @@ async def business_main_dashboard(request: Request):
                             취소
                         </button>
                         <button type="button" class="quick-btn quick-btn-save" onclick="saveQuickTask()">
+                            등록하기
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- 지출 내역 등록 모달 -->
+        <div class="expense-modal" id="expenseModal">
+            <div class="expense-content">
+                <div class="expense-header">
+                    <h3 class="expense-title">💳 지출 내역 등록</h3>
+                    <button class="close-btn" onclick="hideExpenseModal()">&times;</button>
+                </div>
+                <form id="expenseForm">
+                    <!-- 업무 연동 섹션 -->
+                    <div class="form-section">
+                        <h4 class="section-title">업무 연동</h4>
+                        <div class="task-selection-row">
+                            <div class="form-group flex-grow">
+                                <label class="form-label">연결 업무 선택</label>
+                                <select class="form-input" id="expenseTaskSelect">
+                                    <option value="">업무를 선택하세요</option>
+                                </select>
+                            </div>
+                            <div class="search-container">
+                                <input type="text" class="search-input" id="taskSearchInput" placeholder="업무명 검색">
+                                <button type="button" class="search-btn" onclick="searchTasks()">🔍</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 지출 정보 섹션 -->
+                    <div class="form-section">
+                        <h4 class="section-title">지출 정보</h4>
+                        <div class="form-group">
+                            <label class="form-label">카테고리 *</label>
+                            <select class="form-input" id="expenseCategory" onchange="handleCategoryChange()" required>
+                                <option value="">카테고리를 선택하세요</option>
+                                <option value="자산">자산</option>
+                                <option value="소모품">소모품</option>
+                                <option value="식비">식비</option>
+                                <option value="교통">교통</option>
+                                <option value="출장">출장</option>
+                                <option value="통신">통신</option>
+                                <option value="소프트웨어">소프트웨어</option>
+                                <option value="급여">급여</option>
+                                <option value="인센티브">인센티브</option>
+                                <option value="교육/세미나">교육/세미나</option>
+                                <option value="관리비">관리비</option>
+                                <option value="인건비">인건비</option>
+                                <option value="용역">용역</option>
+                                <option value="세금">세금</option>
+                                <option value="기타">기타</option>
+                                <option value="일반">일반</option>
+                            </select>
+                            <div class="category-note" id="categoryNote" style="display: none;">
+                                <small>"일반" 카테고리는 업무 연동 없이 등록 가능합니다.</small>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group flex-2">
+                                <label class="form-label">지출 제목 *</label>
+                                <input type="text" class="form-input" id="expenseTitle" 
+                                       placeholder="지출 제목을 입력하세요" maxlength="200" required>
+                            </div>
+                            <div class="form-group flex-1">
+                                <label class="form-label">지출 금액 *</label>
+                                <input type="number" class="form-input" id="expenseAmount" 
+                                       placeholder="0" min="1" step="1" required>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">지출 일시</label>
+                            <input type="datetime-local" class="form-input" id="expenseDate">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">상세 설명</label>
+                            <textarea class="form-textarea" id="expenseDescription" 
+                                      placeholder="지출에 대한 상세 설명을 입력하세요 (선택사항)" rows="3"></textarea>
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="expense-btn expense-btn-cancel" onclick="hideExpenseModal()">
+                            취소
+                        </button>
+                        <button type="button" class="expense-btn expense-btn-save" onclick="saveExpense()">
                             등록하기
                         </button>
                     </div>
@@ -1735,7 +2044,181 @@ async def business_main_dashboard(request: Request):
                 document.getElementById('menuModal').style.display = 'none';
             }}
             
-            // 메뉴 모달 외부 클릭시 닫기
+            // === 지출 내역 모달 관련 함수들 ===
+            function showExpenseModal() {{
+                document.getElementById('expenseModal').style.display = 'block';
+                
+                // 현재 시간으로 초기화
+                const now = new Date();
+                const localDate = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
+                document.getElementById('expenseDate').value = localDate.toISOString().slice(0, 16);
+                
+                // 활성 업무 목록 로드
+                loadActiveTasks();
+            }}
+            
+            function hideExpenseModal() {{
+                document.getElementById('expenseModal').style.display = 'none';
+                
+                // 폼 초기화
+                document.getElementById('expenseForm').reset();
+                document.getElementById('categoryNote').style.display = 'none';
+                document.getElementById('expenseTaskSelect').disabled = false;
+            }}
+            
+            // 활성 업무 목록 로드
+            async function loadActiveTasks() {{
+                try {{
+                    const response = await fetch('/api/business/tasks/active');
+                    const data = await response.json();
+                    
+                    const select = document.getElementById('expenseTaskSelect');
+                    select.innerHTML = '<option value="">업무를 선택하세요</option>';
+                    
+                    if (data.success && data.tasks) {{
+                        data.tasks.forEach(task => {{
+                            const option = document.createElement('option');
+                            option.value = task.id;
+                            option.textContent = `[${{task.category}}] ${{task.title}}`;
+                            select.appendChild(option);
+                        }});
+                    }}
+                }} catch (error) {{
+                    console.error('활성 업무 로드 실패:', error);
+                }}
+            }}
+            
+            // 업무 검색
+            async function searchTasks() {{
+                const query = document.getElementById('taskSearchInput').value.trim();
+                if (!query) {{
+                    await loadActiveTasks();
+                    return;
+                }}
+                
+                try {{
+                    const response = await fetch(`/api/business/tasks/search?query=${{encodeURIComponent(query)}}`);
+                    const data = await response.json();
+                    
+                    const select = document.getElementById('expenseTaskSelect');
+                    select.innerHTML = '<option value="">업무를 선택하세요</option>';
+                    
+                    if (data.success && data.tasks) {{
+                        data.tasks.forEach(task => {{
+                            const option = document.createElement('option');
+                            option.value = task.id;
+                            const statusText = task.status === '완료' ? ' (완료)' : '';
+                            option.textContent = `[${{task.category}}] ${{task.title}}${{statusText}}`;
+                            select.appendChild(option);
+                        }});
+                        
+                        showToast(`${{data.tasks.length}}개의 업무를 찾았습니다.`, 'info');
+                    }} else {{
+                        showToast('검색 결과가 없습니다.', 'info');
+                    }}
+                }} catch (error) {{
+                    console.error('업무 검색 실패:', error);
+                    showToast('업무 검색 중 오류가 발생했습니다.', 'error');
+                }}
+            }}
+            
+            // 카테고리 변경 처리
+            function handleCategoryChange() {{
+                const category = document.getElementById('expenseCategory').value;
+                const taskSelect = document.getElementById('expenseTaskSelect');
+                const categoryNote = document.getElementById('categoryNote');
+                
+                if (category === '일반') {{
+                    taskSelect.disabled = true;
+                    taskSelect.value = '';
+                    categoryNote.style.display = 'block';
+                }} else {{
+                    taskSelect.disabled = false;
+                    categoryNote.style.display = 'none';
+                }}
+            }}
+            
+            // 지출 저장
+            async function saveExpense() {{
+                const saveBtn = document.querySelector('.expense-btn-save');
+                const originalText = saveBtn.textContent;
+                
+                // 유효성 검사
+                const taskId = document.getElementById('expenseTaskSelect').value;
+                const category = document.getElementById('expenseCategory').value;
+                const title = document.getElementById('expenseTitle').value.trim();
+                const amount = document.getElementById('expenseAmount').value;
+                const expenseDate = document.getElementById('expenseDate').value;
+                const description = document.getElementById('expenseDescription').value.trim();
+                
+                if (!category) {{
+                    alert('카테고리를 선택해주세요.');
+                    return;
+                }}
+                
+                if (!title) {{
+                    alert('지출 제목을 입력해주세요.');
+                    return;
+                }}
+                
+                if (!amount || parseFloat(amount) <= 0) {{
+                    alert('올바른 금액을 입력해주세요.');
+                    return;
+                }}
+                
+                if (!expenseDate) {{
+                    alert('지출 일시를 선택해주세요.');
+                    return;
+                }}
+                
+                // 일반 카테고리가 아닌데 업무를 선택하지 않은 경우
+                if (category !== '일반' && !taskId) {{
+                    alert('이 카테고리는 업무 선택이 필요합니다.');
+                    return;
+                }}
+                
+                try {{
+                    saveBtn.disabled = true;
+                    saveBtn.textContent = '저장 중...';
+                    
+                    const expenseData = {{
+                        task_id: taskId || null,
+                        category,
+                        amount: parseFloat(amount),
+                        description: title,
+                        expense_date: expenseDate.split('T')[0], // YYYY-MM-DD 형식
+                        participants_internal: null,
+                        participants_external: 0,
+                        external_note: description || null
+                    }};
+                    
+                    const response = await fetch('/api/business/expenses', {{
+                        method: 'POST',
+                        headers: {{
+                            'Content-Type': 'application/json'
+                        }},
+                        body: JSON.stringify(expenseData)
+                    }});
+                    
+                    if (response.ok) {{
+                        hideExpenseModal();
+                        showToast('지출이 성공적으로 등록되었습니다!', 'success');
+                        // 재무 현황 다시 로드
+                        setTimeout(loadFinancialData, 500);
+                    }} else {{
+                        const error = await response.json();
+                        alert('오류: ' + (error.detail || '지출 등록에 실패했습니다.'));
+                    }}
+                }} catch (error) {{
+                    console.error('지출 등록 오류:', error);
+                    alert('지출 등록 중 오류가 발생했습니다.');
+                }} finally {{
+                    saveBtn.disabled = false;
+                    saveBtn.textContent = originalText;
+                }}
+            }}
+            
+            // 모달 외부 클릭시 닫기
             window.addEventListener('click', function(event) {{
                 const menuModal = document.getElementById('menuModal');
                 if (event.target === menuModal) {{
@@ -1745,6 +2228,28 @@ async def business_main_dashboard(request: Request):
                 const quickTaskModal = document.getElementById('quickTaskModal');
                 if (event.target === quickTaskModal) {{
                     hideQuickTaskModal();
+                }}
+                
+                const expenseModal = document.getElementById('expenseModal');
+                if (event.target === expenseModal) {{
+                    hideExpenseModal();
+                }}
+            }});
+            
+            // ESC 키로 모달 닫기
+            document.addEventListener('keydown', function(event) {{
+                if (event.key === 'Escape') {{
+                    const quickTaskModal = document.getElementById('quickTaskModal');
+                    const expenseModal = document.getElementById('expenseModal');
+                    const menuModal = document.getElementById('menuModal');
+                    
+                    if (expenseModal.style.display === 'block') {{
+                        hideExpenseModal();
+                    }} else if (quickTaskModal.style.display === 'block') {{
+                        hideQuickTaskModal();
+                    }} else if (menuModal.style.display === 'block') {{
+                        hideMenuModal();
+                    }}
                 }}
             }});
             
