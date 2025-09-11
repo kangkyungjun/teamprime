@@ -108,9 +108,9 @@ def _get_user_session_or_error(current_user: Dict[str, Any]):
     
     user_session = session_manager.get_session(user_id)
     if not user_session:
-        error_msg = f"⚠️ 사용자 {username} 세션이 존재하지 않습니다"
-        logger.error(error_msg)
-        return None, {"success": False, "message": "세션이 만료되었습니다. 다시 로그인해주세요."}
+        # JWT 인증된 사용자의 세션 자동 생성
+        user_session = session_manager.create_session(user_id, username)
+        logger.info(f"🔄 JWT 인증 사용자 세션 자동 생성: {username}")
     
     return user_session, None
 
@@ -121,11 +121,10 @@ async def start_auto_trading(current_user: Dict[str, Any] = Depends(require_auth
         user_id = current_user.get("id")
         username = current_user.get("username")
         
-        # 사용자 세션 조회
-        user_session = session_manager.get_session(user_id)
-        if not user_session:
-            logger.error(f"⚠️ 사용자 {username} 세션이 존재하지 않습니다")
-            return {"success": False, "message": "세션이 만료되었습니다. 다시 로그인해주세요."}
+        # 사용자 세션 조회 또는 자동 생성
+        user_session, error = _get_user_session_or_error(current_user)
+        if error:
+            return error
         
         # 사용자별 거래 엔진 실행 상태 확인
         if user_session.trading_engine.is_running:

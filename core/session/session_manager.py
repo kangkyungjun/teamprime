@@ -111,7 +111,7 @@ class SessionManager:
     
     def __init__(self):
         self._sessions: Dict[int, UserSession] = {}
-        logger.info("🎯 세션 관리자 초기화 완료")
+        logger.info("🎯 세션 관리자 초기화 완료 - 모든 이전 세션 삭제됨")
     
     def create_session(self, user_id: int, username: str) -> UserSession:
         """새로운 사용자 세션 생성"""

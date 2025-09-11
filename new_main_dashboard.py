@@ -637,6 +637,70 @@ async def business_main_dashboard(request: Request):
                 box-shadow: 0 4px 15px rgba(0,0,0,0.2);
             }}
             
+            /* 플로팅 서브 버튼 */
+            .floating-sub-buttons {{
+                position: fixed;
+                bottom: 100px; /* 탭바(80px) 위쪽 20px */
+                left: 50%;
+                transform: translateX(-50%);
+                display: flex;
+                gap: 20px;
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(20px);
+                -webkit-backdrop-filter: blur(20px);
+                border-radius: 25px;
+                padding: 15px 25px;
+                box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+                z-index: 999;
+                animation: slideUp 0.3s ease-out;
+            }}
+            
+            .sub-button {{
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                padding: 15px 20px;
+                border-radius: 18px;
+                background: linear-gradient(45deg, #667eea, #764ba2);
+                color: white;
+                cursor: pointer;
+                transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+                min-width: 70px;
+                box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            }}
+            
+            .sub-button:hover {{
+                transform: translateY(-3px);
+                box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            }}
+            
+            .sub-button:active {{
+                transform: translateY(-1px);
+            }}
+            
+            .sub-icon {{
+                font-size: 20px;
+                margin-bottom: 4px;
+            }}
+            
+            .sub-label {{
+                font-size: 12px;
+                font-weight: 600;
+                letter-spacing: 0.5px;
+            }}
+            
+            @keyframes slideUp {{
+                from {{
+                    opacity: 0;
+                    transform: translateX(-50%) translateY(20px);
+                }}
+                to {{
+                    opacity: 1;
+                    transform: translateX(-50%) translateY(0);
+                }}
+            }}
+
             /* 하단 탭바 네비게이션 */
             .bottom-nav {{
                 position: fixed;
@@ -676,6 +740,19 @@ async def business_main_dashboard(request: Request):
             .nav-item:active {{
                 transform: translateY(0);
                 background: rgba(103, 80, 164, 0.12);
+            }}
+            
+            .nav-item.active {{
+                background: linear-gradient(45deg, #667eea, #764ba2);
+                color: white;
+                transform: translateY(-2px);
+                box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            }}
+            
+            .nav-item.active:hover {{
+                background: linear-gradient(45deg, #667eea, #764ba2);
+                transform: translateY(-3px);
+                box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
             }}
             
             .nav-icon {{
@@ -1327,26 +1404,27 @@ async def business_main_dashboard(request: Request):
             
         </div>
         
-        <!-- 하단 탭바 네비게이션 -->
+        <!-- 플로팅 서브 버튼 (탭바 위쪽) -->
+        <div class="floating-sub-buttons" id="floatingSubButtons" style="display: none;">
+            <div class="sub-button" id="subButton1" onclick="">
+                <div class="sub-icon" id="subIcon1">📋</div>
+                <div class="sub-label" id="subLabel1">목록</div>
+            </div>
+            <div class="sub-button" id="subButton2" onclick="">
+                <div class="sub-icon" id="subIcon2">➕</div>
+                <div class="sub-label" id="subLabel2">등록</div>
+            </div>
+        </div>
+
+        <!-- 하단 탭바 네비게이션 (2개 버튼) -->
         <div class="bottom-nav">
-            <div class="nav-item" onclick="navigateToTaskList()">
+            <div class="nav-item" id="taskTab" onclick="selectTab('task')">
                 <div class="nav-icon">📝</div>
-                <div class="nav-label">업무 목록</div>
+                <div class="nav-label">업무</div>
             </div>
-            <div class="nav-item nav-fab" onclick="showQuickTaskModal()">
-                <div class="nav-icon-fab">➕</div>
-            </div>
-            <div class="nav-item" onclick="showExpenseModal()">
-                <div class="nav-icon">💳</div>
-                <div class="nav-label">지출내역</div>
-            </div>
-            <div class="nav-item" onclick="navigateToProfitLoss()">
+            <div class="nav-item" id="profitTab" onclick="selectTab('profit')">
                 <div class="nav-icon">💰</div>
                 <div class="nav-label">손익</div>
-            </div>
-            <div class="nav-item" onclick="showMenuModal()">
-                <div class="nav-icon">☰</div>
-                <div class="nav-label">메뉴</div>
             </div>
         </div>
         
@@ -2027,7 +2105,91 @@ async def business_main_dashboard(request: Request):
                 }});
             }});
             
-            // 탭바 네비게이션 함수들
+            // 탭 선택 및 서브 버튼 제어 시스템
+            let currentTab = null;
+            
+            function selectTab(tabType) {{
+                // 이미 선택된 탭을 다시 누르면 서브 버튼 숨김
+                if (currentTab === tabType) {{
+                    hideSubButtons();
+                    return;
+                }}
+                
+                currentTab = tabType;
+                
+                if (tabType === 'task') {{
+                    // 업무 탭 선택
+                    showSubButtons('📋', '업무 목록', '➕', '업무 등록', 
+                                  'navigateToTaskList()', 'showQuickTaskModal()');
+                    updateTabState('task');
+                }} else if (tabType === 'profit') {{
+                    // 손익 탭 선택
+                    showSubButtons('💰', '손익 목록', '💳', '손익 등록', 
+                                  'navigateToProfitLoss()', 'showExpenseModal()');
+                    updateTabState('profit');
+                }}
+            }}
+            
+            function showSubButtons(icon1, label1, icon2, label2, action1, action2) {{
+                const subButtons = document.getElementById('floatingSubButtons');
+                const button1 = document.getElementById('subButton1');
+                const button2 = document.getElementById('subButton2');
+                const icon1El = document.getElementById('subIcon1');
+                const label1El = document.getElementById('subLabel1');
+                const icon2El = document.getElementById('subIcon2');
+                const label2El = document.getElementById('subLabel2');
+                
+                // 서브 버튼 내용 설정
+                icon1El.textContent = icon1;
+                label1El.textContent = label1;
+                icon2El.textContent = icon2;
+                label2El.textContent = label2;
+                
+                // 클릭 이벤트 설정
+                button1.onclick = () => eval(action1);
+                button2.onclick = () => eval(action2);
+                
+                // 애니메이션과 함께 표시
+                subButtons.style.display = 'flex';
+                setTimeout(() => {{
+                    subButtons.style.animation = 'slideUp 0.3s ease-out';
+                }}, 10);
+            }}
+            
+            function hideSubButtons() {{
+                const subButtons = document.getElementById('floatingSubButtons');
+                subButtons.style.display = 'none';
+                currentTab = null;
+                updateTabState(null);
+            }}
+            
+            function updateTabState(activeTab) {{
+                // 모든 탭에서 active 클래스 제거
+                document.getElementById('taskTab').classList.remove('active');
+                document.getElementById('profitTab').classList.remove('active');
+                
+                // 선택된 탭에 active 클래스 추가
+                if (activeTab === 'task') {{
+                    document.getElementById('taskTab').classList.add('active');
+                }} else if (activeTab === 'profit') {{
+                    document.getElementById('profitTab').classList.add('active');
+                }}
+            }}
+            
+            // 화면 다른 곳 클릭 시 서브 버튼 숨김
+            document.addEventListener('click', function(event) {{
+                const subButtons = document.getElementById('floatingSubButtons');
+                const bottomNav = document.querySelector('.bottom-nav');
+                
+                if (currentTab && subButtons.style.display === 'flex') {{
+                    // 서브 버튼이나 탭바가 아닌 곳을 클릭한 경우
+                    if (!subButtons.contains(event.target) && !bottomNav.contains(event.target)) {{
+                        hideSubButtons();
+                    }}
+                }}
+            }});
+            
+            // 기존 네비게이션 함수들 유지
             function navigateToTaskList() {{
                 window.location.href = '/task-list';
             }}

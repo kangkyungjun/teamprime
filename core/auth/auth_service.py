@@ -186,7 +186,7 @@ class AuthService:
             if not user_id:
                 return False, "유효하지 않은 토큰입니다", None
             
-            # 🚀 서버 재시작 감지 - 토큰이 이전 서버 세션에서 생성된 경우 무효화
+            # 🚀 서버 재시작 감지 활성화 - 재시작 시 모든 토큰 무효화
             if token_server_start_time and token_server_start_time != SERVER_START_TIME:
                 logger.warning(f"⚠️ 서버 재시작으로 인한 토큰 무효화: user_id={user_id}")
                 return False, "서버가 재시작되어 다시 로그인해주세요", None

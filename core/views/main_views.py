@@ -38,7 +38,18 @@ async def authenticated_api_key_input_dashboard(request: Request, current_user: 
         if not current_user:
             return RedirectResponse(url="/login")
     
+    user_id = current_user.get('id')
     username = current_user.get('username', '사용자')
+    
+    # 🔍 기존 세션 확인 - 이미 API 키로 로그인된 경우 바로 거래 대시보드로
+    from core.session.session_manager import session_manager
+    existing_session = session_manager.get_session(user_id)
+    
+    if existing_session and existing_session.login_status.get("logged_in", False):
+        logger.info(f"✅ {username} 기존 세션 발견 - 거래 대시보드로 리다이렉트")
+        return RedirectResponse(url="/dashboard")
+    
+    logger.info(f"🔑 {username} 새로운 API 키 입력 필요 - 로그인 폼 표시")
     
     html_content = f"""
     <!DOCTYPE html>
@@ -199,10 +210,247 @@ async def authenticated_api_key_input_dashboard(request: Request, current_user: 
             .nav-links a:hover {{
                 text-decoration: underline;
             }}
+            
+            /* 플로팅 서브 버튼 */
+            .floating-sub-buttons {{
+                position: fixed;
+                bottom: 100px; /* 탭바(80px) 위쪽 20px */
+                left: 50%;
+                transform: translateX(-50%);
+                display: flex;
+                gap: 20px;
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(20px);
+                -webkit-backdrop-filter: blur(20px);
+                border-radius: 25px;
+                padding: 15px 25px;
+                box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+                z-index: 999;
+                animation: slideUp 0.3s ease-out;
+            }}
+            
+            .sub-button {{
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                padding: 15px 20px;
+                border-radius: 18px;
+                background: linear-gradient(45deg, #667eea, #764ba2);
+                color: white;
+                cursor: pointer;
+                transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+                min-width: 70px;
+                box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            }}
+            
+            .sub-button:hover {{
+                transform: translateY(-3px);
+                box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            }}
+            
+            .sub-icon {{
+                font-size: 20px;
+                margin-bottom: 4px;
+            }}
+            
+            .sub-label {{
+                font-size: 12px;
+                font-weight: 600;
+                letter-spacing: 0.5px;
+            }}
+            
+            @keyframes slideUp {{
+                from {{
+                    opacity: 0;
+                    transform: translateX(-50%) translateY(20px);
+                }}
+                to {{
+                    opacity: 1;
+                    transform: translateX(-50%) translateY(0);
+                }}
+            }}
+
+            /* 하단 탭바 네비게이션 */
+            .bottom-nav {{
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                height: 80px;
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(20px);
+                -webkit-backdrop-filter: blur(20px);
+                border-top: 1px solid #e0e0e0;
+                box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+                display: flex;
+                align-items: center;
+                justify-content: space-around;
+                z-index: 1000;
+                padding: 8px 16px 20px 16px;
+            }}
+            
+            .nav-item {{
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                padding: 8px 12px;
+                border-radius: 12px;
+                transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+                min-width: 60px;
+            }}
+            
+            .nav-item:hover {{
+                background: rgba(103, 80, 164, 0.08);
+                transform: translateY(-1px);
+            }}
+            
+            .nav-item.active {{
+                background: linear-gradient(45deg, #667eea, #764ba2);
+                color: white;
+                transform: translateY(-2px);
+                box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            }}
+            
+            .nav-icon {{
+                font-size: 22px;
+                margin-bottom: 4px;
+            }}
+            
+            .nav-label {{
+                font-size: 11px;
+                font-weight: 500;
+                color: #333;
+                text-align: center;
+            }}
+            
+            /* 상단 앱바 */
+            .app-bar {{
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(10px);
+                padding: 0 20px;
+                height: 60px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                z-index: 1000;
+            }}
+            
+            .app-title {{
+                font-size: 20px;
+                font-weight: 700;
+                color: #333;
+                text-decoration: none;
+            }}
+            
+            .user-info {{
+                display: flex;
+                align-items: center;
+                gap: 15px;
+            }}
+            
+            .user-name {{
+                font-weight: 600;
+                color: #333;
+            }}
+            
+            .user-role {{
+                background: linear-gradient(45deg, #667eea, #764ba2);
+                color: white;
+                padding: 4px 12px;
+                border-radius: 20px;
+                font-size: 12px;
+                font-weight: 500;
+                text-transform: uppercase;
+            }}
+            
+            .menu-btn {{
+                background: none;
+                border: none;
+                font-size: 24px;
+                cursor: pointer;
+                padding: 8px;
+                border-radius: 8px;
+                transition: background-color 0.2s;
+            }}
+            
+            .menu-btn:hover {{
+                background-color: rgba(0,0,0,0.05);
+            }}
+            
+            .user-menu {{
+                position: relative;
+                display: inline-block;
+            }}
+            
+            .dropdown-menu {{
+                display: none;
+                position: absolute;
+                right: 0;
+                top: 100%;
+                background: white;
+                min-width: 160px;
+                box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+                border-radius: 12px;
+                padding: 8px 0;
+                z-index: 1000;
+                margin-top: 8px;
+            }}
+            
+            .dropdown-menu.show {{
+                display: block;
+            }}
+            
+            .dropdown-item {{
+                display: block;
+                width: 100%;
+                padding: 12px 20px;
+                text-decoration: none;
+                color: #333;
+                border: none;
+                background: none;
+                text-align: left;
+                cursor: pointer;
+                transition: background-color 0.2s;
+            }}
+            
+            .dropdown-item:hover {{
+                background-color: #f8f9fa;
+            }}
+            
+            .dropdown-divider {{
+                height: 1px;
+                background-color: #e9ecef;
+                margin: 8px 0;
+            }}
         </style>
     </head>
     <body>
-        <div class="container">
+        <!-- 상단 앱바 -->
+        <div class="app-bar">
+            <a href="/main-dashboard" class="app-title">🚀 Teamprime</a>
+            <div class="user-info">
+                <span class="user-name">👤 {username}</span>
+                <div class="user-menu">
+                    <button class="menu-btn" onclick="toggleMenu()">☰</button>
+                    <div class="dropdown-menu" id="userDropdown">
+                        <a href="/profile" class="dropdown-item">👤 프로필</a>
+                        <a href="/settings" class="dropdown-item">⚙️ 설정</a>
+                        <div class="dropdown-divider"></div>
+                        <button class="dropdown-item" onclick="logout()">🚪 로그아웃</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="container" style="margin-top: 80px;">
             <div class="logo">
                 <h1>🚀 Teamprime</h1>
                 <p>업비트 자동거래 시스템</p>
@@ -298,7 +546,137 @@ async def authenticated_api_key_input_dashboard(request: Request, current_user: 
                     loading.style.display = 'none';
                 }}
             }});
+            
+            // === 탭바 관련 JavaScript 함수들 ===
+            let currentTab = null;
+
+            function selectTab(tabType) {{
+                if (currentTab === tabType) {{
+                    hideSubButtons();
+                    return;
+                }}
+                
+                currentTab = tabType;
+                
+                if (tabType === 'task') {{
+                    showSubButtons('📋', '업무 목록', '➕', '업무 등록', 
+                                  'navigateToTaskList()', 'showQuickTaskModal()');
+                    updateTabState('task');
+                }} else if (tabType === 'profit') {{
+                    showSubButtons('💰', '손익 목록', '💳', '손익 등록', 
+                                  'navigateToProfitLoss()', 'showExpenseModal()');
+                    updateTabState('profit');
+                }}
+            }}
+            
+            function showSubButtons(icon1, label1, icon2, label2, action1, action2) {{
+                const subButtons = document.getElementById('floatingSubButtons');
+                const button1 = document.getElementById('subButton1');
+                const button2 = document.getElementById('subButton2');
+                const icon1El = document.getElementById('subIcon1');
+                const label1El = document.getElementById('subLabel1');
+                const icon2El = document.getElementById('subIcon2');
+                const label2El = document.getElementById('subLabel2');
+                
+                icon1El.textContent = icon1;
+                label1El.textContent = label1;
+                icon2El.textContent = icon2;
+                label2El.textContent = label2;
+                
+                button1.onclick = () => eval(action1);
+                button2.onclick = () => eval(action2);
+                
+                subButtons.style.display = 'flex';
+            }}
+            
+            function hideSubButtons() {{
+                document.getElementById('floatingSubButtons').style.display = 'none';
+                currentTab = null;
+                updateTabState(null);
+            }}
+            
+            function updateTabState(activeTab) {{
+                document.getElementById('taskTab').classList.remove('active');
+                document.getElementById('profitTab').classList.remove('active');
+                
+                if (activeTab === 'task') {{
+                    document.getElementById('taskTab').classList.add('active');
+                }} else if (activeTab === 'profit') {{
+                    document.getElementById('profitTab').classList.add('active');
+                }}
+            }}
+            
+            function navigateToTaskList() {{
+                window.location.href = '/task-list';
+            }}
+            
+            function navigateToProfitLoss() {{
+                window.location.href = '/profit-loss';
+            }}
+            
+            function showQuickTaskModal() {{
+                alert('빠른 업무 등록 기능은 메인 대시보드에서 이용하실 수 있습니다.');
+            }}
+            
+            function showExpenseModal() {{
+                alert('손익 등록 기능은 손익 페이지에서 이용하실 수 있습니다.');
+            }}
+            
+            function toggleMenu() {{
+                const dropdown = document.getElementById('userDropdown');
+                dropdown.classList.toggle('show');
+            }}
+            
+            function logout() {{
+                if (confirm('로그아웃 하시겠습니까?')) {{
+                    window.location.href = '/logout';
+                }}
+            }}
+            
+            // 메뉴 외부 클릭 시 닫기
+            document.addEventListener('click', function(event) {{
+                const subButtons = document.getElementById('floatingSubButtons');
+                const bottomNav = document.querySelector('.bottom-nav');
+                
+                if (currentTab && subButtons.style.display === 'flex') {{
+                    if (!subButtons.contains(event.target) && !bottomNav.contains(event.target)) {{
+                        hideSubButtons();
+                    }}
+                }}
+                
+                if (!event.target.matches('.menu-btn')) {{
+                    const dropdown = document.getElementById('userDropdown');
+                    if (dropdown.classList.contains('show')) {{
+                        dropdown.classList.remove('show');
+                    }}
+                }}
+            }});
         </script>
+        
+        <!-- 플로팅 서브 버튼 (탭바 위쪽) -->
+        <div class="floating-sub-buttons" id="floatingSubButtons" style="display: none;">
+            <div class="sub-button" id="subButton1">
+                <div class="sub-icon" id="subIcon1">📋</div>
+                <div class="sub-label" id="subLabel1">목록</div>
+            </div>
+            <div class="sub-button" id="subButton2">
+                <div class="sub-icon" id="subIcon2">➕</div>
+                <div class="sub-label" id="subLabel2">등록</div>
+            </div>
+        </div>
+
+        <!-- 하단 탭바 네비게이션 -->
+        <div class="bottom-nav">
+            <div class="nav-item" id="taskTab" onclick="selectTab('task')">
+                <div class="nav-icon">📝</div>
+                <div class="nav-label">업무</div>
+            </div>
+            <div class="nav-item" id="profitTab" onclick="selectTab('profit')">
+                <div class="nav-icon">💰</div>
+                <div class="nav-label">손익</div>
+            </div>
+        </div>
+        
     </body>
     </html>
     """
@@ -558,10 +936,246 @@ async def profile_page(request: Request):
                 transform: translateY(-2px);
                 box-shadow: 0 4px 15px rgba(0,0,0,0.2);
             }}
+            
+            /* 플로팅 서브 버튼 */
+            .floating-sub-buttons {{
+                position: fixed;
+                bottom: 100px;
+                left: 50%;
+                transform: translateX(-50%);
+                display: flex;
+                gap: 20px;
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(20px);
+                border-radius: 25px;
+                padding: 15px 25px;
+                box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+                z-index: 999;
+                animation: slideUp 0.3s ease-out;
+            }}
+            
+            .sub-button {{
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                padding: 15px 20px;
+                border-radius: 18px;
+                background: linear-gradient(45deg, #667eea, #764ba2);
+                color: white;
+                cursor: pointer;
+                transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+                min-width: 70px;
+                box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            }}
+            
+            .sub-button:hover {{
+                transform: translateY(-3px);
+                box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+            }}
+            
+            .sub-icon {{
+                font-size: 20px;
+                margin-bottom: 4px;
+            }}
+            
+            .sub-label {{
+                font-size: 12px;
+                font-weight: 600;
+                letter-spacing: 0.5px;
+            }}
+            
+            @keyframes slideUp {{
+                from {{
+                    opacity: 0;
+                    transform: translateX(-50%) translateY(20px);
+                }}
+                to {{
+                    opacity: 1;
+                    transform: translateX(-50%) translateY(0);
+                }}
+            }}
+
+            /* 하단 탭바 네비게이션 */
+            .bottom-nav {{
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                height: 80px;
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(20px);
+                border-top: 1px solid #e0e0e0;
+                box-shadow: 0 -4px 20px rgba(0,0,0,0.1);
+                display: flex;
+                align-items: center;
+                justify-content: space-around;
+                z-index: 1000;
+                padding: 8px 16px 20px 16px;
+            }}
+            
+            .nav-item {{
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                padding: 8px 12px;
+                border-radius: 12px;
+                transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+                min-width: 60px;
+            }}
+            
+            .nav-item:hover {{
+                background: rgba(103, 80, 164, 0.08);
+                transform: translateY(-1px);
+            }}
+            
+            .nav-item.active {{
+                background: linear-gradient(45deg, #667eea, #764ba2);
+                color: white;
+                transform: translateY(-2px);
+                box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            }}
+            
+            .nav-icon {{
+                font-size: 22px;
+                margin-bottom: 4px;
+            }}
+            
+            .nav-label {{
+                font-size: 11px;
+                font-weight: 500;
+                color: #333;
+                text-align: center;
+            }}
+            
+            /* 상단 앱바 */
+            .app-bar {{
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(10px);
+                padding: 0 20px;
+                height: 60px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                z-index: 1000;
+            }}
+            
+            .app-title {{
+                font-size: 20px;
+                font-weight: 700;
+                color: #333;
+                text-decoration: none;
+            }}
+            
+            .user-info {{
+                display: flex;
+                align-items: center;
+                gap: 15px;
+            }}
+            
+            .user-name {{
+                font-weight: 600;
+                color: #333;
+            }}
+            
+            .user-role {{
+                background: linear-gradient(45deg, #667eea, #764ba2);
+                color: white;
+                padding: 4px 12px;
+                border-radius: 20px;
+                font-size: 12px;
+                font-weight: 500;
+                text-transform: uppercase;
+            }}
+            
+            .menu-btn {{
+                background: none;
+                border: none;
+                font-size: 24px;
+                cursor: pointer;
+                padding: 8px;
+                border-radius: 8px;
+                transition: background-color 0.2s;
+            }}
+            
+            .menu-btn:hover {{
+                background-color: rgba(0,0,0,0.05);
+            }}
+            
+            .user-menu {{
+                position: relative;
+                display: inline-block;
+            }}
+            
+            .dropdown-menu {{
+                display: none;
+                position: absolute;
+                right: 0;
+                top: 100%;
+                background: white;
+                min-width: 160px;
+                box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+                border-radius: 12px;
+                padding: 8px 0;
+                z-index: 1000;
+                margin-top: 8px;
+            }}
+            
+            .dropdown-menu.show {{
+                display: block;
+            }}
+            
+            .dropdown-item {{
+                display: block;
+                width: 100%;
+                padding: 12px 20px;
+                text-decoration: none;
+                color: #333;
+                border: none;
+                background: none;
+                text-align: left;
+                cursor: pointer;
+                transition: background-color 0.2s;
+            }}
+            
+            .dropdown-item:hover {{
+                background-color: #f8f9fa;
+            }}
+            
+            .dropdown-divider {{
+                height: 1px;
+                background-color: #e9ecef;
+                margin: 8px 0;
+            }}
         </style>
     </head>
     <body>
-        <div class="container">
+        <!-- 상단 앱바 -->
+        <div class="app-bar">
+            <a href="/main-dashboard" class="app-title">🚀 Teamprime</a>
+            <div class="user-info">
+                <span class="user-name">👤 {username}</span>
+                <span class="user-role">{display_role}</span>
+                <div class="user-menu">
+                    <button class="menu-btn" onclick="toggleMenu()">☰</button>
+                    <div class="dropdown-menu" id="userDropdown">
+                        <a href="/profile" class="dropdown-item">👤 프로필</a>
+                        <a href="/settings" class="dropdown-item">⚙️ 설정</a>
+                        <div class="dropdown-divider"></div>
+                        <button class="dropdown-item" onclick="logout()">🚪 로그아웃</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="container" style="margin-top: 80px; margin-bottom: 100px;">
             <div class="header">
                 <h1>👤 사용자 프로필</h1>
             </div>
@@ -704,7 +1318,137 @@ async def profile_page(request: Request):
                     message.style.display = 'block';
                 }}
             }});
+            
+            // === 탭바 관련 JavaScript 함수들 ===
+            let currentTab = null;
+
+            function selectTab(tabType) {{
+                if (currentTab === tabType) {{
+                    hideSubButtons();
+                    return;
+                }}
+                
+                currentTab = tabType;
+                
+                if (tabType === 'task') {{
+                    showSubButtons('📋', '업무 목록', '➕', '업무 등록', 
+                                  'navigateToTaskList()', 'showQuickTaskModal()');
+                    updateTabState('task');
+                }} else if (tabType === 'profit') {{
+                    showSubButtons('💰', '손익 목록', '💳', '손익 등록', 
+                                  'navigateToProfitLoss()', 'showExpenseModal()');
+                    updateTabState('profit');
+                }}
+            }}
+            
+            function showSubButtons(icon1, label1, icon2, label2, action1, action2) {{
+                const subButtons = document.getElementById('floatingSubButtons');
+                const button1 = document.getElementById('subButton1');
+                const button2 = document.getElementById('subButton2');
+                const icon1El = document.getElementById('subIcon1');
+                const label1El = document.getElementById('subLabel1');
+                const icon2El = document.getElementById('subIcon2');
+                const label2El = document.getElementById('subLabel2');
+                
+                icon1El.textContent = icon1;
+                label1El.textContent = label1;
+                icon2El.textContent = icon2;
+                label2El.textContent = label2;
+                
+                button1.onclick = () => eval(action1);
+                button2.onclick = () => eval(action2);
+                
+                subButtons.style.display = 'flex';
+            }}
+            
+            function hideSubButtons() {{
+                document.getElementById('floatingSubButtons').style.display = 'none';
+                currentTab = null;
+                updateTabState(null);
+            }}
+            
+            function updateTabState(activeTab) {{
+                document.getElementById('taskTab').classList.remove('active');
+                document.getElementById('profitTab').classList.remove('active');
+                
+                if (activeTab === 'task') {{
+                    document.getElementById('taskTab').classList.add('active');
+                }} else if (activeTab === 'profit') {{
+                    document.getElementById('profitTab').classList.add('active');
+                }}
+            }}
+            
+            function navigateToTaskList() {{
+                window.location.href = '/task-list';
+            }}
+            
+            function navigateToProfitLoss() {{
+                window.location.href = '/profit-loss';
+            }}
+            
+            function showQuickTaskModal() {{
+                alert('빠른 업무 등록 기능은 메인 대시보드에서 이용하실 수 있습니다.');
+            }}
+            
+            function showExpenseModal() {{
+                alert('손익 등록 기능은 손익 페이지에서 이용하실 수 있습니다.');
+            }}
+            
+            function toggleMenu() {{
+                const dropdown = document.getElementById('userDropdown');
+                dropdown.classList.toggle('show');
+            }}
+            
+            function logout() {{
+                if (confirm('로그아웃 하시겠습니까?')) {{
+                    window.location.href = '/logout';
+                }}
+            }}
+            
+            // 메뉴 외부 클릭 시 닫기
+            document.addEventListener('click', function(event) {{
+                const subButtons = document.getElementById('floatingSubButtons');
+                const bottomNav = document.querySelector('.bottom-nav');
+                
+                if (currentTab && subButtons.style.display === 'flex') {{
+                    if (!subButtons.contains(event.target) && !bottomNav.contains(event.target)) {{
+                        hideSubButtons();
+                    }}
+                }}
+                
+                if (!event.target.matches('.menu-btn')) {{
+                    const dropdown = document.getElementById('userDropdown');
+                    if (dropdown.classList.contains('show')) {{
+                        dropdown.classList.remove('show');
+                    }}
+                }}
+            }});
         </script>
+        
+        <!-- 플로팅 서브 버튼 (탭바 위쪽) -->
+        <div class="floating-sub-buttons" id="floatingSubButtons" style="display: none;">
+            <div class="sub-button" id="subButton1">
+                <div class="sub-icon" id="subIcon1">📋</div>
+                <div class="sub-label" id="subLabel1">목록</div>
+            </div>
+            <div class="sub-button" id="subButton2">
+                <div class="sub-icon" id="subIcon2">➕</div>
+                <div class="sub-label" id="subLabel2">등록</div>
+            </div>
+        </div>
+
+        <!-- 하단 탭바 네비게이션 -->
+        <div class="bottom-nav">
+            <div class="nav-item" id="taskTab" onclick="selectTab('task')">
+                <div class="nav-icon">📝</div>
+                <div class="nav-label">업무</div>
+            </div>
+            <div class="nav-item" id="profitTab" onclick="selectTab('profit')">
+                <div class="nav-icon">💰</div>
+                <div class="nav-label">손익</div>
+            </div>
+        </div>
+        
     </body>
     </html>
     """
