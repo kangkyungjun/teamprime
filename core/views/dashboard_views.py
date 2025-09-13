@@ -176,23 +176,6 @@ async def task_list_page(request: Request):
                 gap: 4px;
             }}
             
-            .task-priority {{
-                display: flex;
-                align-items: center;
-                gap: 4px;
-            }}
-            
-            .priority-high {{
-                color: #dc3545;
-            }}
-            
-            .priority-medium {{
-                color: #fd7e14;
-            }}
-            
-            .priority-low {{
-                color: #28a745;
-            }}
             
             .loading {{
                 text-align: center;
@@ -390,53 +373,6 @@ async def task_list_page(request: Request):
 
             .floating-sub-buttons {{
                 position: fixed;
-                bottom: 90px;
-                left: 50%;
-                transform: translateX(-50%);
-                display: none;
-                flex-direction: column;
-                gap: 12px;
-                z-index: 999;
-                animation: slideUpFade 0.3s ease-out;
-            }}
-
-            @keyframes slideUpFade {{
-                from {{
-                    opacity: 0;
-                    transform: translateX(-50%) translateY(20px);
-                }}
-                to {{
-                    opacity: 1;
-                    transform: translateX(-50%) translateY(0);
-                }}
-            }}
-
-            .sub-button {{
-                background: rgba(255, 255, 255, 0.95);
-                border: none;
-                border-radius: 16px;
-                padding: 12px 20px;
-                cursor: pointer;
-                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-                backdrop-filter: blur(20px);
-                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-                color: #333;
-                font-weight: 500;
-                font-size: 14px;
-                min-width: 120px;
-                text-align: center;
-            }}
-
-            .sub-button:hover {{
-                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                color: white;
-                transform: translateY(-2px);
-                box-shadow: 0 6px 25px rgba(102, 126, 234, 0.4);
-            }}
-
-            /* 플로팅 서브 버튼 */
-            .floating-sub-buttons {{
-                position: fixed;
                 bottom: 100px; /* 탭바(80px) 위쪽 20px */
                 left: 50%;
                 transform: translateX(-50%);
@@ -451,7 +387,8 @@ async def task_list_page(request: Request):
                 z-index: 999;
                 animation: slideUp 0.3s ease-out;
             }}
-            
+
+
             .sub-button {{
                 display: flex;
                 flex-direction: column;
@@ -466,7 +403,7 @@ async def task_list_page(request: Request):
                 min-width: 70px;
                 box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
             }}
-            
+
             .sub-button:hover {{
                 transform: translateY(-3px);
                 box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
@@ -485,17 +422,6 @@ async def task_list_page(request: Request):
                 font-size: 12px;
                 font-weight: 600;
                 letter-spacing: 0.5px;
-            }}
-            
-            @keyframes slideUp {{
-                from {{
-                    opacity: 0;
-                    transform: translateX(-50%) translateY(20px);
-                }}
-                to {{
-                    opacity: 1;
-                    transform: translateX(-50%) translateY(0);
-                }}
             }}
 
             /* 하단 탭바 네비게이션 */
@@ -651,13 +577,13 @@ async def task_list_page(request: Request):
                 margin: 0;
             }}
             
-            .filter-buttons, .priority-filters {{
+            .filter-buttons, .period-filter-buttons {{
                 display: flex;
                 gap: 8px;
                 flex-wrap: wrap;
             }}
             
-            .filter-btn, .priority-btn {{
+            .filter-btn, .period-btn {{
                 padding: 8px 16px;
                 border: 2px solid #e0e0e0;
                 border-radius: 20px;
@@ -670,12 +596,12 @@ async def task_list_page(request: Request):
                 white-space: nowrap;
             }}
             
-            .filter-btn:hover, .priority-btn:hover {{
+            .filter-btn:hover, .period-btn:hover {{
                 border-color: var(--md-primary);
                 color: var(--md-primary);
             }}
             
-            .filter-btn.active, .priority-btn.active {{
+            .filter-btn.active, .period-btn.active {{
                 background: var(--md-primary);
                 border-color: var(--md-primary);
                 color: white;
@@ -780,20 +706,6 @@ async def task_list_page(request: Request):
                 color: #155724;
             }}
             
-            .task-detail-priority.priority-high {{
-                background: #f8d7da;
-                color: #721c24;
-            }}
-            
-            .task-detail-priority.priority-medium {{
-                background: #fff3cd;
-                color: #856404;
-            }}
-            
-            .task-detail-priority.priority-low {{
-                background: #d1ecf1;
-                color: #0c5460;
-            }}
             
             .task-detail-section {{
                 margin-bottom: 24px;
@@ -881,6 +793,13 @@ async def task_list_page(request: Request):
                 
                 .task-meta-grid {{
                     grid-template-columns: 1fr;
+                }}
+                
+                .quick-task-content {{
+                    width: 95%;
+                    margin: 2% auto;
+                    padding: 20px;
+                    max-height: 90vh;
                 }}
             }}
             
@@ -984,7 +903,7 @@ async def task_list_page(request: Request):
             .quick-task-modal {{
                 display: none;
                 position: fixed;
-                z-index: 1000;
+                z-index: 1001;
                 left: 0;
                 top: 0;
                 width: 100%;
@@ -994,11 +913,13 @@ async def task_list_page(request: Request):
             
             .quick-task-content {{
                 background-color: white;
-                margin: 10% auto;
+                margin: 5% auto;
                 padding: 30px;
                 border-radius: 15px;
                 width: 90%;
                 max-width: 500px;
+                max-height: 85vh;
+                overflow-y: auto;
                 box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             }}
             
@@ -1181,6 +1102,109 @@ async def task_list_page(request: Request):
             .menu-text {{
                 font-size: 16px;
             }}
+            
+            /* 손익 유형 선택기 */
+            .profit-type-selector {{
+                display: flex;
+                gap: 16px;
+                margin-top: 8px;
+            }}
+            
+            .radio-option {{
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                padding: 12px 20px;
+                border: 2px solid #e1e8ed;
+                border-radius: 12px;
+                cursor: pointer;
+                transition: all 0.3s;
+                flex: 1;
+            }}
+            
+            .radio-option:hover {{
+                border-color: #667eea;
+                transform: translateY(-1px);
+            }}
+            
+            .radio-option input[type="radio"] {{
+                display: none;
+            }}
+            
+            .radio-custom {{
+                width: 20px;
+                height: 20px;
+                border-radius: 50%;
+                border: 2px solid #ddd;
+                position: relative;
+                transition: all 0.3s;
+                flex-shrink: 0;
+            }}
+            
+            .radio-custom.profit {{
+                border-color: #28a745;
+            }}
+            
+            .radio-custom.expense {{
+                border-color: #dc3545;
+            }}
+            
+            .radio-option input[type="radio"]:checked + .radio-custom.profit {{
+                background-color: #28a745;
+                border-color: #28a745;
+            }}
+            
+            .radio-option input[type="radio"]:checked + .radio-custom.expense {{
+                background-color: #dc3545;
+                border-color: #dc3545;
+            }}
+            
+            .radio-option input[type="radio"]:checked + .radio-custom::after {{
+                content: '';
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                background-color: white;
+            }}
+            
+            .profit-option input[type="radio"]:checked + .radio-custom {{
+                background-color: #28a745;
+                border-color: #28a745;
+            }}
+            
+            .expense-option input[type="radio"]:checked + .radio-custom {{
+                background-color: #dc3545;
+                border-color: #dc3545;
+            }}
+            
+            .radio-text {{
+                font-size: 16px;
+                font-weight: 600;
+                color: #333;
+            }}
+            
+            .profit-option input[type="radio"]:checked ~ .radio-text {{
+                color: #28a745;
+            }}
+            
+            .expense-option input[type="radio"]:checked ~ .radio-text {{
+                color: #dc3545;
+            }}
+            
+            /* 금액 표시 */
+            .amount-korean {{
+                font-size: 14px;
+                color: #666;
+                margin-top: 8px;
+                padding: 8px 12px;
+                background: #f8f9fa;
+                border-radius: 8px;
+                min-height: 20px;
+            }}
         </style>
     </head>
     <body>
@@ -1223,12 +1247,13 @@ async def task_list_page(request: Request):
                     </div>
                     
                     <div class="filter-group">
-                        <label>우선순위</label>
-                        <div class="priority-filters">
-                            <button class="priority-btn active" data-priority="all">전체</button>
-                            <button class="priority-btn" data-priority="high">높음</button>
-                            <button class="priority-btn" data-priority="medium">보통</button>
-                            <button class="priority-btn" data-priority="low">낮음</button>
+                        <label>기간</label>
+                        <div class="period-filter-buttons">
+                            <button class="period-btn active" data-period="this_year">올해</button>
+                            <button class="period-btn" data-period="last_3_months">최근 3개월</button>
+                            <button class="period-btn" data-period="last_6_months">최근 6개월</button>
+                            <button class="period-btn" data-period="last_year">작년</button>
+                            <button class="period-btn" data-period="all">전체</button>
                         </div>
                     </div>
                     
@@ -1324,17 +1349,6 @@ async def task_list_page(request: Request):
                                     </select>
                                 </div>
                                 
-                                <div class="col-md-6 mb-3">
-                                    <label for="editTaskPriority" class="form-label">
-                                        <i class="fas fa-exclamation-circle me-1"></i>우선순위
-                                    </label>
-                                    <select class="form-select" id="editTaskPriority">
-                                        <option value="low">낮음</option>
-                                        <option value="medium">보통</option>
-                                        <option value="high">높음</option>
-                                        <option value="urgent">긴급</option>
-                                    </select>
-                                </div>
                             </div>
                             
                             <div class="mb-3">
@@ -1361,25 +1375,6 @@ async def task_list_page(request: Request):
                         </button>
                     </div>
                 </div>
-            </div>
-        </div>
-        
-        <!-- 하단 탭바 네비게이션 -->
-        <div class="bottom-nav">
-            <div class="nav-item active" onclick="navigateToTaskList()">
-                <div class="nav-icon">📝</div>
-                <div class="nav-label">업무 목록</div>
-            </div>
-            <div class="nav-item nav-fab" onclick="showQuickTaskModal()">
-                <div class="nav-icon-fab">➕</div>
-            </div>
-            <div class="nav-item" onclick="navigateToProfitLoss()">
-                <div class="nav-icon">💰</div>
-                <div class="nav-label">손익</div>
-            </div>
-            <div class="nav-item" onclick="showMenuModal()">
-                <div class="nav-icon">☰</div>
-                <div class="nav-label">메뉴</div>
             </div>
         </div>
         
@@ -1412,6 +1407,16 @@ async def task_list_page(request: Request):
                             <option value="유지보수">유지보수</option>
                         </select>
                     </div>
+                    <div class="quick-form-group">
+                        <label class="quick-form-label">상태</label>
+                        <select class="quick-form-select" id="quickTaskStatus">
+                            <option value="대기">대기</option>
+                            <option value="진행중">진행중</option>
+                            <option value="완료">완료</option>
+                            <option value="보류">보류</option>
+                            <option value="취소">취소</option>
+                        </select>
+                    </div>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                         <div class="quick-form-group">
                             <label class="quick-form-label">시작일</label>
@@ -1436,6 +1441,61 @@ async def task_list_page(request: Request):
                         </button>
                     </div>
                 </form>
+            </div>
+        </div>
+        
+        <!-- 손익 등록 모달 -->
+        <div id="profitModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>손익 등록</h2>
+                    <span class="close" onclick="closeProfitModal()">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>손익 유형</label>
+                        <div class="profit-type-selector">
+                            <label class="radio-option profit-option">
+                                <input type="radio" name="profitType" value="profit" checked>
+                                <span class="radio-custom profit"></span>
+                                <span class="radio-text">수익</span>
+                            </label>
+                            <label class="radio-option expense-option">
+                                <input type="radio" name="profitType" value="expense">
+                                <span class="radio-custom expense"></span>
+                                <span class="radio-text">지출</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="profitAmount">금액</label>
+                        <input type="text" id="profitAmount" placeholder="금액을 입력하세요" 
+                               oninput="formatAmountInput(this)" style="font-size: 18px; font-weight: 600;">
+                        <div id="amountInKorean" class="amount-korean"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="profitDescription">내용</label>
+                        <textarea id="profitDescription" placeholder="손익 내용을 입력하세요" rows="3"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="profitTaskSelect">연결 업무 (선택사항)</label>
+                        <select id="profitTaskSelect">
+                            <option value="">업무를 선택하세요</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="profitDate">날짜</label>
+                        <input type="date" id="profitDate">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button onclick="closeProfitModal()" class="btn-secondary">취소</button>
+                    <button onclick="saveProfit()" class="btn-primary">등록</button>
+                </div>
             </div>
         </div>
         
@@ -1551,11 +1611,11 @@ async def task_list_page(request: Request):
                     }});
                 }});
                 
-                // 우선순위 필터 버튼들
-                const priorityBtns = document.querySelectorAll('.priority-btn');
-                priorityBtns.forEach(btn => {{
+                // 기간 필터 버튼들
+                const periodBtns = document.querySelectorAll('.period-btn');
+                periodBtns.forEach(btn => {{
                     btn.addEventListener('click', function() {{
-                        priorityBtns.forEach(b => b.classList.remove('active'));
+                        periodBtns.forEach(b => b.classList.remove('active'));
                         this.classList.add('active');
                         filterTasks();
                     }});
@@ -1573,10 +1633,40 @@ async def task_list_page(request: Request):
                 }}, 300); // 300ms 디바운싱
             }}
             
+            // 기간 매칭 함수
+            function matchesDatePeriod(task, period) {{
+                if (period === 'all') return true;
+                
+                const now = new Date();
+                const currentYear = now.getFullYear();
+                const taskDate = new Date(task.created_at || task.start_date);
+                
+                if (!taskDate || isNaN(taskDate.getTime())) return true; // 날짜가 없으면 표시
+                
+                switch(period) {{
+                    case 'this_year':
+                        return taskDate.getFullYear() === currentYear;
+                    case 'last_3_months': {{
+                        const threeMonthsAgo = new Date();
+                        threeMonthsAgo.setMonth(now.getMonth() - 3);
+                        return taskDate >= threeMonthsAgo && taskDate <= now;
+                    }}
+                    case 'last_6_months': {{
+                        const sixMonthsAgo = new Date();
+                        sixMonthsAgo.setMonth(now.getMonth() - 6);
+                        return taskDate >= sixMonthsAgo && taskDate <= now;
+                    }}
+                    case 'last_year':
+                        return taskDate.getFullYear() === (currentYear - 1);
+                    default:
+                        return true;
+                }}
+            }}
+
             function filterTasks() {{
                 const searchTerm = document.getElementById('searchInput').value.toLowerCase();
                 const activeStatus = document.querySelector('.filter-btn.active').dataset.status;
-                const activePriority = document.querySelector('.priority-btn.active').dataset.priority;
+                const activePeriod = document.querySelector('.period-btn.active').dataset.period;
                 const selectedAuthor = document.getElementById('authorFilter').value;
                 
                 filteredTasks = allTasks.filter(task => {{
@@ -1588,15 +1678,14 @@ async def task_list_page(request: Request):
                     // 상태 필터링
                     const matchesStatus = activeStatus === 'all' || task.status === activeStatus;
                     
-                    // 우선순위 필터링
-                    const matchesPriority = activePriority === 'all' || 
-                        (task.priority || 'medium') === activePriority;
+                    // 기간 필터링
+                    const matchesPeriod = matchesDatePeriod(task, activePeriod);
                     
                     // 작성자 필터링
                     const taskAuthor = task.author_name || task.created_by || task.username || '작성자 미상';
                     const matchesAuthor = selectedAuthor === 'all' || taskAuthor === selectedAuthor;
                     
-                    return matchesSearch && matchesStatus && matchesPriority && matchesAuthor;
+                    return matchesSearch && matchesStatus && matchesPeriod && matchesAuthor;
                 }});
                 
                 displayTasks(filteredTasks);
@@ -1613,8 +1702,6 @@ async def task_list_page(request: Request):
                 const tasksHtml = tasks.map(task => {{
                     const statusClass = getStatusClass(task.status);
                     const statusText = getStatusText(task.status);
-                    const priorityClass = getPriorityClass(task.priority);
-                    const priorityIcon = getPriorityIcon(task.priority);
                     
                     return `
                         <div class="task-card" onclick="viewTaskDetail(${{task.id}})">
@@ -1634,9 +1721,6 @@ async def task_list_page(request: Request):
                                     <i class="fas fa-user"></i>
                                     <span>${{task.author_name || task.created_by || task.username || '작성자 미상'}}</span>
                                 </div>
-                                <div class="task-priority ${{priorityClass}}">
-                                    <i class="${{priorityIcon}}"></i>
-                                    <span>${{task.priority || '보통'}}</span>
                                 </div>
                             </div>
                         </div>
@@ -1662,21 +1746,6 @@ async def task_list_page(request: Request):
                 }}
             }}
             
-            function getPriorityClass(priority) {{
-                switch(priority) {{
-                    case 'high': return 'priority-high';
-                    case 'low': return 'priority-low';
-                    default: return 'priority-medium';
-                }}
-            }}
-            
-            function getPriorityIcon(priority) {{
-                switch(priority) {{
-                    case 'high': return 'fas fa-exclamation-circle';
-                    case 'low': return 'fas fa-minus-circle';
-                    default: return 'fas fa-circle';
-                }}
-            }}
             
             function formatDate(dateString) {{
                 if (!dateString) return '날짜 없음';
@@ -1741,16 +1810,14 @@ async def task_list_page(request: Request):
                 
                 const content = document.getElementById('taskDetailContent');
                 
-                // 상태 및 우선순위 배지 생성
+                // 상태 배지 생성
                 const statusBadge = getStatusBadgeHtml(task.status);
-                const priorityBadge = getPriorityBadgeHtml(task.priority || 'medium');
                 
                 content.innerHTML = `
                     <div class="task-detail-header">
                         <h2 class="task-detail-title">${{task.title || '제목 없음'}}</h2>
                         <div class="task-detail-badges">
                             ${{statusBadge}}
-                            ${{priorityBadge}}
                         </div>
                     </div>
                     
@@ -1835,19 +1902,6 @@ async def task_list_page(request: Request):
                 return `<span class="task-detail-status ${{statusClass}}">${{statusText}}</span>`;
             }}
             
-            function getPriorityBadgeHtml(priority) {{
-                const priorityText = getPriorityText(priority);
-                const priorityClass = getPriorityClass(priority);
-                return `<span class="task-detail-priority ${{priorityClass}}">${{priorityText}}</span>`;
-            }}
-            
-            function getPriorityText(priority) {{
-                switch(priority) {{
-                    case 'high': return '높음';
-                    case 'low': return '낮음';
-                    default: return '보통';
-                }}
-            }}
             
             function formatTaskDetailDate(dateString) {{
                 if (!dateString) return '날짜 없음';
@@ -1868,10 +1922,10 @@ async def task_list_page(request: Request):
                 // 필터링 중인지 확인
                 const searchTerm = document.getElementById('searchInput').value;
                 const activeStatus = document.querySelector('.filter-btn.active').dataset.status;
-                const activePriority = document.querySelector('.priority-btn.active').dataset.priority;
+                const activePeriod = document.querySelector('.period-btn.active').dataset.period;
                 const selectedAuthor = document.getElementById('authorFilter').value;
                 
-                const isFiltering = searchTerm || activeStatus !== 'all' || activePriority !== 'all' || selectedAuthor !== 'all';
+                const isFiltering = searchTerm || activeStatus !== 'all' || activePeriod !== 'this_year' || selectedAuthor !== 'all';
                 
                 if (isFiltering) {{
                     // 필터링 결과가 없을 때
@@ -1907,10 +1961,10 @@ async def task_list_page(request: Request):
                     }}
                 }});
                 
-                // 우선순위 필터 초기화
-                document.querySelectorAll('.priority-btn').forEach(btn => {{
+                // 기간 필터를 올해로 초기화
+                document.querySelectorAll('.period-btn').forEach(btn => {{
                     btn.classList.remove('active');
-                    if (btn.dataset.priority === 'all') {{
+                    if (btn.dataset.period === 'this_year') {{
                         btn.classList.add('active');
                     }}
                 }});
@@ -1944,7 +1998,6 @@ async def task_list_page(request: Request):
                 document.getElementById('editTaskTitle').value = currentTask.title || '';
                 document.getElementById('editTaskDescription').value = currentTask.description || '';
                 document.getElementById('editTaskStatus').value = currentTask.status || '대기';
-                document.getElementById('editTaskPriority').value = currentTask.priority || 'medium';
                 document.getElementById('editTaskAssignee').value = currentTask.assignee_name || '';
                 
                 // 마감일 처리 (ISO 형식으로 변환)
@@ -2076,6 +2129,10 @@ async def task_list_page(request: Request):
                 console.log('이미 업무 목록 페이지입니다');
             }}
             
+            function navigateToHome() {{
+                window.location.href = '/main-dashboard';
+            }}
+            
             function navigateToProfitLoss() {{
                 window.location.href = '/main-dashboard';
             }}
@@ -2120,6 +2177,7 @@ async def task_list_page(request: Request):
                 const taskData = {{
                     title: title,
                     category: document.getElementById('quickTaskCategory').value,
+                    status: document.getElementById('quickTaskStatus').value,
                     description: document.getElementById('quickTaskDescription').value.trim(),
                     start_date: startDate || null,
                     end_date: endDate || null
@@ -2195,6 +2253,8 @@ async def task_list_page(request: Request):
             let currentTab = 'task'; // 업무 페이지이므로 기본적으로 task 탭 활성화
 
             function selectTab(tabType) {{
+                console.log('selectTab 호출됨:', tabType); // 디버그 로그
+                
                 // 이미 선택된 탭을 다시 누르면 서브 버튼 숨김
                 if (currentTab === tabType) {{
                     hideSubButtons();
@@ -2217,6 +2277,8 @@ async def task_list_page(request: Request):
             }}
             
             function showSubButtons(icon1, label1, icon2, label2, action1, action2) {{
+                console.log('showSubButtons 호출됨:', icon1, label1, icon2, label2); // 디버그 로그
+                
                 const subButtons = document.getElementById('floatingSubButtons');
                 const button1 = document.getElementById('subButton1');
                 const button2 = document.getElementById('subButton2');
@@ -2225,6 +2287,12 @@ async def task_list_page(request: Request):
                 const icon2El = document.getElementById('subIcon2');
                 const label2El = document.getElementById('subLabel2');
                 
+                // DOM 요소 존재 여부 확인
+                if (!subButtons || !button1 || !button2 || !icon1El || !label1El || !icon2El || !label2El) {{
+                    console.error('서브 버튼 DOM 요소를 찾을 수 없습니다');
+                    return;
+                }}
+                
                 // 서브 버튼 내용 설정
                 icon1El.textContent = icon1;
                 label1El.textContent = label1;
@@ -2232,8 +2300,8 @@ async def task_list_page(request: Request):
                 label2El.textContent = label2;
                 
                 // 클릭 이벤트 설정
-                button1.onclick = () => eval(action1);
-                button2.onclick = () => eval(action2);
+                button1.onclick = function() {{ eval(action1); }};
+                button2.onclick = function() {{ eval(action2); }};
                 
                 // 애니메이션과 함께 표시
                 subButtons.style.display = 'flex';
@@ -2323,9 +2391,39 @@ async def task_list_page(request: Request):
                 }}
             }});
 
-            // 페이지 로드시 업무 탭을 활성 상태로 설정
+            // 페이지 로드시 초기화 및 업무 탭 활성 상태로 설정
             document.addEventListener('DOMContentLoaded', function() {{
-                updateTabState('task'); // 업무 페이지이므로 task 탭 활성화
+                console.log('task-list 페이지 DOMContentLoaded'); // 디버그 로그
+                
+                // DOM 요소들이 모두 로드되었는지 확인
+                const taskTab = document.getElementById('taskTab');
+                const profitTab = document.getElementById('profitTab');
+                const floatingSubButtons = document.getElementById('floatingSubButtons');
+                
+                if (!taskTab || !profitTab || !floatingSubButtons) {{
+                    console.error('필수 DOM 요소들이 로드되지 않았습니다');
+                    return;
+                }}
+                
+                console.log('모든 DOM 요소가 준비되었습니다');
+                
+                // 업무 페이지이므로 task 탭 활성화
+                currentTab = 'task';
+                updateTabState('task');
+                
+                // 기간 필터를 올해로 초기화 (페이지 로드시)
+                const periodBtns = document.querySelectorAll('.period-btn');
+                periodBtns.forEach(btn => {{
+                    btn.classList.remove('active');
+                    if (btn.dataset.period === 'this_year') {{
+                        btn.classList.add('active');
+                    }}
+                }});
+                
+                // 업무 목록 로드
+                if (typeof loadTasks === 'function') {{
+                    loadTasks();
+                }}
             }});
         </script>
 
@@ -2341,8 +2439,12 @@ async def task_list_page(request: Request):
             </div>
         </div>
 
-        <!-- 하단 탭바 네비게이션 (2개 버튼) -->
+        <!-- 하단 탭바 네비게이션 (3개 버튼) -->
         <div class="bottom-nav">
+            <div class="nav-item" id="homeTab" onclick="navigateToHome()">
+                <div class="nav-icon">🏠</div>
+                <div class="nav-label">홈</div>
+            </div>
             <div class="nav-item active" id="taskTab" onclick="selectTab('task')">
                 <div class="nav-icon">📝</div>
                 <div class="nav-label">업무</div>
@@ -2931,6 +3033,289 @@ async def profit_loss_page(request: Request):
                     flex-wrap: wrap;
                 }}
             }}
+            
+            /* 모달 스타일 */
+            .modal {{
+                display: none;
+                position: fixed;
+                z-index: 10000;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.5);
+                backdrop-filter: blur(5px);
+                -webkit-backdrop-filter: blur(5px);
+            }}
+            
+            .modal-content {{
+                background-color: white;
+                margin: 2% auto;
+                padding: 0;
+                border-radius: 16px;
+                width: 90%;
+                max-width: 500px;
+                max-height: 90vh;
+                overflow-y: auto;
+                box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+                animation: modalSlideIn 0.3s ease-out;
+            }}
+            
+            @keyframes modalSlideIn {{
+                from {{
+                    opacity: 0;
+                    transform: translateY(-50px);
+                }}
+                to {{
+                    opacity: 1;
+                    transform: translateY(0);
+                }}
+            }}
+            
+            .modal-header {{
+                background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 24px;
+                border-radius: 16px 16px 0 0;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }}
+            
+            .modal-header h2 {{
+                margin: 0;
+                font-size: 24px;
+                font-weight: 600;
+            }}
+            
+            .close {{
+                color: white;
+                float: right;
+                font-size: 32px;
+                font-weight: bold;
+                cursor: pointer;
+                opacity: 0.8;
+                transition: opacity 0.3s;
+            }}
+            
+            .close:hover,
+            .close:focus {{
+                opacity: 1;
+            }}
+            
+            .modal-body {{
+                padding: 32px;
+            }}
+            
+            .form-group {{
+                margin-bottom: 24px;
+            }}
+            
+            .form-group label {{
+                display: block;
+                margin-bottom: 8px;
+                font-weight: 600;
+                color: #333;
+                font-size: 14px;
+            }}
+            
+            .form-group input,
+            .form-group select,
+            .form-group textarea {{
+                width: 100%;
+                padding: 12px 16px;
+                border: 2px solid #e1e8ed;
+                border-radius: 12px;
+                font-size: 16px;
+                transition: border-color 0.3s, box-shadow 0.3s;
+                box-sizing: border-box;
+            }}
+            
+            .form-group input:focus,
+            .form-group select:focus,
+            .form-group textarea:focus {{
+                outline: none;
+                border-color: #667eea;
+                box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            }}
+            
+            .form-group textarea {{
+                resize: vertical;
+                min-height: 80px;
+            }}
+            
+            .modal-footer {{
+                display: flex;
+                gap: 12px;
+                padding: 24px 32px 32px 32px;
+                justify-content: flex-end;
+            }}
+            
+            .btn-primary,
+            .btn-secondary {{
+                padding: 12px 24px;
+                border: none;
+                border-radius: 12px;
+                font-size: 16px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.3s;
+                min-width: 100px;
+            }}
+            
+            .btn-primary {{
+                background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+                color: white;
+            }}
+            
+            .btn-primary:hover {{
+                transform: translateY(-2px);
+                box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+            }}
+            
+            .btn-secondary {{
+                background: #f8f9fa;
+                color: #333;
+                border: 2px solid #e1e8ed;
+            }}
+            
+            .btn-secondary:hover {{
+                background: #e9ecef;
+                transform: translateY(-1px);
+            }}
+            
+            /* 손익 유형 선택기 */
+            .profit-type-selector {{
+                display: flex;
+                gap: 16px;
+                margin-top: 8px;
+            }}
+            
+            .radio-option {{
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                padding: 12px 20px;
+                border: 2px solid #e1e8ed;
+                border-radius: 12px;
+                cursor: pointer;
+                transition: all 0.3s;
+                flex: 1;
+            }}
+            
+            .radio-option:hover {{
+                border-color: #667eea;
+                transform: translateY(-1px);
+            }}
+            
+            .radio-option input[type="radio"] {{
+                display: none;
+            }}
+            
+            .radio-custom {{
+                width: 20px;
+                height: 20px;
+                border-radius: 50%;
+                border: 2px solid #ddd;
+                position: relative;
+                transition: all 0.3s;
+                flex-shrink: 0;
+            }}
+            
+            .radio-custom.profit {{
+                border-color: #28a745;
+            }}
+            
+            .radio-custom.expense {{
+                border-color: #dc3545;
+            }}
+            
+            .radio-option input[type="radio"]:checked + .radio-custom.profit {{
+                background-color: #28a745;
+                border-color: #28a745;
+            }}
+            
+            .radio-option input[type="radio"]:checked + .radio-custom.expense {{
+                background-color: #dc3545;
+                border-color: #dc3545;
+            }}
+            
+            .radio-option input[type="radio"]:checked + .radio-custom::after {{
+                content: '';
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                width: 8px;
+                height: 8px;
+                border-radius: 50%;
+                background-color: white;
+            }}
+            
+            .profit-option input[type="radio"]:checked + .radio-custom {{
+                background-color: #28a745;
+                border-color: #28a745;
+            }}
+            
+            .expense-option input[type="radio"]:checked + .radio-custom {{
+                background-color: #dc3545;
+                border-color: #dc3545;
+            }}
+            
+            .radio-text {{
+                font-size: 16px;
+                font-weight: 600;
+                color: #333;
+            }}
+            
+            .profit-option input[type="radio"]:checked ~ .radio-text {{
+                color: #28a745;
+            }}
+            
+            .expense-option input[type="radio"]:checked ~ .radio-text {{
+                color: #dc3545;
+            }}
+            
+            /* 금액 표시 */
+            .amount-korean {{
+                font-size: 14px;
+                color: #666;
+                margin-top: 8px;
+                padding: 8px 12px;
+                background: #f8f9fa;
+                border-radius: 8px;
+                min-height: 20px;
+            }}
+            
+            /* 반응형 디자인 */
+            @media (max-width: 768px) {{
+                .modal-content {{
+                    width: 95%;
+                    margin: 5% auto;
+                }}
+                
+                .modal-header,
+                .modal-body,
+                .modal-footer {{
+                    padding: 20px;
+                }}
+                
+                .profit-type-selector {{
+                    flex-direction: column;
+                    gap: 12px;
+                }}
+                
+                .radio-option {{
+                    justify-content: center;
+                }}
+                
+                .quick-task-content {{
+                    width: 95%;
+                    margin: 2% auto;
+                    padding: 20px;
+                    max-height: 90vh;
+                }}
+            }}
         </style>
     </head>
     <body>
@@ -3206,7 +3591,7 @@ async def profit_loss_page(request: Request):
                 if (tabType === 'task') {{
                     // 업무 탭 선택
                     showSubButtons('📋', '업무 목록', '➕', '업무 등록', 
-                                  'refreshTaskList()', 'showQuickTaskModal()');
+                                  'navigateToTaskList()', 'showQuickTaskModal()');
                     updateTabState('task');
                 }} else if (tabType === 'profit') {{
                     // 손익 탭 선택
@@ -3263,16 +3648,22 @@ async def profit_loss_page(request: Request):
             }}
 
             function navigateToTaskList() {{
-                // 이미 task-list 페이지에 있으므로 업무 목록 새로고침
-                loadTasks();
+                // task-list 페이지로 이동
+                window.location.href = '/task-list';
             }}
             
             function refreshTaskList() {{
                 // 업무 목록 새로고침용 함수
+                console.log('refreshTaskList 호출됨'); // 디버그 로그
                 loadTasks();
             }}
 
+            function navigateToHome() {{
+                window.location.href = '/main-dashboard';
+            }}
+            
             function navigateToProfitLoss() {{
+                console.log('navigateToProfitLoss 호출됨'); // 디버그 로그
                 window.location.href = '/profit-loss';
             }}
 
@@ -3281,17 +3672,310 @@ async def profit_loss_page(request: Request):
                 modal.style.display = 'block';
                 // 폼 리셋
                 document.getElementById('quickTaskForm').reset();
+            }}
+            
+            function hideQuickTaskModal() {{
+                const modal = document.getElementById('quickTaskModal');
+                modal.style.display = 'none';
+            }}
+            
+            async function saveQuickTask() {{
+                const title = document.getElementById('quickTaskTitle').value.trim();
+                const startDate = document.getElementById('quickTaskStartDate').value;
+                const endDate = document.getElementById('quickTaskEndDate').value;
                 
-                // 오늘 날짜를 시작일 기본값으로 설정
-                const today = new Date().toISOString().split('T')[0];
-                document.getElementById('quickTaskStartDate').value = today;
+                if (!title) {{
+                    alert('업무 제목을 입력해주세요.');
+                    document.getElementById('quickTaskTitle').focus();
+                    return;
+                }}
                 
-                document.getElementById('quickTaskTitle').focus();
+                if (title.length > 200) {{
+                    alert('업무 제목은 200자를 초과할 수 없습니다.');
+                    document.getElementById('quickTaskTitle').focus();
+                    return;
+                }}
+                
+                // 날짜 유효성 검사
+                if (startDate && endDate && new Date(startDate) > new Date(endDate)) {{
+                    alert('시작일은 마감일보다 늦을 수 없습니다.');
+                    document.getElementById('quickTaskStartDate').focus();
+                    return;
+                }}
+                
+                const taskData = {{
+                    title: title,
+                    category: document.getElementById('quickTaskCategory').value,
+                    status: document.getElementById('quickTaskStatus').value,
+                    description: document.getElementById('quickTaskDescription').value.trim(),
+                    start_date: startDate || null,
+                    end_date: endDate || null
+                }};
+                
+                const saveBtn = document.querySelector('.quick-btn-save');
+                const originalText = saveBtn.textContent;
+                saveBtn.disabled = true;
+                saveBtn.textContent = '등록 중...';
+                
+                try {{
+                    const response = await fetch('/api/business/tasks', {{
+                        method: 'POST',
+                        headers: {{
+                            'Content-Type': 'application/json'
+                        }},
+                        body: JSON.stringify(taskData)
+                    }});
+                    
+                    if (response.ok) {{
+                        const result = await response.json();
+                        alert('✅ 업무가 성공적으로 등록되었습니다!');
+                        hideQuickTaskModal();
+                        
+                        // 폼 리셋
+                        document.getElementById('quickTaskForm').reset();
+                        
+                        // 손익 페이지에서는 페이지 새로고침
+                        if (typeof loadProfitLossData === 'function') {{
+                            loadProfitLossData();
+                        }}
+                    }} else {{
+                        const errorData = await response.json();
+                        alert('❌ ' + (errorData.detail || '업무 등록에 실패했습니다.'));
+                    }}
+                }} catch (error) {{
+                    console.error('업무 등록 오류:', error);
+                    alert('❌ 서버 연결 오류가 발생했습니다. 잠시 후 다시 시도해주세요.');
+                }} finally {{
+                    saveBtn.disabled = false;
+                    saveBtn.textContent = originalText;
+                }}
             }}
 
+            // 손익 등록 모달 관련 함수들
+            function showProfitModal() {{
+                const modal = document.getElementById('profitModal');
+                modal.style.display = 'block';
+                
+                // 현재 날짜로 설정
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('profitDate').value = today;
+                
+                // 활성 업무 목록 로드
+                loadActiveProfitTasks();
+                
+                // 폼 초기화
+                document.getElementById('profitAmount').value = '';
+                document.getElementById('profitDescription').value = '';
+                document.getElementById('amountInKorean').textContent = '';
+                
+                // 수익 라디오 버튼 기본 선택
+                document.querySelector('input[name="profitType"][value="profit"]').checked = true;
+                
+                // 첫 번째 입력 필드에 포커스
+                setTimeout(() => {{
+                    document.getElementById('profitAmount').focus();
+                }}, 100);
+            }}
+            
+            function closeProfitModal() {{
+                document.getElementById('profitModal').style.display = 'none';
+            }}
+            
+            // 활성 업무 목록 로드
+            async function loadActiveProfitTasks() {{
+                try {{
+                    const response = await fetch('/api/business/tasks?status=대기,진행중&limit=50');
+                    const data = await response.json();
+                    
+                    const selectElement = document.getElementById('profitTaskSelect');
+                    selectElement.innerHTML = '<option value="">업무를 선택하세요</option>';
+                    
+                    if (data.success && data.tasks && data.tasks.length > 0) {{
+                        // 클라이언트에서 상태 필터링
+                        const activeTasks = data.tasks.filter(task => 
+                            task.status === '대기' || task.status === '진행중'
+                        );
+                        
+                        activeTasks.forEach(task => {{
+                            const option = document.createElement('option');
+                            option.value = task.id;
+                            option.textContent = `${{task.title}} (${{task.status}})`;
+                            selectElement.appendChild(option);
+                        }});
+                    }} else {{
+                        console.log('활성 업무가 없거나 데이터 로딩 실패');
+                    }}
+                }} catch (error) {{
+                    console.error('업무 목록 로딩 실패:', error);
+                    const selectElement = document.getElementById('profitTaskSelect');
+                    selectElement.innerHTML = '<option value="">업무 로딩 실패</option>';
+                }}
+            }}
+            
+            // 금액 입력 포맷팅
+            function formatAmountInput(input) {{
+                let value = input.value.replace(/[^0-9]/g, ''); // 숫자만 남기기
+                
+                if (value) {{
+                    // 쉼표 추가
+                    const formatted = Number(value).toLocaleString();
+                    input.value = formatted;
+                    
+                    // 한국어 표기 업데이트
+                    const koreanText = numberToKorean(Number(value));
+                    document.getElementById('amountInKorean').textContent = koreanText;
+                }} else {{
+                    document.getElementById('amountInKorean').textContent = '';
+                }}
+            }}
+            
+            // 숫자를 한국어로 변환
+            function numberToKorean(num) {{
+                if (num === 0) return '0원';
+                
+                const units = ['', '만', '억', '조'];
+                const nums = ['', '일', '이', '삼', '사', '오', '육', '칠', '팔', '구'];
+                let result = '';
+                let unitIndex = 0;
+                
+                while (num > 0) {{
+                    const part = num % 10000;
+                    if (part > 0) {{
+                        let partStr = '';
+                        
+                        // 천의 자리
+                        if (Math.floor(part / 1000) > 0) {{
+                            partStr += nums[Math.floor(part / 1000)] + '천';
+                        }}
+                        
+                        // 백의 자리
+                        if (Math.floor((part % 1000) / 100) > 0) {{
+                            partStr += nums[Math.floor((part % 1000) / 100)] + '백';
+                        }}
+                        
+                        // 십의 자리
+                        if (Math.floor((part % 100) / 10) > 0) {{
+                            partStr += nums[Math.floor((part % 100) / 10)] + '십';
+                        }}
+                        
+                        // 일의 자리
+                        if (part % 10 > 0) {{
+                            partStr += nums[part % 10];
+                        }}
+                        
+                        result = partStr + units[unitIndex] + result;
+                    }}
+                    
+                    num = Math.floor(num / 10000);
+                    unitIndex++;
+                }}
+                
+                return result + '원';
+            }}
+            
+            // 손익 저장
+            async function saveProfit() {{
+                try {{
+                    const profitType = document.querySelector('input[name="profitType"]:checked').value;
+                    const amount = document.getElementById('profitAmount').value.replace(/,/g, ''); // 쉼표 제거
+                    const description = document.getElementById('profitDescription').value.trim();
+                    const taskId = document.getElementById('profitTaskSelect').value || null;
+                    const date = document.getElementById('profitDate').value;
+                    
+                    // 유효성 검사
+                    if (!amount || amount === '0') {{
+                        alert('금액을 입력해주세요.');
+                        document.getElementById('profitAmount').focus();
+                        return;
+                    }}
+                    
+                    if (!description) {{
+                        const typeText = profitType === 'profit' ? '수익' : '지출';
+                        alert(`${{typeText}} 내용을 입력해주세요.`);
+                        document.getElementById('profitDescription').focus();
+                        return;
+                    }}
+                    
+                    if (!date) {{
+                        alert('날짜를 선택해주세요.');
+                        document.getElementById('profitDate').focus();
+                        return;
+                    }}
+                    
+                    // API 요청 데이터 준비
+                    const requestData = {{
+                        type: profitType, // 'profit' 또는 'expense'
+                        amount: parseInt(amount),
+                        description: description,
+                        business_task_id: taskId,
+                        transaction_date: date
+                    }};
+                    
+                    console.log('손익 등록 요청:', requestData);
+                    
+                    // API 호출
+                    const response = await fetch('/api/business/profit-loss', {{
+                        method: 'POST',
+                        headers: {{
+                            'Content-Type': 'application/json'
+                        }},
+                        body: JSON.stringify(requestData)
+                    }});
+                    
+                    const result = await response.json();
+                    
+                    if (result.success) {{
+                        alert(`${{profitType === 'profit' ? '수익' : '지출'}} 등록이 완료되었습니다!`);
+                        closeProfitModal();
+                        
+                        // 페이지 새로고침 또는 데이터 다시 로드
+                        if (typeof loadProfitLossData === 'function') {{
+                            loadProfitLossData();
+                        }} else {{
+                            location.reload();
+                        }}
+                    }} else {{
+                        alert(`등록에 실패했습니다: ${{result.message || '알 수 없는 오류'}}`);
+                    }}
+                    
+                }} catch (error) {{
+                    console.error('손익 등록 실패:', error);
+                    alert('등록 중 오류가 발생했습니다.');
+                }}
+            }}
+            
+            // 모달 외부 클릭 시 닫기
+            window.addEventListener('click', function(event) {{
+                const modal = document.getElementById('profitModal');
+                if (event.target === modal) {{
+                    closeProfitModal();
+                }}
+            }});
+            
+            // ESC 키로 모달 닫기
+            document.addEventListener('keydown', function(event) {{
+                if (event.key === 'Escape') {{
+                    const modal = document.getElementById('profitModal');
+                    if (modal.style.display === 'block') {{
+                        closeProfitModal();
+                    }}
+                }}
+            }});
+            
+            // Enter 키로 저장 (텍스트 영역이 아닌 경우)
+            document.addEventListener('keydown', function(event) {{
+                if (event.key === 'Enter' && event.target.tagName !== 'TEXTAREA') {{
+                    const modal = document.getElementById('profitModal');
+                    if (modal.style.display === 'block') {{
+                        event.preventDefault();
+                        saveProfit();
+                    }}
+                }}
+            }});
+
             function showExpenseModal() {{
-                // 손익 등록 모달 (향후 구현)
-                alert('손익 등록 기능이 곧 추가될 예정입니다');
+                // 손익 등록 모달로 연결
+                showProfitModal();
             }}
 
             // 햄버거 메뉴 토글 함수
@@ -3355,8 +4039,12 @@ async def profit_loss_page(request: Request):
             </div>
         </div>
 
-        <!-- 하단 탭바 네비게이션 (2개 버튼) -->
+        <!-- 하단 탭바 네비게이션 (3개 버튼) -->
         <div class="bottom-nav">
+            <div class="nav-item" id="homeTab" onclick="navigateToHome()">
+                <div class="nav-icon">🏠</div>
+                <div class="nav-label">홈</div>
+            </div>
             <div class="nav-item" id="taskTab" onclick="selectTab('task')">
                 <div class="nav-icon">📝</div>
                 <div class="nav-label">업무</div>
@@ -3366,6 +4054,128 @@ async def profit_loss_page(request: Request):
                 <div class="nav-label">손익</div>
             </div>
         </div>
+        
+        <!-- 빠른 업무 등록 모달 -->
+        <div class="quick-task-modal" id="quickTaskModal">
+            <div class="quick-task-content">
+                <div class="quick-task-header">
+                    <h3 class="quick-task-title">➕ 빠른 업무 등록</h3>
+                    <button class="close-btn" onclick="hideQuickTaskModal()">&times;</button>
+                </div>
+                <form id="quickTaskForm">
+                    <div class="quick-form-group">
+                        <label class="quick-form-label">업무 제목 *</label>
+                        <input type="text" class="quick-form-input" id="quickTaskTitle" 
+                               placeholder="업무 제목을 입력하세요" maxlength="200" required>
+                    </div>
+                    <div class="quick-form-group">
+                        <label class="quick-form-label">분야</label>
+                        <select class="quick-form-select" id="quickTaskCategory">
+                            <option value="기타">기타</option>
+                            <option value="기획">기획</option>
+                            <option value="개발">개발</option>
+                            <option value="디자인">디자인</option>
+                            <option value="운영">운영</option>
+                            <option value="영업">영업</option>
+                            <option value="고객지원">고객지원</option>
+                            <option value="회계">회계</option>
+                            <option value="법무">법무</option>
+                            <option value="교육">교육</option>
+                            <option value="유지보수">유지보수</option>
+                        </select>
+                    </div>
+                    <div class="quick-form-group">
+                        <label class="quick-form-label">상태</label>
+                        <select class="quick-form-select" id="quickTaskStatus">
+                            <option value="대기">대기</option>
+                            <option value="진행중">진행중</option>
+                            <option value="완료">완료</option>
+                            <option value="보류">보류</option>
+                            <option value="취소">취소</option>
+                        </select>
+                    </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div class="quick-form-group">
+                            <label class="quick-form-label">시작일</label>
+                            <input type="date" class="quick-form-input" id="quickTaskStartDate">
+                        </div>
+                        <div class="quick-form-group">
+                            <label class="quick-form-label">마감일</label>
+                            <input type="date" class="quick-form-input" id="quickTaskEndDate">
+                        </div>
+                    </div>
+                    <div class="quick-form-group">
+                        <label class="quick-form-label">간단한 설명</label>
+                        <textarea class="quick-form-textarea" id="quickTaskDescription" 
+                                  placeholder="업무에 대한 간단한 설명을 입력하세요 (선택사항)"></textarea>
+                    </div>
+                    <div class="quick-form-actions">
+                        <button type="button" class="quick-btn quick-btn-cancel" onclick="hideQuickTaskModal()">
+                            취소
+                        </button>
+                        <button type="button" class="quick-btn quick-btn-save" onclick="saveQuickTask()">
+                            등록하기
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- 손익 등록 모달 -->
+        <div id="profitModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>손익 등록</h2>
+                    <span class="close" onclick="closeProfitModal()">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label>손익 유형</label>
+                        <div class="profit-type-selector">
+                            <label class="radio-option profit-option">
+                                <input type="radio" name="profitType" value="profit" checked>
+                                <span class="radio-custom profit"></span>
+                                <span class="radio-text">수익</span>
+                            </label>
+                            <label class="radio-option expense-option">
+                                <input type="radio" name="profitType" value="expense">
+                                <span class="radio-custom expense"></span>
+                                <span class="radio-text">지출</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="profitAmount">금액</label>
+                        <input type="text" id="profitAmount" placeholder="금액을 입력하세요" 
+                               oninput="formatAmountInput(this)" style="font-size: 18px; font-weight: 600;">
+                        <div id="amountInKorean" class="amount-korean"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="profitDescription">내용</label>
+                        <textarea id="profitDescription" placeholder="손익 내용을 입력하세요" rows="3"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="profitTaskSelect">연결 업무 (선택사항)</label>
+                        <select id="profitTaskSelect">
+                            <option value="">업무를 선택하세요</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="profitDate">날짜</label>
+                        <input type="date" id="profitDate">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button onclick="closeProfitModal()" class="btn-secondary">취소</button>
+                    <button onclick="saveProfit()" class="btn-primary">등록</button>
+                </div>
+            </div>
+        </div>
+        
     </body>
     </html>
     """
@@ -4115,7 +4925,11 @@ async def trading_dashboard(request: Request):
                 }}
             }});
             
-            // 기존 네비게이션 함수들 유지
+            // 네비게이션 함수들
+            function navigateToHome() {{
+                window.location.href = '/main-dashboard';
+            }}
+            
             function navigateToTaskList() {{
                 window.location.href = '/task-list';
             }}
@@ -4171,8 +4985,12 @@ async def trading_dashboard(request: Request):
             </div>
         </div>
 
-        <!-- 하단 탭바 네비게이션 (2개 버튼) -->
+        <!-- 하단 탭바 네비게이션 (3개 버튼) -->
         <div class="bottom-nav">
+            <div class="nav-item" id="homeTab" onclick="navigateToHome()">
+                <div class="nav-icon">🏠</div>
+                <div class="nav-label">홈</div>
+            </div>
             <div class="nav-item" id="taskTab" onclick="selectTab('task')">
                 <div class="nav-icon">📝</div>
                 <div class="nav-label">업무</div>

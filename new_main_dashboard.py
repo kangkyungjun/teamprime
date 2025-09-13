@@ -1195,6 +1195,72 @@ async def business_main_dashboard(request: Request):
                 box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
             }}
             
+            .radio-group {{
+                display: flex;
+                gap: 15px;
+                margin-top: 5px;
+            }}
+            
+            .radio-option {{
+                display: flex;
+                align-items: center;
+                padding: 10px 15px;
+                border: 2px solid #ddd;
+                border-radius: 8px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                background: white;
+                flex: 1;
+                justify-content: center;
+            }}
+            
+            .radio-option:hover {{
+                border-color: #667eea;
+                background: rgba(102, 126, 234, 0.05);
+            }}
+            
+            .radio-option input[type="radio"] {{
+                display: none;
+            }}
+            
+            .radio-option input[type="radio"]:checked + .radio-text {{
+                font-weight: 600;
+            }}
+            
+            .profit-option:has(input[type="radio"]:checked) {{
+                background: rgba(76, 175, 80, 0.1);
+                border-color: #4CAF50;
+            }}
+            
+            .profit-option:has(input[type="radio"]:checked) .radio-text {{
+                color: #2E7D32;
+            }}
+            
+            .expense-option:has(input[type="radio"]:checked) {{
+                background: rgba(244, 67, 54, 0.1);
+                border-color: #f44336;
+            }}
+            
+            .expense-option:has(input[type="radio"]:checked) .radio-text {{
+                color: #C62828;
+            }}
+            
+            .radio-text {{
+                font-size: 14px;
+                font-weight: 500;
+            }}
+            
+            .amount-korean {{
+                margin-top: 5px;
+                padding: 6px 8px;
+                background: #f8f9fa;
+                border-radius: 4px;
+                font-size: 12px;
+                color: #666;
+                min-height: 16px;
+                font-family: 'Malgun Gothic', sans-serif;
+            }}
+            
             .form-row {{
                 display: flex;
                 gap: 15px;
@@ -1416,8 +1482,12 @@ async def business_main_dashboard(request: Request):
             </div>
         </div>
 
-        <!-- 하단 탭바 네비게이션 (2개 버튼) -->
+        <!-- 하단 탭바 네비게이션 (3개 버튼) -->
         <div class="bottom-nav">
+            <div class="nav-item active" id="homeTab" onclick="navigateToHome()">
+                <div class="nav-icon">🏠</div>
+                <div class="nav-label">홈</div>
+            </div>
             <div class="nav-item" id="taskTab" onclick="selectTab('task')">
                 <div class="nav-icon">📝</div>
                 <div class="nav-label">업무</div>
@@ -1444,6 +1514,10 @@ async def business_main_dashboard(request: Request):
                     <a href="/profile" class="menu-item">
                         <div class="menu-icon">👤</div>
                         <div class="menu-text">프로필</div>
+                    </a>
+                    <a href="#" class="menu-item">
+                        <div class="menu-icon">📋</div>
+                        <div class="menu-text">자산 목록</div>
                     </a>
                     <a href="/logout" class="menu-item logout">
                         <div class="menu-icon">🚪</div>
@@ -1593,6 +1667,105 @@ async def business_main_dashboard(request: Request):
                             취소
                         </button>
                         <button type="button" class="expense-btn expense-btn-save" onclick="saveExpense()">
+                            등록하기
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- 손익 등록 모달 -->
+        <div class="expense-modal" id="profitModal">
+            <div class="expense-content">
+                <div class="expense-header">
+                    <h3 class="expense-title">💰 손익 등록</h3>
+                    <button class="close-btn" onclick="hideProfitModal()">&times;</button>
+                </div>
+                <form id="profitForm">
+                    <!-- 업무 연동 섹션 -->
+                    <div class="form-section">
+                        <h4 class="section-title">업무 연동</h4>
+                        <div class="task-selection-row">
+                            <div class="form-group flex-grow">
+                                <label class="form-label">연결 업무 선택</label>
+                                <select class="form-input" id="profitTaskSelect">
+                                    <option value="">업무를 선택하세요</option>
+                                </select>
+                            </div>
+                            <div class="search-container">
+                                <input type="text" class="search-input" id="profitTaskSearchInput" placeholder="업무명 검색">
+                                <button type="button" class="search-btn" onclick="searchProfitTasks()">🔍</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 손익 정보 섹션 -->
+                    <div class="form-section">
+                        <h4 class="section-title">손익 정보</h4>
+                        <div class="form-group">
+                            <label class="form-label">손익 유형 *</label>
+                            <div class="radio-group">
+                                <label class="radio-option profit-option">
+                                    <input type="radio" name="profitType" value="수익" id="profitTypeIncome" onchange="handleProfitTypeChange()">
+                                    <span class="radio-text">💰 수익</span>
+                                </label>
+                                <label class="radio-option expense-option">
+                                    <input type="radio" name="profitType" value="지출" id="profitTypeExpense" checked onchange="handleProfitTypeChange()">
+                                    <span class="radio-text">💳 지출</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">지출 종류 *</label>
+                            <select class="form-input" id="profitCategory" onchange="handleProfitCategoryChange()" required>
+                                <option value="">지출 종류를 선택하세요</option>
+                                <option value="자산">자산</option>
+                                <option value="식비">식비</option>
+                                <option value="교통비">교통비</option>
+                                <option value="업무추진비">업무추진비</option>
+                                <option value="출장비">출장비</option>
+                                <option value="인건비">인건비</option>
+                                <option value="급여">급여</option>
+                                <option value="인센티브">인센티브</option>
+                                <option value="일반">일반</option>
+                            </select>
+                            <div class="category-note" id="profitCategoryNote" style="display: none;">
+                                <small>"일반" 카테고리는 업무 연동 없이 등록 가능합니다.</small>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">설명 *</label>
+                            <textarea class="form-textarea" id="profitDescription" 
+                                      placeholder="손익에 대한 설명을 입력하세요" rows="3" required></textarea>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group flex-2">
+                                <label class="form-label">손익 제목 *</label>
+                                <input type="text" class="form-input" id="profitTitle" 
+                                       placeholder="손익 제목을 입력하세요" maxlength="200" required>
+                            </div>
+                            <div class="form-group flex-1">
+                                <label class="form-label">손익 금액 *</label>
+                                <input type="text" class="form-input" id="profitAmount" 
+                                       placeholder="0" inputmode="numeric" required 
+                                       oninput="formatAmountInput(this)" onkeypress="return isNumberKey(event)">
+                                <div class="amount-korean" id="profitAmountKorean"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">손익 일시</label>
+                            <input type="datetime-local" class="form-input" id="profitDate">
+                        </div>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="expense-btn expense-btn-cancel" onclick="hideProfitModal()">
+                            취소
+                        </button>
+                        <button type="button" class="expense-btn expense-btn-save" onclick="saveProfit()">
                             등록하기
                         </button>
                     </div>
@@ -2125,7 +2298,7 @@ async def business_main_dashboard(request: Request):
                 }} else if (tabType === 'profit') {{
                     // 손익 탭 선택
                     showSubButtons('💰', '손익 목록', '💳', '손익 등록', 
-                                  'navigateToProfitLoss()', 'showExpenseModal()');
+                                  'navigateToProfitLoss()', 'showProfitModal()');
                     updateTabState('profit');
                 }}
             }}
@@ -2189,7 +2362,11 @@ async def business_main_dashboard(request: Request):
                 }}
             }});
             
-            // 기존 네비게이션 함수들 유지
+            // 네비게이션 함수들
+            function navigateToHome() {{
+                window.location.href = '/main-dashboard';
+            }}
+            
             function navigateToTaskList() {{
                 window.location.href = '/task-list';
             }}
@@ -2380,6 +2557,299 @@ async def business_main_dashboard(request: Request):
                 }}
             }}
             
+            // 손익 등록 모달 관련 함수들
+            function showProfitModal() {{
+                document.getElementById('profitModal').style.display = 'block';
+                
+                // 현재 시간으로 초기화
+                const now = new Date();
+                const localDate = new Date(now.getTime() - now.getTimezoneOffset() * 60000);
+                document.getElementById('profitDate').value = localDate.toISOString().slice(0, 16);
+                
+                // 활성 업무 목록 로드 (손익용)
+                loadActiveProfitTasks();
+            }}
+            
+            function hideProfitModal() {{
+                document.getElementById('profitModal').style.display = 'none';
+                
+                // 폼 초기화
+                document.getElementById('profitForm').reset();
+                document.getElementById('profitCategoryNote').style.display = 'none';
+                document.getElementById('profitTaskSelect').disabled = false;
+                
+                // 추가 초기화
+                document.getElementById('profitAmountKorean').textContent = '';
+                document.getElementById('profitTypeExpense').checked = true; // 기본값을 지출로 설정
+                
+                // 카테고리 라벨을 지출로 초기화
+                const categoryLabel = document.querySelector('#profitModal .form-group:nth-of-type(3) .form-label');
+                categoryLabel.textContent = '지출 종류 *';
+                const categorySelect = document.getElementById('profitCategory');
+                categorySelect.getElementsByTagName('option')[0].textContent = '지출 종류를 선택하세요';
+            }}
+            
+            // 활성 업무 목록 로드 (손익용)
+            async function loadActiveProfitTasks() {{
+                try {{
+                    const response = await fetch('/api/business/tasks?status=대기,진행중&limit=50');
+                    const data = await response.json();
+                    
+                    const select = document.getElementById('profitTaskSelect');
+                    select.innerHTML = '<option value="">업무를 선택하세요</option>';
+                    
+                    if (data.success && data.tasks) {{
+                        // 대기, 진행중 상태의 업무만 필터링
+                        const activeTasks = data.tasks.filter(task => 
+                            task.status === '대기' || task.status === '진행중'
+                        );
+                        
+                        activeTasks.forEach(task => {{
+                            const option = document.createElement('option');
+                            option.value = task.id;
+                            option.textContent = `${{task.title}} (${{task.category}})`;
+                            select.appendChild(option);
+                        }});
+                    }}
+                }} catch (error) {{
+                    console.error('업무 목록 로딩 실패:', error);
+                    // 에러 발생 시 사용자에게 알림
+                    const select = document.getElementById('profitTaskSelect');
+                    select.innerHTML = '<option value="">업무 목록을 불러올 수 없습니다</option>';
+                }}
+            }}
+            
+            // 손익 업무 검색
+            function searchProfitTasks() {{
+                const searchInput = document.getElementById('profitTaskSearchInput');
+                const taskSelect = document.getElementById('profitTaskSelect');
+                const searchTerm = searchInput.value.toLowerCase();
+                
+                Array.from(taskSelect.options).forEach(option => {{
+                    if (option.value === '') return; // 첫 번째 옵션 제외
+                    
+                    const isMatch = option.textContent.toLowerCase().includes(searchTerm);
+                    option.style.display = isMatch ? 'block' : 'none';
+                }});
+            }}
+            
+            // 숫자 입력만 허용하는 함수
+            function isNumberKey(evt) {{
+                var charCode = (evt.which) ? evt.which : evt.keyCode;
+                if (charCode != 46 && charCode > 31 && (charCode < 48 || charCode > 57))
+                    return false;
+                return true;
+            }}
+            
+            // 금액 입력 포맷팅 함수
+            function formatAmountInput(input) {{
+                // 숫자만 추출
+                let value = input.value.replace(/[^0-9]/g, '');
+                
+                if (value === '') {{
+                    input.value = '';
+                    document.getElementById('profitAmountKorean').textContent = '';
+                    return;
+                }}
+                
+                // 쉼표 추가
+                let formattedValue = parseInt(value).toLocaleString();
+                input.value = formattedValue;
+                
+                // 한글 변환
+                let koreanText = numberToKorean(parseInt(value));
+                document.getElementById('profitAmountKorean').textContent = koreanText;
+            }}
+            
+            // 숫자를 한글로 변환하는 함수
+            function numberToKorean(num) {{
+                if (num === 0) return '영원';
+                
+                const units = ['', '만', '억', '조', '경'];
+                const digits = ['', '일', '이', '삼', '사', '오', '육', '칠', '팔', '구'];
+                const tens = ['', '십', '이십', '삼십', '사십', '오십', '육십', '칠십', '팔십', '구십'];
+                const hundreds = ['', '일백', '이백', '삼백', '사백', '오백', '육백', '칠백', '팔백', '구백'];
+                const thousands = ['', '일천', '이천', '삼천', '사천', '오천', '육천', '칠천', '팔천', '구천'];
+                
+                let result = '';
+                let unitIndex = 0;
+                
+                while (num > 0) {{
+                    let part = num % 10000;
+                    if (part > 0) {{
+                        let partStr = '';
+                        
+                        // 천의 자리
+                        if (Math.floor(part / 1000) > 0) {{
+                            partStr += thousands[Math.floor(part / 1000)];
+                        }}
+                        
+                        // 백의 자리
+                        if (Math.floor((part % 1000) / 100) > 0) {{
+                            partStr += hundreds[Math.floor((part % 1000) / 100)];
+                        }}
+                        
+                        // 십의 자리
+                        if (Math.floor((part % 100) / 10) > 0) {{
+                            if (Math.floor((part % 100) / 10) === 1 && part >= 10) {{
+                                partStr += '십';
+                            }} else {{
+                                partStr += tens[Math.floor((part % 100) / 10)];
+                            }}
+                        }}
+                        
+                        // 일의 자리
+                        if (part % 10 > 0) {{
+                            partStr += digits[part % 10];
+                        }}
+                        
+                        result = partStr + units[unitIndex] + result;
+                    }}
+                    
+                    num = Math.floor(num / 10000);
+                    unitIndex++;
+                }}
+                
+                return result + '원';
+            }}
+            
+            // 손익 유형 변경 처리
+            function handleProfitTypeChange() {{
+                const profitType = document.querySelector('input[name="profitType"]:checked').value;
+                const categoryLabel = document.querySelector('#profitModal .form-group:nth-of-type(3) .form-label');
+                const categorySelect = document.getElementById('profitCategory');
+                
+                if (profitType === '수익') {{
+                    categoryLabel.textContent = '수익 종류 *';
+                    categorySelect.getElementsByTagName('option')[0].textContent = '수익 종류를 선택하세요';
+                }} else {{
+                    categoryLabel.textContent = '지출 종류 *';
+                    categorySelect.getElementsByTagName('option')[0].textContent = '지출 종류를 선택하세요';
+                }}
+            }}
+            
+            // 손익 카테고리 변경 처리
+            function handleProfitCategoryChange() {{
+                const category = document.getElementById('profitCategory').value;
+                const taskSelect = document.getElementById('profitTaskSelect');
+                const categoryNote = document.getElementById('profitCategoryNote');
+                
+                if (category === '일반') {{
+                    taskSelect.disabled = true;
+                    taskSelect.value = '';
+                    categoryNote.style.display = 'block';
+                }} else {{
+                    taskSelect.disabled = false;
+                    categoryNote.style.display = 'none';
+                }}
+            }}
+            
+            // 손익 저장
+            async function saveProfit() {{
+                const saveBtn = document.querySelector('#profitModal .expense-btn-save');
+                const originalText = saveBtn.textContent;
+                
+                // 유효성 검사
+                const profitType = document.querySelector('input[name="profitType"]:checked');
+                const taskId = document.getElementById('profitTaskSelect').value;
+                const category = document.getElementById('profitCategory').value;
+                const title = document.getElementById('profitTitle').value.trim();
+                const amountInput = document.getElementById('profitAmount').value;
+                const profitDate = document.getElementById('profitDate').value;
+                const description = document.getElementById('profitDescription').value.trim();
+                
+                // 손익 유형 체크
+                if (!profitType) {{
+                    alert('손익 유형을 선택해주세요.');
+                    return;
+                }}
+                
+                if (!category) {{
+                    const categoryType = profitType.value === '수익' ? '수익 종류' : '지출 종류';
+                    alert(`${{categoryType}}를 선택해주세요.`);
+                    return;
+                }}
+                
+                if (!title) {{
+                    alert('손익 제목을 입력해주세요.');
+                    return;
+                }}
+                
+                // 금액 검증 (쉼표 제거 후 숫자 변환)
+                if (!amountInput) {{
+                    alert('손익 금액을 입력해주세요.');
+                    return;
+                }}
+                
+                const cleanAmount = amountInput.replace(/,/g, '');
+                const amount = parseFloat(cleanAmount);
+                
+                if (isNaN(amount) || amount <= 0) {{
+                    alert('올바른 금액을 입력해주세요.');
+                    return;
+                }}
+                
+                if (!profitDate) {{
+                    alert('손익 일시를 선택해주세요.');
+                    return;
+                }}
+                
+                if (!description) {{
+                    alert('설명을 입력해주세요.');
+                    return;
+                }}
+                
+                // 일반 카테고리가 아닌데 업무를 선택하지 않은 경우
+                if (category !== '일반' && !taskId) {{
+                    alert('이 카테고리는 업무 선택이 필요합니다.');
+                    return;
+                }}
+                
+                try {{
+                    saveBtn.disabled = true;
+                    saveBtn.textContent = '저장 중...';
+                    
+                    // 수익/지출에 따른 금액 부호 설정
+                    const finalAmount = profitType.value === '수익' ? amount : -amount;
+                    
+                    const profitData = {{
+                        task_id: taskId || null,
+                        type: profitType.value,
+                        category,
+                        amount: finalAmount,
+                        title: title,
+                        description: description,
+                        profit_date: profitDate.split('T')[0], // YYYY-MM-DD 형식
+                        raw_amount: cleanAmount // 원본 금액 (쉼표 제거된)
+                    }};
+                    
+                    console.log('손익 등록 데이터:', profitData);
+                    
+                    // TODO: 실제 API 엔드포인트가 구현되면 사용
+                    // const response = await fetch('/api/business/profits', {{
+                    //     method: 'POST',
+                    //     headers: {{
+                    //         'Content-Type': 'application/json'
+                    //     }},
+                    //     body: JSON.stringify(profitData)
+                    // }});
+                    
+                    // 임시로 성공 처리 (실제 API가 준비되면 주석 해제)
+                    hideProfitModal();
+                    const typeText = profitType.value === '수익' ? '수익' : '지출';
+                    showToast(`${{typeText}}이 성공적으로 등록되었습니다!`, 'success');
+                    // 재무 현황 다시 로드
+                    setTimeout(loadFinancialData, 500);
+                    
+                }} catch (error) {{
+                    console.error('손익 등록 오류:', error);
+                    alert('손익 등록 중 오류가 발생했습니다.');
+                }} finally {{
+                    saveBtn.disabled = false;
+                    saveBtn.textContent = originalText;
+                }}
+            }}
+            
             // 모달 외부 클릭시 닫기
             window.addEventListener('click', function(event) {{
                 const menuModal = document.getElementById('menuModal');
@@ -2396,6 +2866,11 @@ async def business_main_dashboard(request: Request):
                 if (event.target === expenseModal) {{
                     hideExpenseModal();
                 }}
+                
+                const profitModal = document.getElementById('profitModal');
+                if (event.target === profitModal) {{
+                    hideProfitModal();
+                }}
             }});
             
             // ESC 키로 모달 닫기
@@ -2403,10 +2878,13 @@ async def business_main_dashboard(request: Request):
                 if (event.key === 'Escape') {{
                     const quickTaskModal = document.getElementById('quickTaskModal');
                     const expenseModal = document.getElementById('expenseModal');
+                    const profitModal = document.getElementById('profitModal');
                     const menuModal = document.getElementById('menuModal');
                     
                     if (expenseModal.style.display === 'block') {{
                         hideExpenseModal();
+                    }} else if (profitModal.style.display === 'block') {{
+                        hideProfitModal();
                     }} else if (quickTaskModal.style.display === 'block') {{
                         hideQuickTaskModal();
                     }} else if (menuModal.style.display === 'block') {{

@@ -606,6 +606,10 @@ async def authenticated_api_key_input_dashboard(request: Request, current_user: 
                 }}
             }}
             
+            function navigateToHome() {{
+                window.location.href = '/main-dashboard';
+            }}
+            
             function navigateToTaskList() {{
                 window.location.href = '/task-list';
             }}
@@ -665,8 +669,12 @@ async def authenticated_api_key_input_dashboard(request: Request, current_user: 
             </div>
         </div>
 
-        <!-- 하단 탭바 네비게이션 -->
+        <!-- 하단 탭바 네비게이션 (3개 버튼) -->
         <div class="bottom-nav">
+            <div class="nav-item" id="homeTab" onclick="navigateToHome()">
+                <div class="nav-icon">🏠</div>
+                <div class="nav-label">홈</div>
+            </div>
             <div class="nav-item" id="taskTab" onclick="selectTab('task')">
                 <div class="nav-icon">📝</div>
                 <div class="nav-label">업무</div>
@@ -1378,6 +1386,10 @@ async def profile_page(request: Request):
                 }}
             }}
             
+            function navigateToHome() {{
+                window.location.href = '/main-dashboard';
+            }}
+            
             function navigateToTaskList() {{
                 window.location.href = '/task-list';
             }}
@@ -1437,8 +1449,12 @@ async def profile_page(request: Request):
             </div>
         </div>
 
-        <!-- 하단 탭바 네비게이션 -->
+        <!-- 하단 탭바 네비게이션 (3개 버튼) -->
         <div class="bottom-nav">
+            <div class="nav-item" id="homeTab" onclick="navigateToHome()">
+                <div class="nav-icon">🏠</div>
+                <div class="nav-label">홈</div>
+            </div>
             <div class="nav-item" id="taskTab" onclick="selectTab('task')">
                 <div class="nav-icon">📝</div>
                 <div class="nav-label">업무</div>
