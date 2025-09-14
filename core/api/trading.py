@@ -881,3 +881,44 @@ async def get_dashboard_data(current_user: Dict[str, Any] = Depends(require_auth
     except Exception as e:
         logger.error(f"대시보드 데이터 조회 오류: {str(e)}")
         return {"success": False, "error": str(e)}
+
+@router.get("/activity-monitor")
+async def get_activity_monitor(current_user: Dict[str, Any] = Depends(require_auth)):
+    """거래 활동 모니터링 상태 조회"""
+    try:
+        # 비활성 상태 체크
+        inactivity_status = trading_engine.check_inactivity_status()
+
+        # 활동 모니터 정보 조합
+        activity_info = {
+            **inactivity_status,
+            "activity_monitor": {
+                "last_trade_time": trading_engine.activity_monitor["last_trade_time"],
+                "last_signal_time": trading_engine.activity_monitor["last_signal_time"],
+                "last_analysis_time": trading_engine.activity_monitor["last_analysis_time"],
+                "inactive_threshold_hours": trading_engine.activity_monitor["inactive_alert_threshold"] / 3600,
+                "critical_threshold_hours": trading_engine.activity_monitor["critical_inactive_threshold"] / 3600
+            },
+            "recommendations": []
+        }
+
+        # 개선 권고사항
+        if inactivity_status["is_critical"]:
+            activity_info["recommendations"].extend([
+                "시스템 파라미터 점검 (volume_mult, price_change 완화)",
+                "MTFA 신뢰도 임계값 재검토",
+                "시장 상황에 따른 전략 조정 필요"
+            ])
+        elif inactivity_status["is_inactive"]:
+            activity_info["recommendations"].extend([
+                "매수 조건 완화 검토",
+                "거래량 급증 기준 조정 고려"
+            ])
+        else:
+            activity_info["recommendations"] = ["정상 작동 중"]
+
+        return activity_info
+
+    except Exception as e:
+        logger.error(f"활동 모니터 조회 오류: {str(e)}")
+        return {"success": False, "error": str(e)}

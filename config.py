@@ -101,7 +101,7 @@ MTFA_OPTIMIZED_CONFIG = {
     },
     "KRW-MEW": {
         "profit_target": 3.0, "stop_loss": -0.2, "max_hold_minutes": 5,
-        "mtfa_threshold": 0.95, "expected_return": 110.9, "expected_win_rate": 50.8
+        "mtfa_threshold": 0.82, "expected_return": 110.9, "expected_win_rate": 50.8
     },
     "KRW-ETH": {
         "profit_target": 2.5, "stop_loss": -1.0, "max_hold_minutes": 10,
@@ -109,7 +109,7 @@ MTFA_OPTIMIZED_CONFIG = {
     },
     "KRW-SHIB": {
         "profit_target": 2.5, "stop_loss": -1.0, "max_hold_minutes": 10,
-        "mtfa_threshold": 0.95, "expected_return": 47.8, "expected_win_rate": 50.8
+        "mtfa_threshold": 0.83, "expected_return": 47.8, "expected_win_rate": 50.8
     },
     "KRW-PEPE": {
         "profit_target": 1.5, "stop_loss": -0.6, "max_hold_minutes": 10,
@@ -117,7 +117,7 @@ MTFA_OPTIMIZED_CONFIG = {
     },
     "KRW-ANIME": {
         "profit_target": 3.0, "stop_loss": -0.8, "max_hold_minutes": 5,
-        "mtfa_threshold": 0.95, "expected_return": 31.7, "expected_win_rate": 50.0
+        "mtfa_threshold": 0.82, "expected_return": 31.7, "expected_win_rate": 50.0
     },
     "KRW-LPT": {
         "profit_target": 2.5, "stop_loss": -1.0, "max_hold_minutes": 60,

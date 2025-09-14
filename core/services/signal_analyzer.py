@@ -15,34 +15,53 @@ class SignalAnalyzer:
         self.min_candles = 20  # 최소 캔들 수 (실시간 API 최적화)
         
     async def check_buy_signal(self, market: str, params: Dict) -> Optional[Dict]:
-        """종합 매수 신호 확인"""
+        """종합 매수 신호 확인 (상세 로깅 강화)"""
+        coin_symbol = market.split('-')[1]
+        analysis_start_time = time.time()
+
         try:
+            logger.info(f"🔍 {coin_symbol} 신호 분석 시작 (MTFA 임계값: {params.get('mtfa_threshold', 0.80)*100:.0f}%)")
+
             # 1. 기본 데이터 조회
             candle_data = await self._get_candle_data(market, self.min_candles)
             if not candle_data or len(candle_data) < self.min_candles:
-                logger.warning(f"⚠️ {market} 캔들 데이터 부족 ({len(candle_data) if candle_data else 0}개)")
+                logger.warning(f"❌ {coin_symbol} 1단계 실패: 캔들 데이터 부족 ({len(candle_data) if candle_data else 0}개)")
                 return None
-            
+
+            logger.info(f"✅ {coin_symbol} 1단계 통과: 캔들 데이터 {len(candle_data)}개 확보")
+
             # 2. 거래량 급증 확인
             volume_signal = await self._check_volume_surge(market, params)
             if not volume_signal["is_surge"]:
+                logger.info(f"❌ {coin_symbol} 2단계 실패: 거래량 급증 없음 (현재: {volume_signal.get('surge_ratio', 0):.1f}배, 요구: {params['volume_mult']:.1f}배)")
                 return None
-            
+
+            logger.info(f"✅ {coin_symbol} 2단계 통과: 거래량 급증 {volume_signal['surge_ratio']:.1f}배 감지")
+
             # 3. 가격 변동률 확인
             price_change = self._calculate_price_change(candle_data)
             if price_change < params["price_change"]:
+                logger.info(f"❌ {coin_symbol} 3단계 실패: 가격변동 부족 (현재: {price_change:.2f}%, 요구: {params['price_change']:.2f}%)")
                 return None
-            
+
+            logger.info(f"✅ {coin_symbol} 3단계 통과: 가격상승 {price_change:.2f}%")
+
             # 4. 기술적 지표 확인
             technical_signals = self._calculate_technical_indicators(candle_data, params)
             if not technical_signals["bullish"]:
+                logger.info(f"❌ {coin_symbol} 4단계 실패: 기술적 지표 점수 부족 (현재: {technical_signals.get('score', 0):.0f}점, 요구: 50점)")
                 return None
-            
+
+            logger.info(f"✅ {coin_symbol} 4단계 통과: 기술적 지표 {technical_signals['score']:.0f}점 (RSI: {technical_signals.get('rsi', 0):.1f})")
+
             # 5. 캔들 패턴 확인
             candle_pattern = self._analyze_candle_pattern(candle_data, params)
             if not candle_pattern["bullish"]:
+                logger.info(f"❌ {coin_symbol} 5단계 실패: 캔들 패턴 점수 부족 (현재: {candle_pattern.get('score', 0):.0f}점, 요구: 50점)")
                 return None
-            
+
+            logger.info(f"✅ {coin_symbol} 5단계 통과: 캔들 패턴 {candle_pattern['score']:.0f}점")
+
             # 6. 종합 신호 강도 계산
             signal_strength = self._calculate_signal_strength(
                 volume_signal, technical_signals, candle_pattern, price_change
@@ -50,7 +69,14 @@ class SignalAnalyzer:
             
             # MTFA 최적화된 코인별 신뢰도 임계값 사용
             mtfa_threshold = params.get("mtfa_threshold", 0.80) * 100  # 퍼센트로 변환
+
+            analysis_duration = time.time() - analysis_start_time
+
             if signal_strength >= mtfa_threshold:
+                logger.info(f"🎯 {coin_symbol} 6단계 통과: 최종 신호 강도 {signal_strength:.0f}점 (임계값: {mtfa_threshold:.0f}점)")
+                logger.info(f"🚀 {coin_symbol} 매수 신호 생성 완료! (분석시간: {analysis_duration:.2f}초)")
+                logger.info(f"   📊 세부 점수 - 거래량: {volume_signal['surge_ratio']:.1f}배, 가격: {price_change:.2f}%, 기술적: {technical_signals['score']:.0f}점, 캔들: {candle_pattern['score']:.0f}점")
+
                 return {
                     "should_buy": True,
                     "signal_strength": signal_strength,
@@ -59,9 +85,13 @@ class SignalAnalyzer:
                     "volume_surge_ratio": volume_signal["surge_ratio"],
                     "price_change": price_change,
                     "technical_score": technical_signals["score"],
-                    "candle_score": candle_pattern["score"]
+                    "candle_score": candle_pattern["score"],
+                    "analysis_duration": analysis_duration
                 }
-            
+            else:
+                logger.info(f"❌ {coin_symbol} 6단계 실패: 신호 강도 부족 (현재: {signal_strength:.0f}점, 요구: {mtfa_threshold:.0f}점)")
+                logger.info(f"   🔍 상세 분석 - 거래량: {volume_signal['surge_ratio']:.1f}배, 가격: {price_change:.2f}%, 기술적: {technical_signals['score']:.0f}점, 캔들: {candle_pattern['score']:.0f}점 (분석시간: {analysis_duration:.2f}초)")
+
             return None
             
         except (KeyError, IndexError) as e:

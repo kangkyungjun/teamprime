@@ -93,6 +93,19 @@ class MultiCoinTradingEngine:
         }
         
         # MTFA 최적화 설정은 config.py의 MTFA_OPTIMIZED_CONFIG 사용
+
+        # 거래 활동 모니터링 (비활성 상태 감지)
+        self.activity_monitor = {
+            "last_trade_time": 0,           # 마지막 거래 시간
+            "last_signal_time": 0,          # 마지막 신호 발생 시간
+            "last_analysis_time": 0,        # 마지막 분석 시간
+            "inactive_alert_threshold": 7200,  # 2시간 비활성시 알림 (초)
+            "critical_inactive_threshold": 14400,  # 4시간 비활성시 긴급 알림 (초)
+            "signal_count_today": 0,        # 오늘 신호 개수
+            "trade_count_today": 0,         # 오늘 거래 개수
+            "analysis_count_today": 0,      # 오늘 분석 개수
+            "last_reset_date": None         # 마지막 일일 통계 리셋일
+        }
     
     async def start_trading(self):
         """거래 시작"""
@@ -416,10 +429,10 @@ class MultiCoinTradingEngine:
                 # 신호 분석 실행 (MTFA 최적화 설정 사용)
                 market_config = MTFA_OPTIMIZED_CONFIG.get(market, MTFA_OPTIMIZED_CONFIG["KRW-BTC"])
                 
-                # SignalAnalyzer가 기대하는 파라미터 형식으로 변환
+                # SignalAnalyzer가 기대하는 파라미터 형식으로 변환 (PDF 분석 기반 최적화)
                 signal_params = {
-                    "volume_mult": 2.0,
-                    "price_change": 0.5, 
+                    "volume_mult": 1.5,  # 200% → 150% 거래량 급증 요구조건 완화
+                    "price_change": 0.3,  # 0.5% → 0.3% 가격변동 요구조건 완화
                     "mtfa_threshold": market_config.get("mtfa_threshold", 0.80),
                     "rsi_period": 14,
                     "ema_periods": [5, 20],
@@ -427,7 +440,10 @@ class MultiCoinTradingEngine:
                 }
                 
                 signal = await signal_analyzer.check_buy_signal(market, signal_params)
-                
+
+                # 활동 모니터링 업데이트
+                self.update_activity_monitor("analysis", current_time)
+
                 # API 호출 시간 기록 (코인별 + 전역)
                 self.api_call_scheduler["last_call_times"][coin_symbol] = current_time
                 self.api_call_scheduler["last_global_call"] = current_time
@@ -436,10 +452,17 @@ class MultiCoinTradingEngine:
                     logger.info(f"📈 {coin_symbol} 매수 신호 감지!")
                     logger.info(f"   신호 강도: {signal['signal_strength']}")
                     logger.info(f"   사유: {signal['reason']}")
-                    
+
+                    # 신호 활동 모니터링 업데이트
+                    self.update_activity_monitor("signal", current_time)
+
                     # 매수 주문 실행
                     await self._execute_buy_order(market, coin_symbol, investment_amount, signal, session_trading_state)
                     self.api_call_scheduler["last_global_call"] = time.time()  # 주문 후 시간 갱신
+
+                    # 거래 활동 모니터링 업데이트
+                    self.update_activity_monitor("trade", time.time())
+
                     self._complete_coin_processing(coin_symbol, "success", "매수 신호 감지")
                 else:
                     self._complete_coin_processing(coin_symbol, "success", "신호 없음")
@@ -1144,6 +1167,70 @@ class MultiCoinTradingEngine:
         total_count = len(DEFAULT_MARKETS)
         
         logger.info(f"✅ 사이클 #{self.cycle_info['cycle_number']} 완료: {completed_count}/{total_count} 코인 처리 ({cycle_duration:.1f}초)")
+
+    def update_activity_monitor(self, activity_type: str, timestamp: float):
+        """활동 모니터 업데이트"""
+        import datetime
+
+        # 일일 통계 리셋 확인
+        current_date = datetime.datetime.fromtimestamp(timestamp).date()
+        if self.activity_monitor["last_reset_date"] != current_date:
+            self.activity_monitor["signal_count_today"] = 0
+            self.activity_monitor["trade_count_today"] = 0
+            self.activity_monitor["analysis_count_today"] = 0
+            self.activity_monitor["last_reset_date"] = current_date
+
+        # 활동별 업데이트
+        if activity_type == "analysis":
+            self.activity_monitor["last_analysis_time"] = timestamp
+            self.activity_monitor["analysis_count_today"] += 1
+        elif activity_type == "signal":
+            self.activity_monitor["last_signal_time"] = timestamp
+            self.activity_monitor["signal_count_today"] += 1
+            logger.info(f"📊 활동 모니터: 신호 #{self.activity_monitor['signal_count_today']} 기록됨")
+        elif activity_type == "trade":
+            self.activity_monitor["last_trade_time"] = timestamp
+            self.activity_monitor["trade_count_today"] += 1
+            logger.info(f"💰 활동 모니터: 거래 #{self.activity_monitor['trade_count_today']} 실행됨")
+
+    def check_inactivity_status(self) -> dict:
+        """비활성 상태 체크 및 알림"""
+        current_time = time.time()
+        status = {
+            "is_inactive": False,
+            "is_critical": False,
+            "alert_message": None,
+            "hours_since_last_trade": 0,
+            "hours_since_last_signal": 0,
+            "today_stats": {
+                "signals": self.activity_monitor["signal_count_today"],
+                "trades": self.activity_monitor["trade_count_today"],
+                "analyses": self.activity_monitor["analysis_count_today"]
+            }
+        }
+
+        # 마지막 거래로부터 경과 시간
+        if self.activity_monitor["last_trade_time"] > 0:
+            seconds_since_trade = current_time - self.activity_monitor["last_trade_time"]
+            hours_since_trade = seconds_since_trade / 3600
+            status["hours_since_last_trade"] = round(hours_since_trade, 1)
+
+            if seconds_since_trade > self.activity_monitor["critical_inactive_threshold"]:
+                status["is_critical"] = True
+                status["alert_message"] = f"🚨 긴급: {hours_since_trade:.1f}시간 동안 거래 없음!"
+                logger.error(status["alert_message"])
+            elif seconds_since_trade > self.activity_monitor["inactive_alert_threshold"]:
+                status["is_inactive"] = True
+                status["alert_message"] = f"⚠️ 주의: {hours_since_trade:.1f}시간 동안 거래 없음"
+                logger.warning(status["alert_message"])
+
+        # 마지막 신호로부터 경과 시간
+        if self.activity_monitor["last_signal_time"] > 0:
+            seconds_since_signal = current_time - self.activity_monitor["last_signal_time"]
+            hours_since_signal = seconds_since_signal / 3600
+            status["hours_since_last_signal"] = round(hours_since_signal, 1)
+
+        return status
 
 
 # 전역 거래 엔진 인스턴스

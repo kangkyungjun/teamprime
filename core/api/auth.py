@@ -9,6 +9,8 @@ from pydantic import BaseModel, EmailStr
 
 from ..auth.auth_service import AuthService
 from ..auth.middleware import get_current_user, require_auth
+from ..session.session_manager import session_manager
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -724,3 +726,118 @@ async def change_password(
     except Exception as e:
         logger.error(f"비밀번호 변경 API 오류: {str(e)}")
         return {"success": False, "message": "비밀번호 변경 중 오류가 발생했습니다"}
+
+# 메모리 기반 세션 저장소 (API 키 임시 저장용)
+user_sessions = {}
+
+async def api_key_authentication_endpoint(request: Request):
+    """API 키 인증 엔드포인트 - 세션 기반 (저장하지 않음) [메인 엔드포인트]"""
+    logger.info("🔑 [AUTH] API 키 인증 요청 수신 - 보안 강화 방식")
+
+    # 사용자 인증 확인
+    current_user = await get_current_user(request)
+    if not current_user:
+        logger.warning("⚠️ [AUTH] 인증되지 않은 사용자의 API 키 요청")
+        return {"success": False, "message": "로그인이 필요합니다"}
+
+    try:
+        data = await request.json()
+        access_key = data.get("access_key", "").strip()
+        secret_key = data.get("secret_key", "").strip()
+
+        # 입력 검증
+        if not access_key or not secret_key:
+            return {"success": False, "message": "모든 API 키 정보를 입력해주세요"}
+
+        # 업비트 API 키 검증 (간단한 계좌 조회로 검증)
+        logger.info(f"🔍 [AUTH] API 키 형식 검증 시작: Access Key 길이 {len(access_key)}, Secret Key 길이 {len(secret_key)}")
+
+        import aiohttp
+        import jwt
+        import uuid
+
+        # JWT 토큰 생성 (업비트 API 규격)
+        payload = {
+            'access_key': access_key,
+            'nonce': str(uuid.uuid4()),
+        }
+
+        jwt_token = jwt.encode(payload, secret_key, algorithm='HS256')
+        authorization = f'Bearer {jwt_token}'
+        headers = {'Authorization': authorization}
+
+        # 업비트 API 호출 (계좌 정보 조회로 검증)
+        url = "https://api.upbit.com/v1/accounts"
+
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url, headers=headers, timeout=10) as response:
+                if response.status == 200:
+                    account_data = await response.json()
+
+                    # API 키 검증 성공
+                    logger.info("✅ [AUTH] API 키 검증 성공")
+
+                    # 세션에 API 키 임시 저장 (보안 강화)
+                    user_id = current_user.get("id")
+                    user_sessions[user_id] = {
+                        "access_key": access_key,
+                        "secret_key": secret_key,
+                        "account_info": account_data,
+                        "authenticated_at": datetime.now().isoformat()
+                    }
+
+                    # 세션 관리자에도 등록
+                    try:
+                        username = current_user.get('username', f'user_{user_id}')
+                        logger.info(f"🔄 세션 생성 시작: user_id={user_id}, username={username}")
+
+                        user_session = session_manager.create_session(user_id, username)
+                        logger.info(f"✅ 세션 생성 성공: {user_session}")
+
+                        # API 키 설정
+                        user_session.update_api_keys(access_key, secret_key)
+                        logger.info("🔑 API 키 설정 완료")
+
+                        # 로그인 상태 설정 (중요: 거래 시작 조건)
+                        user_session.update_login_status(logged_in=True, account_info=account_data)
+                        logger.info("🔐 로그인 상태 설정 완료")
+
+                        # KRW 잔고 추출 및 available_budget 설정
+                        krw_balance = 0
+                        for account in account_data:
+                            if account.get("currency") == "KRW":
+                                krw_balance = float(account.get("balance", 0))
+                                break
+                        user_session.trading_state.available_budget = krw_balance
+                        logger.info(f"💰 사용 가능 예산 설정 완료: {krw_balance:,}원")
+
+                        logger.info(f"📝 세션 관리자에 사용자 {username} 등록 완료")
+
+                        # 세션 검증
+                        check_session = session_manager.get_session(user_id)
+                        if check_session:
+                            logger.info(f"✅ 세션 검증 성공: 사용자 {username} 세션 존재 확인")
+                        else:
+                            logger.error(f"❌ 세션 검증 실패: 사용자 {username} 세션을 찾을 수 없음")
+
+                    except Exception as e:
+                        logger.error(f"❌ 세션 관리자 등록 실패: {str(e)}")
+                        import traceback
+                        logger.error(f"상세 오류: {traceback.format_exc()}")
+
+                    return {
+                        "success": True,
+                        "message": "API 키 검증이 완료되었습니다",
+                        "account_count": len(account_data)
+                    }
+                elif response.status == 401:
+                    logger.warning("❌ [AUTH] API 키 인증 실패 (잘못된 키)")
+                    return {"success": False, "message": "API 키가 올바르지 않습니다"}
+                else:
+                    error_text = await response.text()
+                    logger.error(f"❌ [AUTH] API 검증 실패 ({response.status}): {error_text}")
+                    return {"success": False, "message": f"API 키 검증에 실패했습니다 (상태: {response.status})"}
+
+    except Exception as e:
+        logger.error(f"❌ API 키 인증 오류: {str(e)}")
+        return {"success": False, "message": f"API 키 검증 중 오류가 발생했습니다: {str(e)}"}
